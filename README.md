@@ -139,8 +139,7 @@ Releases ship in phases. ⭐ the repo to get notified as each lands.
 
 ---
 
-<details>
-<summary><h2>Citation &nbsp;<sub>(click to expand BibTeX)</sub></h2></summary>
+## Citation
 
 ```bibtex
 @article{openskill2026,
@@ -152,8 +151,6 @@ Releases ship in phases. ⭐ the repo to get notified as each lands.
   year    = {2026}
 }
 ```
-
-</details>
 
 <details>
 <summary><h2>Authors &amp; Affiliations &nbsp;<sub>(click to expand)</sub></h2></summary>

@@ -132,20 +132,10 @@ Releases ship in phases. ⭐ the repo to get notified as each lands.
 ### 🟢 Now
 - [x] Project page & overview — [openlair.github.io/openskill](https://openlair.github.io/openskill/)
 - [ ] Paper preprint (arXiv) — *coming soon*
-- [ ] BibTeX & citation metadata
 
 ### 🟡 Next
 - [ ] Core **OpenSkill** framework code (knowledge acquisition → skill evolution → evaluation)
 - [ ] Reproduction scripts for the SkillsBench main results
-- [ ] Generated skill artifacts for the reported domains
-- [ ] Open-source license
-
-### 🔵 Later
-- [ ] **SkillsBench** release (11 domains, tasks + harness)
-- [ ] Virtual-task verifier toolkit
-- [ ] Plug-in adapters for additional target agents (Claude Code, Codex, …)
-- [ ] Tutorials & quickstart notebooks
-- [ ] Leaderboard for open-world self-evolution
 
 ---
 

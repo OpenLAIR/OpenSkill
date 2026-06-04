@@ -91,7 +91,10 @@ On **SkillsBench** (11 domains) OpenSkill beats the strongest closed-world basel
 
 ---
 
-## Analysis — skills transfer, the verifier aligns, every component matters
+<details>
+<summary><h2>Analysis — skills transfer, the verifier aligns, every component matters &nbsp;<sub>(click to expand)</sub></h2></summary>
+
+<br/>
 
 <table>
 <tr>
@@ -117,6 +120,8 @@ Without ever seeing ground-truth tests, the verifier reaches **80.5%** recall ag
 &nbsp;
 <img src="assets/ablations.png" alt="Ablations on SocialMaze: reward vs refinement iterations, and component contributions." width="48%"/>
 </div>
+
+</details>
 
 ---
 
@@ -144,7 +149,8 @@ Releases ship in phases. ⭐ the repo to get notified as each lands.
 
 ---
 
-## Citation
+<details>
+<summary><h2>Citation &nbsp;<sub>(click to expand BibTeX)</sub></h2></summary>
 
 ```bibtex
 @article{openskill2026,
@@ -157,9 +163,12 @@ Releases ship in phases. ⭐ the repo to get notified as each lands.
 }
 ```
 
----
+</details>
 
-## Authors
+<details>
+<summary><h2>Authors &amp; Affiliations &nbsp;<sub>(click to expand)</sub></h2></summary>
+
+<br/>
 
 Zhiling Yan<sup>1,\*</sup>, Dingjie Song<sup>1,\*</sup>, Hanrong Zhang<sup>2</sup>, Wei Liang<sup>1</sup>, Yuxuan Zhang<sup>3,4</sup>, Yutong Dai<sup>5</sup>, Lifang He<sup>1</sup>, Philip S. Yu<sup>2</sup>, Ran Xu<sup>5</sup>, Xiang Li<sup>6</sup>, Lichao Sun<sup>1,†</sup>
 
@@ -176,6 +185,8 @@ Zhiling Yan<sup>1,\*</sup>, Dingjie Song<sup>1,\*</sup>, Hanrong Zhang<sup>2</su
 <img src="assets/logos/mgh.png" height="34"/> &nbsp;&nbsp;
 <img src="assets/logos/harvard.png" height="34"/>
 </div>
+
+</details>
 
 ---
 

@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+title: "OpenSkill: Open-World Self-Evolution for LLM Agents"
+type: article
+year: 2026
+authors:
+  - { given-names: Zhiling, family-names: Yan }
+  - { given-names: Dingjie, family-names: Song }
+  - { given-names: Hanrong, family-names: Zhang }
+  - { given-names: Wei, family-names: Liang }
+  - { given-names: Yuxuan, family-names: Zhang }
+  - { given-names: Yutong, family-names: Dai }
+  - { given-names: Lifang, family-names: He }
+  - { given-names: "Philip S.", family-names: Yu }
+  - { given-names: Ran, family-names: Xu }
+  - { given-names: Xiang, family-names: Li }
+  - { given-names: Lichao, family-names: Sun }

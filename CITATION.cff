@@ -3,6 +3,11 @@ message: "If you use this work, please cite it as below."
 title: "OpenSkill: Open-World Self-Evolution for LLM Agents"
 type: article
 year: 2026
+url: "https://arxiv.org/abs/2606.06741"
+repository-code: "https://github.com/OpenLAIR/OpenSkill"
+identifiers:
+  - type: url
+    value: "https://arxiv.org/abs/2606.06741"
 authors:
   - { given-names: Zhiling, family-names: Yan }
   - { given-names: Dingjie, family-names: Song }

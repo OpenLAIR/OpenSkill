@@ -7,9 +7,10 @@
 *An agent that builds both its skills and its own verification signals from scratch — using only a task prompt and open-world resources, with **no target-task supervision**.*
 
 [![Website](https://img.shields.io/badge/🌐_Website-openlair.github.io/openskill-2f64b3)](https://openlair.github.io/openskill/)
-[![Paper](https://img.shields.io/badge/📄_Paper-coming_soon-6b7280)](https://openlair.github.io/openskill/)
-[![arXiv](https://img.shields.io/badge/arXiv-coming_soon-b31b1b)](https://openlair.github.io/openskill/)
-[![Code](https://img.shields.io/badge/💻_Code-coming_soon-2f8c5b)](#-roadmap)
+[![Paper](https://img.shields.io/badge/📄_Paper-PDF-6b7280)](https://arxiv.org/pdf/2606.06741)
+[![arXiv](https://img.shields.io/badge/arXiv-2606.06741-b31b1b)](https://arxiv.org/abs/2606.06741)
+[![Hugging Face Papers](https://img.shields.io/badge/🤗_HF_Papers-2606.06741-ffcc4d)](https://huggingface.co/papers/2606.06741)
+[![Code](https://img.shields.io/badge/💻_Code-repository-2f8c5b)](https://github.com/OpenLAIR/OpenSkill)
 [![License](https://img.shields.io/badge/License-TBD-lightgrey)](#-roadmap)
 
 </div>
@@ -131,7 +132,7 @@ Releases ship in phases. ⭐ the repo to get notified as each lands.
 
 ### 🟢 Now
 - [x] Project page & overview — [openlair.github.io/openskill](https://openlair.github.io/openskill/)
-- [ ] Paper preprint (arXiv) — *coming soon*
+- [x] Paper preprint (arXiv) — [arXiv:2606.06741](https://arxiv.org/abs/2606.06741)
 
 ### 🟡 Next
 - [ ] Core **OpenSkill** framework code (knowledge acquisition → skill evolution → evaluation)
@@ -142,13 +143,14 @@ Releases ship in phases. ⭐ the repo to get notified as each lands.
 ## Citation
 
 ```bibtex
-@article{openskill2026,
-  title   = {OpenSkill: Open-World Self-Evolution for LLM Agents},
-  author  = {Yan, Zhiling and Song, Dingjie and Zhang, Hanrong and Liang, Wei and
-             Zhang, Yuxuan and Dai, Yutong and He, Lifang and Yu, Philip S. and
-             Xu, Ran and Li, Xiang and Sun, Lichao},
-  journal = {arXiv preprint},
-  year    = {2026}
+@misc{yan2026openskillopenworldselfevolutionllm,
+  title         = {OpenSkill: Open-World Self-Evolution for LLM Agents},
+  author        = {Zhiling Yan and Dingjie Song and Hanrong Zhang and Wei Liang and Yuxuan Zhang and Yutong Dai and Lifang He and Philip S. Yu and Ran Xu and Xiang Li and Lichao Sun},
+  year          = {2026},
+  eprint        = {2606.06741},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.AI},
+  url           = {https://arxiv.org/abs/2606.06741}
 }
 ```
 

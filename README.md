@@ -151,14 +151,6 @@ uv run python -m libs.openskill.run_pipeline \
 
 The pipeline copies the task from `tasks/` into an isolated `workspace/`, strips any pre-existing skills or documents, and never exposes the hidden test suite to the creator or the verifier. Evolved skills land in `workspace/<task>/environment/skills/evo-*`; the full evolution trace (interventions, virtual-test results, verifier sessions) is stored under `jobs/<job-name>/`.
 
-Component ablations from the paper (RQ3) map to CLI flags:
-
-```bash
---disable-dr              # skip open-world knowledge acquisition
---disable-surrogate-dr    # skip verification-anchor retrieval
---disable-targeted-dr     # skip gap-driven targeted retrieval
-```
-
 > [!NOTE]
 > Skill evolution is stochastic. On tasks whose instructions under-specify conventions
 > (units, interface variants, event definitions), a single evolution run can converge to a

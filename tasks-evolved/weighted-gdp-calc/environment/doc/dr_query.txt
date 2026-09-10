@@ -1,0 +1,88 @@
+Need background research to help author a reusable Python skill for automating Excel workbook updates for a task like: read an existing .xlsx file, inspect sheets "Data" and "Task", pull values by two-dimensional lookup (series code + year), write formulas and/or computed results into specified target ranges, preserve workbook formatting, and save without adding sheets/macros. Focus on Python APIs available with openpyxl==3.1.5, plus any reliable Linux-compatible formula recalculation/evaluation options using LibreOffice or Gnumeric in Ubuntu 24.04.
+
+Please research and synthesize the following, with exact API details, signatures, defaults, return types, and working code examples:
+
+1) openpyxl workbook I/O and sheet access for existing .xlsx files
+- Correct imports and package name for openpyxl 3.1.5.
+- Exact usage of openpyxl.load_workbook(), including important parameters like data_only, keep_vba, read_only, rich_text, keep_links, and their effects on preserving formulas/styles/content.
+- Best practices for loading an existing workbook, editing only cells in existing sheets, and saving back while preserving formatting, merged cells, number formats, fills, fonts, borders, column widths, row heights, and workbook structure.
+- How worksheet indexing works: wb["Task"], wb["Data"], iter_rows(), iter_cols(), max_row/max_column, cell(row=..., column=...), and range slicing.
+- How openpyxl represents formulas, values, and data types; how to write formula strings versus literal computed numeric values.
+
+2) Reading Excel headers and source tables robustly
+- Patterns for locating a rectangular data block in a worksheet when rows/columns are specified loosely by task instructions.
+- How to read a header row of years and a key column of series codes, including handling Excel cells that may contain numbers, strings, blanks, or date-like values.
+- Safe conversion helpers for year headers and numeric cells: distinguishing int/float/Decimal/string, handling percentages stored as fractions vs displayed percentages, empty cells, and formulas.
+- Working examples for building lookup dictionaries from a worksheet, especially two-key lookup maps like {(series_code, year): value}.
+
+3) Writing Excel formulas with openpyxl
+- Exact syntax for assigning formulas to cells, including English function names and comma vs semicolon separators in .xlsx files when written by openpyxl.
+- How to programmatically generate formulas for:
+  - INDEX/MATCH with two conditions
+  - XLOOKUP with MATCH
+  - HLOOKUP/VLOOKUP combined with MATCH
+  - SUMPRODUCT
+  - MIN, MAX, MEDIAN, AVERAGE/simple mean, PERCENTILE or QUARTILE-related formulas
+- Whether modern Excel-only functions like XLOOKUP are preserved by openpyxl even if not evaluated.
+- Absolute vs relative references in formula strings and how to generate them safely.
+- Common pitfalls when writing formulas to cells that later need recalculation in Excel/LibreOffice/Gnumeric.
+- Any version-specific issues with formula storage, cached values, or unsupported formula tokens in openpyxl 3.1.5.
+
+4) Formula recalculation and evaluation outside Excel
+- Since openpyxl does not calculate formulas, research practical approaches on Ubuntu 24.04 for recalculating a workbook after formula insertion using:
+  - LibreOffice command line (soffice / libreoffice --headless)
+  - Gnumeric / ssconvert
+- Exact CLI commands, flags, expected behavior, and caveats for forcing recalculation and saving updated cached formula results.
+- How to call these tools from Python subprocess safely.
+- Which approach is more reliable for .xlsx files containing formulas like INDEX/MATCH, XLOOKUP, SUMPRODUCT, MEDIAN, and PERCENTILE.
+- Any incompatibilities: e.g., XLOOKUP support in LibreOffice/Gnumeric versions commonly available on Ubuntu 24.04, locale issues, recalculation settings, or formula translation problems.
+- If external recalculation is unreliable, explain robust alternatives a skill author can use, such as computing results in Python and writing values directly while preserving workbook formatting.
+
+5) Implementing the domain calculations in reusable Python helpers
+- Patterns for reusable functions that:
+  - extract a 2D lookup table from "Data"
+  - populate target ranges on "Task" by matching series code and year
+  - compute net exports as a percentage of GDP from filled values
+  - compute summary statistics: min, max, median, arithmetic mean, 25th percentile, 75th percentile
+  - compute a weighted mean using SUMPRODUCT-equivalent logic in Python
+- Ask for exact formulas/concepts relevant to “net exports as percent of GDP” in spreadsheet automation contexts, but do not solve this specific workbook. Focus on how to implement such calculations generically once the relevant numerator/denominator cells are identified.
+- For weighted mean routines, request guidance on:
+  - numerator/weight vector handling
+  - skipping blanks/errors
+  - divide-by-zero behavior
+  - whether weights should be normalized explicitly or not
+  - matching Excel SUMPRODUCT/SUM semantics exactly in Python.
+- Ask for working Python examples using standard library + openpyxl only, unless a strongly justified extra dependency is needed.
+
+6) Mapping between Excel ranges and Python structures
+- Best practices for converting Excel column letters/ranges to indices and back:
+  - openpyxl.utils.get_column_letter
+  - openpyxl.utils.column_index_from_string
+  - range_boundaries / coordinate_from_string if relevant
+- Reusable code patterns for iterating over target ranges like H12:L17 and parallel metadata ranges (row labels, year headers).
+- How to preserve existing cell styles when only updating .value.
+- Pitfalls with merged cells, formulas copied across ranges, and stale cached values.
+
+7) Statistical functions parity with Excel
+- For median, percentiles, and quartiles, research the exact Excel function behavior most relevant for interoperability:
+  - MEDIAN
+  - PERCENTILE.INC vs PERCENTILE.EXC
+  - QUARTILE.INC vs QUARTILE.EXC
+  - legacy PERCENTILE / QUARTILE compatibility
+- Which functions are most broadly supported across Excel/LibreOffice/Gnumeric when written into .xlsx formulas.
+- How to reproduce equivalent results in Python if needed, including interpolation behavior and edge cases for small samples, blanks, booleans, and errors.
+- Request examples comparing Excel-compatible percentile calculations in Python.
+
+8) Common pitfalls and deprecations
+- Any deprecated openpyxl APIs previously used for cell ranges, worksheet access, formula handling, or workbook saving, and their current replacements.
+- Locale issues: decimal separators, formula separators, and function names when generating formulas in .xlsx files programmatically.
+- Differences between displayed formatted values and stored numeric values.
+- Problems caused by using data_only=True when intending to preserve formulas.
+- Any gotchas when saving over the original file versus saving to a temp file and replacing atomically.
+
+9) Skill-author-oriented output
+Please provide:
+- concise recommendations for utility function boundaries and signatures suitable for a reusable skill module (e.g., load workbook, read table, two-key lookup, write formula block, compute stats, save/recalc workbook)
+- minimal but complete working code snippets with correct imports
+- notes on correctness-critical parameters and edge cases
+- references to official docs or authoritative sources for openpyxl, LibreOffice Calc CLI recalculation, and Gnumeric/ssconvert behavior.

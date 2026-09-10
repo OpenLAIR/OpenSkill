@@ -1,0 +1,52 @@
+Research query:
+
+GitHub CLI (`gh`) API usage for querying pull requests and issues from a specific repository within a date range — building reusable Python utility functions
+
+I need comprehensive documentation and working code examples for the following:
+
+**1. `gh` CLI commands for listing and filtering PRs and issues:**
+- Exact syntax for `gh pr list` and `gh issue list` with date range filtering for the `cli/cli` repository
+- How to use `--search` qualifier with `created:2024-12-01..2024-12-31` date range syntax
+- How to get ALL results (pagination) — what is the `--limit` flag behavior? What happens if you set `--limit 1000`? Is there a maximum? How to ensure you retrieve every matching item and don't silently truncate?
+- How to use `--state` flag (values: `open`, `closed`, `merged`, `all`) for both PRs and issues
+- How to use `--json` flag to output structured JSON with specific fields. What are the exact field names available? Specifically: `createdAt`, `mergedAt`, `closedAt`, `state`, `author`, `labels`, `number`
+- Exact `--json` field names for PR merge time (`mergedAt`), PR author login (`author`), issue labels (`labels`)
+- How does `gh pr list --search` interact with `--state`? Can you combine them? What are the gotchas?
+
+**2. Filtering merged vs closed PRs:**
+- When using `gh pr list --json state`, what are the exact string values for state? Is it `MERGED`, `CLOSED`, `OPEN` (uppercase) or lowercase?
+- How to distinguish between PRs that were merged vs PRs that were closed without merging. Is `state: "MERGED"` a separate state from `state: "CLOSED"`?
+- When querying with `--state all`, does that include merged PRs or do you need a separate query?
+
+**3. Date/time parsing:**
+- What format are `createdAt`, `mergedAt`, `closedAt` returned in? ISO 8601 with timezone? Example: `2024-12-15T10:30:00Z`
+- Python `datetime` parsing for these timestamps — correct `strftime`/`strptime` format strings or `datetime.fromisoformat()` behavior with trailing `Z`
+- Python 3.x version-specific behavior: does `datetime.fromisoformat()` handle the `Z` suffix in Python 3.10 vs 3.11 vs 3.12? What's the safe portable approach?
+
+**4. Label filtering for bug issues:**
+- When using `--json labels`, what is the exact structure returned? Is it `[{"name": "bug"}, ...]` or a different schema?
+- How to check if any label name contains the substring "bug" (case-sensitive or case-insensitive?)
+
+**5. `gh` CLI search qualifiers:**
+- Exact GitHub search qualifier syntax for filtering by creation date: `created:2024-12-01..2024-12-31`
+- Can you use `gh issue list --repo cli/cli --search "created:2024-12-01..2024-12-31 label:bug"` and does that work correctly?
+- How to filter issues that were closed during a specific date range (not just created during that range) — is there a `closed:` search qualifier?
+
+**6. Python subprocess patterns for calling `gh`:**
+- Best practice for calling `gh` from Python using `subprocess.run()` and capturing JSON output
+- How to parse the JSON output with `json.loads()`
+- Error handling patterns
+
+**7. Common pitfalls:**
+- Does `gh pr list` with `--search` and `--state` conflict or override each other?
+- Pagination limits — does `--limit` actually cap results or is there an API maximum (e.g., GitHub API returns max 1000 search results)?
+- Does the `created:` date range filter in search use UTC dates?
+- When a PR is merged, does `closedAt` also get set? How to avoid double-counting merged PRs as closed?
+- Does `gh` require authentication (`GH_TOKEN` env var) and what permissions are needed for public repos?
+- Rate limiting considerations when making multiple `gh` API calls
+
+**8. Working end-to-end Python code example:**
+- A complete example that uses `subprocess` to call `gh pr list --repo cli/cli --search "created:2024-12-01..2024-12-31" --state all --json number,state,createdAt,mergedAt,author --limit 500` and parses the result
+- Similarly for issues with labels
+- Computing average time-to-merge in days from `createdAt` to `mergedAt` for merged PRs
+- Finding the author with the most PRs (extracting `author.login` from the JSON)

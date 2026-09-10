@@ -1,0 +1,61 @@
+Generate a comprehensive technical research document for a Python skill author who needs to build a reusable utility module that parses a Three.js JavaScript file (containing a `createScene()` function) to extract the hierarchical part structure of a 3D object, then exports individual meshes and grouped parts as Wavefront OBJ files. The skill will be used by an AI coding agent in a Node.js + Python environment (Three.js v0.170.0 pinned, Ubuntu 24.04, Python 3).
+
+Please research and provide detailed information on the following:
+
+## 1. Three.js Scene Graph and Primitive Geometries (v0.170.0)
+
+- Exact API and constructor signatures for all primitive geometry classes commonly used in `createScene()` patterns: `THREE.BoxGeometry`, `THREE.SphereGeometry`, `THREE.CylinderGeometry`, `THREE.ConeGeometry`, `THREE.PlaneGeometry`, `THREE.TorusGeometry`, `THREE.CircleGeometry`, `THREE.TetrahedronGeometry`, `THREE.IcosahedronGeometry`, `THREE.DodecahedronGeometry`, `THREE.OctahedronGeometry`, `THREE.RingGeometry`, `THREE.CapsuleGeometry`, `THREE.LatheGeometry`, `THREE.TorusKnotGeometry`. Include all parameters with defaults.
+- How `THREE.Mesh`, `THREE.Group`, and `THREE.Object3D` work: parent/child relationships, the `.children` array, the `.name` property, `.add()`, `.position`, `.rotation`, `.quaternion`, `.scale`, and `.matrix`/`.matrixWorld`.
+- How `updateMatrixWorld(true)` and `updateWorldMatrix()` propagate transforms, and the difference between local and world transforms.
+- How to traverse a scene graph with `.traverse()`, `.traverseVisible()`, and how to distinguish between `Mesh`, `Group`, and other Object3D types via `.type` or `.isMesh` / `.isGroup`.
+
+## 2. Mesh Geometry Internals
+
+- The structure of `BufferGeometry`: `.attributes.position`, `.attributes.normal`, `.attributes.uv`, `.index`, and how to read vertex data as Float32Array.
+- How to apply a world transformation matrix to geometry vertices using `geometry.applyMatrix4(object.matrixWorld)` and the implications (in-place mutation, normals).
+- How to merge multiple BufferGeometries: the correct import path and usage of `BufferGeometryUtils.mergeGeometries` (formerly `mergeBufferGeometries`) in v0.170.0, including the `examples/jsm/utils/BufferGeometryUtils.js` module location. Note any deprecation between version transitions.
+- Handling non-indexed vs indexed geometries when merging or exporting.
+
+## 3. OBJ Export from Three.js
+
+- The exact API of `OBJExporter` in Three.js v0.170.0: import path (`three/examples/jsm/exporters/OBJExporter.js`), constructor, and the `.parse(object)` method signature and return type (string).
+- What `OBJExporter.parse()` accepts (Mesh, Group, Scene, Object3D) and how it handles hierarchies and world transforms.
+- Whether OBJExporter applies world matrices automatically or whether geometries must be pre-transformed.
+- Alternatives if OBJExporter is insufficient: writing OBJ manually from BufferGeometry (vertex `v x y z`, face `f a b c` 1-indexed, handling normals `vn` and the `g`/`o` group markers).
+
+## 4. Executing Three.js Code from a Headless Node.js Environment
+
+- How to `require()` or `import` Three.js in Node.js without a browser/WebGL context (Three.js core works headlessly for scene graph and geometry; only rendering requires WebGL).
+- ES modules vs CommonJS for `three@0.170.0` — the `package.json` exports field and how to import `OBJExporter` and `BufferGeometryUtils` from `three/examples/jsm/...` in Node.
+- How to evaluate or `require()` a user-provided `object.js` file that defines `createScene()` and returns a `THREE.Scene` or `THREE.Group`.
+- Common pitfalls: missing `self`/`window` globals, `TextEncoder` polyfills, file URL imports, `"type": "module"` in package.json.
+
+## 5. Parsing Strategy for Extracting Part Structure
+
+- Heuristics for identifying "parts" in a Three.js scene: typically `THREE.Group` nodes with a `.name` are treated as parts, and their descendant Meshes are the part's components. Standalone meshes added directly to the scene (not inside a Group) should be treated as their own single-mesh parts.
+- How to walk children of the root scene/group returned by `createScene()` and classify each top-level child as either a Group-part or a standalone Mesh-part.
+- How to assign sensible names when `.name` is empty (fallback to type + index).
+- Handling nested groups (groups within groups) and whether to flatten or preserve hierarchy.
+
+## 6. Recommended Implementation Approach for the Skill
+
+Since the skill is in Python but Three.js executes in Node.js, research:
+- The pattern of having the Python skill write a Node.js helper script (template string), spawn it via `subprocess.run(['node', script])`, and capture OBJ output written to disk or stdout.
+- How to pass file paths and output directories to the Node script via CLI args or environment variables.
+- JSON-based scene structure dump from Node → Python for inspection before export.
+- Error handling: capturing Node.js stderr, handling syntax errors in `object.js`.
+
+## 7. OBJ File Format Specifics
+
+- Wavefront OBJ format: vertex lines, face lines (1-indexed!), group/object markers, vertex normals, texture coordinates.
+- Whether per-part OBJ files should contain world-space or local-space coordinates (for the "links" directory containing merged part OBJs, world space is typically expected so parts assemble correctly).
+- Common pitfalls: 0-indexed vs 1-indexed faces, missing trailing newline, mixing indexed/non-indexed face declarations.
+
+## 8. Known Pitfalls and Version-Specific Notes for Three.js 0.170.0
+
+- Deprecated APIs replaced before 0.170.0: `Geometry` (removed, use `BufferGeometry`), `mergeBufferGeometries` renamed to `mergeGeometries`, `Face3` removed.
+- Whether `OBJExporter` in 0.170.0 properly handles `Group` and applies `matrixWorld`.
+- Issues with `THREE.MeshBasicMaterial` and other materials being required (OBJExporter may or may not need a material attached).
+- Whether `scene.updateMatrixWorld(true)` must be called before export.
+
+Please include working, copy-pasteable Node.js code snippets demonstrating: (a) loading a `createScene()` module, (b) traversing to extract groups and meshes, (c) using OBJExporter to serialize a single Mesh and a Group to OBJ strings, (d) merging all geometries within a group into one OBJ. Cite the official Three.js v0.170.0 documentation and source where possible.

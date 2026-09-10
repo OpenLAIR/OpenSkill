@@ -1,0 +1,28 @@
+Comprehensive guide to using PyCBC 2.8.5 for gravitational wave matched filtering analysis in Python. I need exact API details for building a reusable utility module. Specifically:
+
+1. **Reading GWF frame files with PyCBC**: How to use `pycbc.frame.read_frame()` to load strain data from a `.gwf` file. What are the exact function signature, parameters (including `channel_name`, `start_time`, `end_time`), and return type? What happens if you don't specify start/end times — does it read the entire file? How do you determine the available time range in a GWF file? Show working code examples with correct imports.
+
+2. **Data conditioning for matched filtering in PyCBC**: What preprocessing steps are needed before matched filtering? Specifically:
+   - How to use `TimeSeries.highpass_fir()` or `pycbc.filter.highpass()` — what cutoff frequency is standard for LIGO data (e.g., 15 Hz, 20 Hz, 30 Hz)?
+   - How to crop the data to remove filter artifacts — how many seconds to crop from each end?
+   - How to resample the data if needed using `TimeSeries.resample()`
+   - How to compute the PSD using `pycbc.psd.interpolate()` and `pycbc.psd.inverse_spectrum_truncation()` — what are the correct parameters (`seg_len`, `seg_stride`, `low_freq_cutoff`)? What is the standard Welch segment length?
+   - Show the complete conditioning pipeline as working code.
+
+3. **Generating waveform templates with PyCBC**: How to use `pycbc.waveform.get_td_waveform()` and/or `pycbc.waveform.get_fd_waveform()` for the approximants "SEOBNRv4_opt", "IMRPhenomD", and "TaylorT4". What are the required parameters (`mass1`, `mass2`, `delta_t` or `delta_f`, `f_lower`, `approximant`)? What is the standard `f_lower` value to use? Are there any differences in how these three approximants should be called? Does TaylorT4 require special handling since it's a time-domain-only approximant? What about `delta_t` matching between template and data?
+
+4. **Matched filtering with PyCBC**: How to use `pycbc.filter.matched_filter()` — exact function signature, parameters, return type. How to extract the SNR time series from the result. How to find the peak SNR using `abs()` on the matched filter output and `numpy.argmax()` or PyCBC's built-in methods. Is the return a complex SNR time series? Do you need to call `.crop()` on the SNR time series to remove edge effects, and if so how many seconds?
+
+5. **Complete working code example**: A full pipeline that reads a frame file, conditions data, generates a template waveform, performs matched filtering, and extracts peak SNR. Include all imports.
+
+6. **Common pitfalls and version-specific issues in PyCBC 2.8.5**:
+   - Are there any deprecated functions or API changes between PyCBC versions?
+   - What happens if template and data have different `delta_t` or different lengths?
+   - Do you need to resize the template to match the data length before filtering?
+   - Memory issues when doing grid search over many mass combinations — best practices?
+   - Does `pycbc.waveform.get_td_waveform()` return one or two polarizations, and which one (hp, hc) should be used for matched filtering?
+   - What `low_frequency_cutoff` parameter does `matched_filter()` require and should it match `f_lower` used in waveform generation?
+
+7. **PSD estimation details**: When using `pycbc.psd.from_string()` vs computing from data with `pycbc.psd.welch()` or the TimeSeries method `psd()` — which approach is correct for real detector data? What is `pycbc.psd.interpolate()` used for and when is `inverse_spectrum_truncation()` needed?
+
+8. **Output formatting**: After finding the best SNR for each approximant across a grid of (mass1, mass2) from 10 to 40 solar masses, how to properly report total_mass = mass1 + mass2 and format as CSV using pandas.

@@ -1,0 +1,50 @@
+Research query:
+
+Python PDF invoice text extraction and cross-reference fraud detection: building reusable utility functions
+
+I need comprehensive documentation and working code examples for building a Python utility module that extracts structured data from PDF invoices and cross-references it against vendor and purchase order databases to detect fraud. Specifically:
+
+1. **pdfplumber PDF text extraction API (version 0.11.x)**:
+   - Exact API for opening a PDF and iterating over pages: `pdfplumber.open()`, `pdf.pages`, `page.extract_text()` — show complete working code with correct imports
+   - How to reliably extract structured fields (vendor name, IBAN, PO number, invoice amount) from free-text invoice pages. What are the best patterns for using regex on extracted text?
+   - Does `pdfplumber` use 0-based or 1-based page indexing? How to convert to 1-based page numbers?
+   - Common pitfalls: encoding issues, text extraction returning None, whitespace/newline handling in extracted text, tables vs plain text extraction differences
+   - Alternative: `pypdf` (version 6.6.x) `PdfReader` API for text extraction — when is it better than pdfplumber?
+
+2. **Parsing invoice fields from extracted text using regex**:
+   - Robust regex patterns for extracting IBAN numbers (international format), monetary amounts (with commas, periods, currency symbols), PO numbers (e.g., "PO-1001"), and vendor names from semi-structured invoice text
+   - How to handle invoices where PO number might be missing entirely — detecting absence vs extraction failure
+   - Parsing monetary amounts: converting strings like "$5,000.00" or "5000.00 EUR" to Python float, handling locale-specific decimal separators
+
+3. **openpyxl and pandas for reading .xlsx files (openpyxl 3.1.5, pandas 2.3.3)**:
+   - `pandas.read_excel()` with openpyxl engine — exact function signature, how to specify sheet, header row, column types
+   - Reading vendor data (Vendor ID, Name, IBAN) into a DataFrame and creating lookup dictionaries
+   - Common pitfalls: integer columns read as float, trailing whitespace in string columns, case sensitivity
+
+4. **pandas for reading CSV files**:
+   - `pandas.read_csv()` for purchase_orders.csv — handling Amount column as float, PO Number and Vendor ID as strings
+   - Data cleaning: stripping whitespace, normalizing column names
+
+5. **rapidfuzz (version 3.14.x) for fuzzy string matching**:
+   - Exact import paths: `from rapidfuzz import fuzz, process`
+   - `process.extractOne()` — full function signature, parameters: `query`, `choices`, `scorer`, `score_cutoff`
+   - Which scorer to use for vendor name matching with minor typos and abbreviation variations like "Ltd" vs "Limited"? Compare `fuzz.ratio`, `fuzz.partial_ratio`, `fuzz.token_sort_ratio`, `fuzz.token_set_ratio` — which is best for company names?
+   - What score_cutoff threshold is appropriate for matching company names with minor variations? Show examples of scores for "Acme Ltd" vs "Acme Limited", "Tech Solutions Inc." vs "Tech Solutions Inc"
+   - Return type of `process.extractOne()` — is it a tuple `(match, score, index)` or `(match, score)`? What does it return when no match exceeds the cutoff — None or empty?
+   - Pitfall: does rapidfuzz 3.x change any API from 2.x? Any deprecated functions?
+
+6. **JSON output formatting**:
+   - `json.dumps()` with `indent=2`, `ensure_ascii=False` — handling None/null for missing PO numbers
+   - How Python None maps to JSON null automatically
+   - Ensuring float amounts are serialized correctly (not as integers, preserving two decimal places)
+
+7. **Data pipeline pattern for fraud detection**:
+   - Best practice for structuring the comparison logic: loading reference data into dictionaries/DataFrames, iterating over extracted invoices, applying each fraud check in priority order
+   - How to implement the "first matching reason wins" pattern when multiple fraud criteria apply
+   - Edge cases: vendor name matching should be case-insensitive, IBAN comparison should ignore spaces, amount comparison with 0.01 tolerance using `abs(a - b) > 0.01`
+
+8. **Common pitfalls across the entire pipeline**:
+   - pdfplumber extracting text with unexpected whitespace or line breaks that break regex
+   - Float comparison precision issues in Python
+   - IBAN formats with spaces vs without spaces
+   - Vendor names with different capitalization, punctuation, or legal suffix abbreviations

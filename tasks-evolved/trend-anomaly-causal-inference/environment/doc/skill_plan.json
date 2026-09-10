@@ -1,0 +1,109 @@
+{
+  "task_summary": "Clean e-commerce transaction and survey data, detect anomalous product category sales in March 2020 using Prophet counterfactuals, engineer demographic features, and run Difference-in-Differences causal analysis to identify demographic drivers of surges and slumps.",
+  "decomposition_rationale": "The task has four distinct functional domains: (1) data cleaning/preparation, (2) time-series anomaly detection via Prophet, (3) feature engineering on survey data, and (4) causal inference via DiD. These map cleanly to four skills with clear dependency ordering—cleaning feeds all downstream steps, anomaly detection identifies target categories, feature engineering prepares demographic variables, and causal analysis combines everything.",
+  "skills": [
+    {
+      "name": "evo-ecommerce-data-cleaning",
+      "description": "Utilities for cleaning and preparing dirty e-commerce transaction data and survey demographic data. Handles deduplication, missing values, inconsistent formatting, date parsing, monetary column cleaning, category extraction, and produces cleaned CSV outputs.",
+      "responsibility": "All data ingestion, cleaning, normalization, and output of survey_cleaned.csv and amazon-purchases-2019-2020-filtered.csv. No analytical computations.",
+      "key_functions": [
+        "clean_survey_data",
+        "clean_transaction_data",
+        "deduplicate_dataframe",
+        "clean_monetary_column",
+        "normalize_strings",
+        "parse_dates",
+        "extract_top_category"
+      ],
+      "dr_sections": [
+        "1. Data Cleaning Patterns for Dirty E-commerce & Survey Data (`pandas` 2.3.3)",
+        "1.1 Deduplication Strategies",
+        "1.2 Handling Missing Values",
+        "1.3 Inconsistent Formatting and String Normalization",
+        "1.4 Date Parsing with Coercion",
+        "1.5 Cleaning Price and Monetary Columns",
+        "1.6 Extracting Product Categories from Hierarchies",
+        "1.7 Merging Transaction and Survey Data",
+        "6.2 `pandas` 2.3 Breaking Changes"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-ecommerce-anomaly-detection",
+      "description": "Utilities for detecting anomalous daily sales patterns per product category using Facebook Prophet counterfactual predictions. Computes a deviation index (-100 to 100) comparing actual March 2020 sales against Prophet forecasts trained on all prior history.",
+      "responsibility": "Time-series aggregation to daily category sales, Prophet model fitting per category, counterfactual prediction, deviation index calculation, and output of category_anomaly_index.csv.",
+      "key_functions": [
+        "aggregate_daily_category_sales",
+        "fit_prophet_counterfactual",
+        "calculate_deviation_index",
+        "compute_category_anomaly_scores",
+        "get_top_surge_slump_categories"
+      ],
+      "dr_sections": [
+        "4. Facebook Prophet for Counterfactual Prediction & Anomaly Detection",
+        "4.1 Prophet API in v1.2.1",
+        "4.2 Handling Prophet's Logging Output",
+        "4.3 Building the Counterfactual Model",
+        "4.4 Extracting Intervals and Computing the Deviation Index",
+        "6.4 Categories with Zero Sales in Time Series"
+      ],
+      "depends_on": [
+        "evo-ecommerce-data-cleaning"
+      ]
+    },
+    {
+      "name": "evo-ecommerce-feature-engineering",
+      "description": "Utilities for engineering features from cleaned survey/demographic data using scikit-learn encoders. Handles ordinal encoding, one-hot encoding, binning continuous variables, and producing the feature-engineered survey CSV and user-category-period aggregated panel datasets for DiD analysis.",
+      "responsibility": "All feature engineering on survey data, creation of panel datasets (intensive and extensive margin), and output of survey_feature_engineered.csv, user_category_period_aggregated_intensive.csv, and user_category_period_aggregated_extensive.csv.",
+      "key_functions": [
+        "engineer_survey_features",
+        "encode_ordinal_features",
+        "encode_nominal_features",
+        "bin_continuous_variables",
+        "create_intensive_margin_panel",
+        "create_extensive_margin_panel",
+        "assign_period_labels"
+      ],
+      "dr_sections": [
+        "2. Feature Engineering on Survey/Demographic Data (`scikit-learn` 1.8.0)",
+        "2.1 Handling Categorical Variables",
+        "2.2 Binning Continuous Variables",
+        "2.3 Preserving Identification Columns",
+        "3. Aggregation Patterns for User-Category-Period Data",
+        "3.1 Defining the Temporal Periods",
+        "3.2 Intensive vs. Extensive Margin Aggregations"
+      ],
+      "depends_on": [
+        "evo-ecommerce-data-cleaning",
+        "evo-ecommerce-anomaly-detection"
+      ]
+    },
+    {
+      "name": "evo-ecommerce-causal-analysis",
+      "description": "Utilities for running Difference-in-Differences causal analysis using statsmodels. Estimates intensive margin (univariate DiD on spend among purchasers) and extensive margin (multivariate heterogeneous DiD on purchase propensity) drivers for surge and slump categories, and outputs the final causal_analysis_report.json.",
+      "responsibility": "All DiD regression modeling, extraction of top 3 intensive and extensive margin drivers per category, result sorting by contribution strength, JSON report generation with proper NumPy serialization.",
+      "key_functions": [
+        "run_intensive_margin_did",
+        "run_extensive_margin_did",
+        "extract_top_drivers",
+        "build_causal_report",
+        "save_report_json",
+        "NpEncoder"
+      ],
+      "dr_sections": [
+        "5. Difference-in-Differences (DiD) Causal Analysis (`statsmodels` 0.14.6)",
+        "5.1 DiD Theory and Formula Definition",
+        "5.2 Statsmodels OLS API",
+        "5.3 Intensive Margin DiD (Univariate)",
+        "5.4 Extensive Margin DiD (Multivariate Heterogeneous)",
+        "5.5 Sorting Results by Contribution Strength",
+        "6.1 JSON Serialization of NumPy Types",
+        "6.3 Sparse Binary Outcomes in `statsmodels`"
+      ],
+      "depends_on": [
+        "evo-ecommerce-feature-engineering",
+        "evo-ecommerce-anomaly-detection"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+Syzkaller syzlang description language: complete syntax reference, grammar, and semantics for writing device driver syscall descriptions in .txt files and corresponding .txt.const constant files. I need the following specific information:
+
+1. **Syzlang syntax for device file descriptions**: How to use `syz_open_dev` to open numbered device nodes like `/dev/parport0`, `/dev/parport1`, etc. What is the exact syntax including the `$` placeholder for device number? Show complete working examples of syz_open_dev declarations with resource types (e.g., `resource fd_mydev[fd]` and `syz_open_dev$mydev(...) fd_mydev`). What are the correct argument types for syz_open_dev (the path pointer type, device number range type, and flags)?
+
+2. **Syzlang ioctl description syntax**: How to describe ioctl calls with different argument directions:
+   - `ioctl$NAME(fd fd_type, cmd const[IOCTL_NUM], arg ptr[in, type])` for input ioctls
+   - `ioctl$NAME(fd fd_type, cmd const[IOCTL_NUM], arg ptr[out, type])` for output ioctls  
+   - `ioctl$NAME(fd fd_type, cmd const[IOCTL_NUM])` for ioctls with no argument (void)
+   - How to handle ioctls where the argument is passed by value (e.g., `intptr` directly, not a pointer)
+   Show examples for `_IOR`, `_IOW`, `_IOWR`, and bare `_IO` ioctl types.
+
+3. **Syzlang struct definitions**: Syntax for defining structs with fields, especially for simple structs like `{ mask int8, val int8 }`. How to reference kernel header types. How to use `flags` type references within struct fields and ioctl arguments.
+
+4. **Syzlang flags and constants**: How to define `flags` groups (e.g., `ieee1284_modes = PP_DATADIR, PP_ADDR, ...`), how to use `flags[group_name, int32]` as argument types.
+
+5. **The .txt.const file format**: Exact format for the constants file. How arch-specific constants are declared (the `arches = amd64, 386` header line). The format for each constant entry — is it `CONSTANT_NAME = value` or some other format? Are values decimal or hex? Show a complete example .txt.const file.
+
+6. **Linux ppdev driver ioctl interface**: All 23 ioctl commands defined in `linux/ppdev.h` and `linux/parport.h`. For each ioctl, I need:
+   - The ioctl macro name (e.g., PPSETMODE, PPGETMODE, PPRSTATUS, etc.)
+   - Whether it uses `_IOR`, `_IOW`, `_IOWR`, or `_IO`
+   - The ioctl type character (should be 'p' = 0x70)
+   - The ioctl sequence number
+   - The argument type and direction (int, struct, void)
+   - The computed ioctl number for amd64 and i386 architectures
+   
+   Specifically list: PPSETMODE, PPGETMODE, PPRSTATUS, PPWSTATUS, PPDATADIR, PPNEGOT, PPWCTLONIRQ, PPCLRIRQ, PPSETPHASE, PPGETPHASE, PPGETMODES, PPGETTIME, PPSETTIME, PPGETFLAGS, PPSETFLAGS, PPWDATA, PRDATA, PPWCONTROL, PPCONTROL, PPFCONTROL (frob control), PPCLAIM, PPRELEASE, PPYIELD, PPEXCL, and any others.
+
+7. **The ppdev_frob_struct (pp_fcontrol)**: What is the exact struct definition from ppdev.h — field names, types, sizes.
+
+8. **IEEE 1284 mode flags and PP flags**: All flag constants from parport.h relevant to ppdev — IEEE1284_MODE_NIBBLE, IEEE1284_MODE_BYTE, IEEE1284_MODE_COMPAT, IEEE1284_MODE_ECP, IEEE1284_MODE_EPP, IEEE1284_DEVICEID, IEEE1284_EXT_LINK, PP_FASTWRITE, PP_FASTREAD, PP_W91284PIC, and any others.
+
+9. **How syzkaller computes ioctl numbers**: The `_IO`, `_IOR`, `_IOW`, `_IOWR` macros and how they encode type, number, direction, and size into a 32-bit value on amd64 vs 386 (note: direction encoding differs on some architectures).
+
+10. **Common pitfalls in syzlang descriptions**: What errors does `make descriptions` / syz-sysgen catch? What causes "undeclared" or "unused" constant errors? How must include directives be formatted? Must constants referenced in .txt all appear in .txt.const? What happens if you reference a constant that isn't in the .const file?
+
+11. **Existing syzkaller device description examples**: Show complete examples from the syzkaller repository of similar character device descriptions (e.g., dev_fuse.txt, dev_kvm.txt, dev_tun.txt) — both the .txt and .txt.const files — so I can see the patterns for struct definitions, ioctl families, resource types, and flag groups.

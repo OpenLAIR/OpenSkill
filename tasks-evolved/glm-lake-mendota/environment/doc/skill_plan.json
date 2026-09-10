@@ -1,0 +1,32 @@
+{
+  "task_summary": "Run GLM to simulate Lake Mendota vertical water temperature (2009-2015) with RMSE < 2°C against field observations.",
+  "decomposition_rationale": "Single cohesive workflow: configure namelist, execute GLM, parse NetCDF, compare to observations, and iterate calibration. One skill keeps these tightly-coupled steps together with shared utilities.",
+  "skills": [
+    {
+      "name": "evo-glm-simulation",
+      "description": "Utility skill for running General Lake Model (GLM) simulations: edit glm3.nml namelist parameters, execute the GLM binary, parse NetCDF output with dynamic Lagrangian layers, match to field observations, compute RMSE, and iteratively calibrate key parameters (Kw, wind_factor, coef_mix_hyp, lw_factor, ch) to achieve RMSE < 2°C.",
+      "responsibility": "End-to-end GLM workflow: namelist I/O, subprocess execution, NetCDF parsing with depth conversion (lake_depth - z), observation matching/interpolation, RMSE computation, and calibration loop.",
+      "key_functions": [
+        "run_glm",
+        "update_glm_nml",
+        "read_glm_nml",
+        "verify_bcs",
+        "process_glm_netcdf",
+        "load_field_observations",
+        "calculate_rmse",
+        "calibrate_parameters"
+      ],
+      "dr_sections": [
+        "1. GLM 3 Executable Usage",
+        "2. `glm3.nml` Configuration Format and Critical Parameters",
+        "3. Python Libraries for Reading/Writing Fortran Namelists",
+        "4. Boundary Condition CSV Formats",
+        "5. Parsing GLM NetCDF Output",
+        "6. Observation Data Matching and RMSE Computation",
+        "7. Calibration Strategy",
+        "8. Common Pitfalls"
+      ],
+      "depends_on": []
+    }
+  ]
+}

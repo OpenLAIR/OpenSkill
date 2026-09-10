@@ -1,0 +1,25 @@
+Research query: How to programmatically parse and execute Three.js geometry code in Node.js (without a browser/DOM) to export 3D objects as .OBJ format files, including the following specific details:
+
+1. **Three.js Node.js usage (v0.175.0)**: What are the correct ES module import paths for Three.js when using it in Node.js with `type: "module"` in package.json? Specifically, how to import from `three` package: `import * as THREE from 'three'` vs `import { Scene, Mesh, ... } from 'three'`. Are there any Node.js-specific gotchas with Three.js 0.175.x (e.g., missing WebGL context, document/window dependencies)?
+
+2. **OBJExporter in Three.js 0.175.0**: What is the correct import path for OBJExporter in the `three` npm package? Is it `three/examples/jsm/exporters/OBJExporter.js` or `three/addons/exporters/OBJExporter.js`? Show the exact working import statement and usage pattern. What is the API signature — does `OBJExporter.parse(scene)` return a string? Does it handle BufferGeometry, indexed and non-indexed geometries, and multiple meshes in a scene?
+
+3. **Three.js geometry types and their OBJ export compatibility**: How do common Three.js geometry constructors (BoxGeometry, SphereGeometry, CylinderGeometry, TorusGeometry, PlaneGeometry, ExtrudeGeometry, LatheGeometry, TubeGeometry, ShapeGeometry, BufferGeometry with custom attributes) get exported via OBJExporter? Are there any geometry types that need special handling (e.g., converting to BufferGeometry first)? Do Group, Object3D hierarchies, and nested meshes get properly traversed?
+
+4. **Coordinate system transformation — Three.js Y-up to Blender Z-up**: How to apply a -90 degree rotation around the X-axis to convert from Three.js Y-up coordinate system to Blender Z-up. Should this rotation be applied to the root scene/group object using `object.rotation.x = -Math.PI / 2` before export, or should it be applied via a matrix? Does `object.updateMatrixWorld(true)` need to be called? Does OBJExporter bake world transforms, or do you need to manually apply transforms to geometry using `geometry.applyMatrix4()`? What is the difference between rotating the object vs applying the rotation to the geometry vertices directly, and which approach produces correct OBJ output?
+
+5. **Dynamic import and evaluation of Three.js scene files**: Given a file like `/root/data/object.js` that contains Three.js code defining 3D objects using Three.js constructors, what are patterns for loading/evaluating this file? Can you use dynamic `import()` to load it as an ES module? What if it exports a function, a scene, or a mesh? Common patterns for wrapping arbitrary Three.js construction code into an importable module.
+
+6. **Writing OBJ files in Node.js**: How to use `fs.writeFileSync` to write the OBJ string output to a file. Any encoding considerations (UTF-8)?
+
+7. **Common pitfalls**:
+   - OBJExporter not exporting vertices when geometry has no `position` attribute
+   - OBJExporter producing empty files when objects aren't added to the scene
+   - Matrix/transform not being applied before export (object appears at origin or with wrong orientation)
+   - `updateMatrixWorld()` not being called causing transforms to be ignored
+   - Indexed vs non-indexed BufferGeometry handling differences
+   - Three.js objects with `visible: false` being skipped
+   - Deprecated APIs in Three.js 0.175.0 (e.g., Geometry class removed, Face3 removed)
+   - Node.js-specific errors like "document is not defined" or "window is not defined" when importing Three.js addons
+
+8. **Working end-to-end code example**: Provide a complete Node.js ES module script that imports Three.js and OBJExporter, creates a simple scene with a mesh, applies a -90 degree X rotation for Blender Z-up conversion, exports to OBJ string, and writes to file. Include all necessary imports, the exact API calls, and file I/O.

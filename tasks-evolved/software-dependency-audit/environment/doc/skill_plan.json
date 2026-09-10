@@ -1,0 +1,26 @@
+{
+  "task_summary": "Run an offline Trivy scan on /root/package-lock.json to identify HIGH/CRITICAL vulnerabilities and write results to a CSV file.",
+  "decomposition_rationale": "This task is a single end-to-end pipeline: run Trivy offline, parse JSON output, and write CSV. The background research provides a near-complete Python script. A single skill covering Trivy execution and CSV generation is sufficient, as the concerns are tightly coupled and splitting them would create unnecessary complexity.",
+  "skills": [
+    {
+      "name": "evo-trivy-offline-audit",
+      "description": "Executes Trivy in offline mode against a package-lock.json file, parses the JSON output to extract HIGH/CRITICAL vulnerabilities with CVSS scores, and generates a CSV report with columns: Package, Version, CVE_ID, Severity, CVSS_Score, Fixed_Version, Title, Url.",
+      "responsibility": "Complete end-to-end pipeline: configure and invoke Trivy CLI with correct offline flags, parse nested JSON output (including vendor-prioritized CVSS score extraction and missing FixedVersion handling), deduplicate results, and write formatted CSV output.",
+      "key_functions": [
+        "run_trivy_offline_scan",
+        "extract_best_cvss_score",
+        "parse_trivy_results",
+        "generate_csv_report"
+      ],
+      "dr_sections": [
+        "Trivy Command-Line Interface Configuration for Offline Environments",
+        "Offline Database Architecture and Cache Directory Structure",
+        "Trivy JSON Output Schema and Data Representation",
+        "Extracting and Normalizing CVSS Scores",
+        "Implementation: Python Automation and Data Pipeline",
+        "Common Pitfalls and Edge Cases in Trivy Offline Scanning"
+      ],
+      "depends_on": []
+    }
+  ]
+}

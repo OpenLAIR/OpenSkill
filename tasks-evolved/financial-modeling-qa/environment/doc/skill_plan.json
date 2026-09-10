@@ -1,0 +1,52 @@
+{
+  "task_summary": "Read an Excel data file and a PDF background file, then compute (Player 1 wins) minus (Player 2 wins) from paired odd/even game rows, and write the numeric answer to a file.",
+  "decomposition_rationale": "This task involves three distinct concerns: (1) reading the PDF to understand the data context/column meanings, (2) loading and analyzing the Excel data with correct index-parity logic for paired game comparisons, and (3) writing the result. Since the PDF reading is a simple prerequisite and the core logic is a single analytical pipeline, two skills suffice: one for PDF context extraction and one for the Excel-based match analysis and output.",
+  "skills": [
+    {
+      "name": "evo-pdf-context-extractor",
+      "description": "Extracts text content from a PDF file using pypdf 5.x to understand the background context, column definitions, and scoring rules for the data analysis task.",
+      "responsibility": "Read and parse PDF files, returning extracted text for interpretation of data semantics and question context.",
+      "key_functions": [
+        "extract_pdf_text",
+        "get_all_pages_text"
+      ],
+      "dr_sections": [
+        "3. Extracting Unstructured Data: PDF Parsing with `pypdf` (5.1.0)",
+        "3.1 Migration from PyPDF2 and Import Semantics",
+        "3.2 Robust Text Extraction Architecture"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-excel-match-analyzer",
+      "description": "Loads an Excel file, splits rows by parity into Player 1 (odd-numbered games) and Player 2 (even-numbered games), pairs them for head-to-head comparison, computes win counts, and writes the final numeric result to a text file.",
+      "responsibility": "Excel data ingestion, index-parity slicing with correct 0-indexed vs 1-indexed mapping, reset_index alignment for vectorized comparison, win/loss tallying, and strict output formatting.",
+      "key_functions": [
+        "load_excel_data",
+        "split_by_parity",
+        "compare_paired_matches",
+        "compute_win_difference",
+        "write_answer"
+      ],
+      "dr_sections": [
+        "2. Advanced Ingestion of Large Excel Files",
+        "2.1 The `pandas.read_excel()` Signature and Engine Delegation",
+        "2.2 Retrieving Workbook Sheet Names",
+        "2.3 Handling Multi-Sheet Workbooks",
+        "4. Game/Match Comparison: Analytical Patterns and Index Parity",
+        "4.1 The 1-Indexed vs 0-Indexed Pitfall",
+        "4.2 Slicing by Parity Using `iloc`",
+        "4.3 The Critical `reset_index(drop=True)` Alignment Pattern",
+        "5. Determining Match Winners and Edge Case Handling",
+        "5.1 Vectorized Comparison and Tie Handling",
+        "5.2 Pitfalls in Row Filtering and Comparisons",
+        "6. Output Formatting and Data Serialization",
+        "6.1 Writing Exact Characters Without Newlines",
+        "7. Synthesis: A Comprehensive Reusable Utility Class"
+      ],
+      "depends_on": [
+        "evo-pdf-context-extractor"
+      ]
+    }
+  ]
+}

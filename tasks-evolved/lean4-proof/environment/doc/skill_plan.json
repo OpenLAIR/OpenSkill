@@ -1,0 +1,27 @@
+{
+  "task_summary": "Complete a Lean 4 proof that a recursively defined sequence S_n = S_{n-1} + 1/2^n (with S_0=1) satisfies S_n ≤ 2 for all n, starting from line 15 of a template file.",
+  "decomposition_rationale": "This is a single-domain task requiring Lean 4 proof writing. The key challenge is reading the existing template, understanding its definitions and theorem statement, then crafting a proof using induction with appropriate Mathlib4 tactics. A single skill covering Lean 4 proof construction for recursive sequence inequalities is sufficient.",
+  "skills": [
+    {
+      "name": "evo-lean4-recursive-sequence-inequality-proof",
+      "description": "Provides utilities and guidance for constructing Lean 4 proofs involving recursive sequences and geometric sum inequalities. Covers reading existing Lean template files, crafting induction-based proofs with closed-form intermediate lemmas, and using Mathlib4 tactics (norm_num, linarith, positivity, ring, field_simp, simp) to handle arithmetic over rationals with powers of 2.",
+      "responsibility": "Analyze the existing solution.lean template (definitions, imports, theorem statement), determine the correct proof strategy (direct induction via closed-form lemma S_n = 2 - 1/2^n, then inequality), generate the complete proof text starting at line 15, and write it to the file while preserving the prefix.",
+      "key_functions": [
+        "read_lean_template",
+        "generate_proof_body",
+        "write_proof_to_file",
+        "validate_lean_build"
+      ],
+      "dr_sections": [
+        "1. Lean 4 and Mathlib4 API for Natural Number Induction",
+        "2. Lean 4 Mathlib4 Geometric Sum Lemmas",
+        "3. Automation Tactics for Arithmetic Reasoning",
+        "4. Defining Recursive Sequences and Proving Properties",
+        "5. Critical Pitfalls in Mathlib4 Proofs Involving `1/2^n`",
+        "6. Working Complete Example",
+        "8. Key Mathlib4 Lemmas for Inequality Patterns"
+      ],
+      "depends_on": []
+    }
+  ]
+}

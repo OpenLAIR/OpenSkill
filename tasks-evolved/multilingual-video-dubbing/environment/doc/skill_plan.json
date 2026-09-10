@@ -1,0 +1,65 @@
+{
+  "task_summary": "Multilingual video dubbing: parse SRT files, synthesize Japanese TTS audio fitted to time windows, normalize loudness per ITU-R BS.1770-4, mux dubbed audio into video, and generate a JSON report.",
+  "decomposition_rationale": "The task has three distinct functional domains: (1) TTS synthesis with duration control, (2) audio processing including loudness normalization and resampling, and (3) video muxing and report generation. Combining audio processing with muxing keeps the pipeline simple while separating TTS synthesis (the most complex component) into its own skill.",
+  "skills": [
+    {
+      "name": "evo-dubbing-tts-synthesis",
+      "description": "Synthesizes target-language speech from text using Kokoro TTS, with speed/duration control to fit precise time windows. Handles SRT parsing, text extraction, and produces WAV segments.",
+      "responsibility": "Parse SRT files (segments, source text, reference target text), read target language, synthesize TTS audio for each segment using Kokoro with speed adjustment to fit the time window, and save individual WAV segment files.",
+      "key_functions": [
+        "parse_srt_file",
+        "read_target_language",
+        "synthesize_segment",
+        "fit_audio_to_window",
+        "generate_tts_segments"
+      ],
+      "dr_sections": [
+        "1. SRT File Parsing with pysrt",
+        "2. Speech Synthesis with Kokoro TTS (v0.9.4)",
+        "3. Alternative Speech Synthesis with `edge-tts` (v6.1.12)",
+        "7. Speed and Rate Adjustment Strategies"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-dubbing-audio-processing",
+      "description": "Handles audio resampling, loudness normalization per ITU-R BS.1770-4, and LUFS measurement for TTS segments to ensure broadcast-quality output.",
+      "responsibility": "Resample audio from Kokoro's native 24kHz to 48kHz, apply ITU-R BS.1770-4 two-pass loudness normalization via FFmpeg loudnorm filter, measure final LUFS, and produce normalized WAV files ready for muxing.",
+      "key_functions": [
+        "resample_audio",
+        "measure_lufs",
+        "normalize_loudness",
+        "process_segment_audio"
+      ],
+      "dr_sections": [
+        "5. ITU-R BS.1770-4 Loudness Measurement and Normalization",
+        "6. Audio Manipulation with SciPy and Soundfile",
+        "10. Common Integration Pitfalls and Best Practices"
+      ],
+      "depends_on": [
+        "evo-dubbing-tts-synthesis"
+      ]
+    },
+    {
+      "name": "evo-dubbing-mux-report",
+      "description": "Muxes normalized TTS audio segments into the original video at precise time offsets using FFmpeg, and generates the JSON report with timing, drift, and loudness metadata.",
+      "responsibility": "Construct FFmpeg filter_complex commands with adelay to place audio segments at exact timestamps, mux with original video (copy video stream), enforce 48kHz mono AAC output, compute drift metrics, and write the structured JSON report.",
+      "key_functions": [
+        "build_ffmpeg_mux_command",
+        "mux_dubbed_video",
+        "calculate_drift",
+        "get_video_duration",
+        "generate_report_json"
+      ],
+      "dr_sections": [
+        "4. FFmpeg Command-Line Integration for Audio/Video Dubbing",
+        "8. Precise Duration Measurement Modalities",
+        "9. JSON Reporting and Drift Calculation",
+        "10. Common Integration Pitfalls and Best Practices"
+      ],
+      "depends_on": [
+        "evo-dubbing-audio-processing"
+      ]
+    }
+  ]
+}

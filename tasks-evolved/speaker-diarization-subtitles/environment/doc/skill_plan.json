@@ -1,0 +1,82 @@
+{
+  "task_summary": "Perform speaker diarization on input.mp4 and generate RTTM diarization output, ASS subtitles with speaker-labeled transcripts, and a JSON report.",
+  "decomposition_rationale": "The task has three distinct functional domains: (1) audio processing with VAD and speaker clustering for diarization, (2) ASR transcription aligned with diarization labels, and (3) output formatting for RTTM/ASS/JSON. Combining diarization and transcription alignment into one skill keeps the core pipeline cohesive, while output formatting is a separate concern.",
+  "skills": [
+    {
+      "name": "evo-diarization-pipeline",
+      "description": "End-to-end speaker diarization pipeline: extracts audio from video via ffmpeg, runs Silero VAD for speech activity detection, extracts ECAPA-TDNN speaker embeddings via SpeechBrain, and clusters them using agglomerative clustering with cosine distance. Returns diarization segments with speaker labels.",
+      "responsibility": "Audio extraction, VAD, speaker embedding extraction, clustering, and producing diarization segment data (start, end, speaker label).",
+      "key_functions": [
+        "extract_audio_from_video",
+        "run_silero_vad",
+        "extract_speaker_embeddings",
+        "cluster_speakers",
+        "run_diarization_pipeline"
+      ],
+      "dr_sections": [
+        "1. Audio Preprocessing and FFmpeg Extraction",
+        "1.1 Audio Format Requirements",
+        "1.2 FFmpeg Extraction Command",
+        "2. Voice Activity Detection (VAD) Mechanisms",
+        "2.1 Silero VAD (v6.2.0) API and Implementation",
+        "2.2 SpeechBrain VAD",
+        "3. SpeechBrain 1.0.3 Speaker Embedding Extraction",
+        "4. Clustering Speaker Embeddings",
+        "4.1 Distance Metric: Cosine vs. Euclidean",
+        "4.2 Agglomerative Clustering with SciPy",
+        "4.3 Determining the Optimal Number of Speakers",
+        "9.1 SpeechBrain 1.0.3 Deprecation Warnings",
+        "9.2 Silero VAD 6.2.0 Breaking Changes"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-transcription-alignment",
+      "description": "Transcribes audio using OpenAI Whisper with word-level timestamps, then aligns each word to diarized speaker segments using overlap-based (IoU) assignment. Groups contiguous same-speaker words into coherent transcript lines.",
+      "responsibility": "ASR transcription via Whisper, word-to-speaker alignment using temporal overlap, and grouping words into speaker-attributed transcript segments.",
+      "key_functions": [
+        "transcribe_audio",
+        "assign_speaker_to_word",
+        "align_transcript_with_diarization",
+        "group_words_into_lines"
+      ],
+      "dr_sections": [
+        "5. Automatic Speech Recognition using OpenAI Whisper",
+        "5.1 API and Parameters",
+        "5.2 Transcribing Numpy Arrays Directly",
+        "5.3 Result Dictionary Structure",
+        "6. Aligning Whisper Transcriptions with Diarization Labels",
+        "6.1 Strategy: Intersection over Union (IoU) Mapping",
+        "9.3 Whisper large-v3 on CPU Memory Management"
+      ],
+      "depends_on": [
+        "evo-diarization-pipeline"
+      ]
+    },
+    {
+      "name": "evo-output-formatting",
+      "description": "Handles all output file generation: writes RTTM files using pyannote.core Annotation, generates ASS subtitle files with proper header/timing/speaker labels, and creates the JSON report with pipeline metadata.",
+      "responsibility": "Formatting and writing RTTM diarization files, ASS subtitle files with centisecond time conversion and speaker labels, and JSON report generation.",
+      "key_functions": [
+        "export_rttm",
+        "format_ass_time",
+        "export_ass_subtitles",
+        "generate_report_json"
+      ],
+      "dr_sections": [
+        "7. RTTM File Format Specification and Pyannote.core",
+        "7.1 Exact Column Format",
+        "7.2 Writing RTTM using pyannote.core.Annotation",
+        "8. ASS (Advanced SubStation Alpha) Subtitle Format",
+        "8.1 Complete Header and Preamble",
+        "8.2 Dialogue Lines and Centiseconds Conversion",
+        "8.3 Injecting Speaker Labels",
+        "9.4 Pyannote.core Immutability Gotchas"
+      ],
+      "depends_on": [
+        "evo-diarization-pipeline",
+        "evo-transcription-alignment"
+      ]
+    }
+  ]
+}

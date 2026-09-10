@@ -1,0 +1,40 @@
+Lean 4 proof techniques for proving inequalities involving recursive sequences and geometric sums, specifically for Mathlib4. I need detailed information on the following:
+
+1. **Lean 4 / Mathlib4 API for natural number induction proofs involving rational or real number inequalities**: What are the exact tactic names, import paths, and calling conventions for proving `∀ n : ℕ, f n ≤ c` by induction in Lean 4 with Mathlib? Specifically:
+   - How to use `induction n with` syntax correctly
+   - How to handle the base case and inductive step for inequalities
+   - Working examples of induction proofs over ℕ with `≤` on rationals/reals
+
+2. **Lean 4 Mathlib4 geometric sum lemmas**: Does Mathlib4 have a lemma for the closed-form of geometric sums like `∑ i in Finset.range (n+1), (1/2)^i = 2 - (1/2)^n` or `∑ i in Finset.range (n+1), (1/2:ℚ)^i ≤ 2`? What are the exact lemma names, their types, and how to apply them? Search for:
+   - `Finset.geom_sum_eq`
+   - `geom_series_def`
+   - `Finset.sum_geometric_two_add_one`
+   - Any lemma about partial sums of geometric series being bounded
+
+3. **Lean 4 tactics for arithmetic reasoning with fractions and powers of 2**: How to use `norm_num`, `ring`, `linarith`, `omega`, `field_simp`, `simp`, `gcongr` for goals involving `1 / 2^n`, `(1:ℚ) / (2:ℚ)^n`, or similar expressions. What are common pitfalls with:
+   - Type coercion issues between ℕ, ℤ, ℚ, ℝ
+   - Division in ℕ vs ℚ (natural number division is floor division)
+   - Powers `2^n` in different number types
+   - When `norm_num` can and cannot close goals
+
+4. **Defining recursive sequences in Lean 4 and proving properties**: If `S : ℕ → ℚ` is defined recursively (e.g., `S 0 = 1` and `S (n+1) = S n + 1/2^(n+1)`), what patterns work for:
+   - Unfolding the recursive definition in a proof (`simp only [S]`, `unfold S`, `rw [S]`)
+   - Proving `S n = ∑ i in Finset.range (n+1), (1/2)^i` and then using the closed form
+   - Directly proving `S n ≤ 2` by induction without going through the closed form
+
+5. **Critical pitfalls in Lean 4 Mathlib proofs involving `1/2^n`**:
+   - Is `1 / 2 ^ (n+1)` parsed as `(1 / 2) ^ (n+1)` or `1 / (2 ^ (n+1))`?
+   - How does `Nat.div` vs field division affect the proof?
+   - What happens with `0 < 2^n` goals — which lemmas close them?
+   - `pow_pos`, `Nat.pos_of_ne_zero`, `two_pos`, etc.
+
+6. **Working complete example**: Provide a complete Lean 4 proof (with exact imports from Mathlib4) of a statement like `∀ n : ℕ, (∑ i in Finset.range (n+1), (1:ℚ) / 2^i) ≤ 2` or equivalently proving that a recursively defined partial sum of a geometric series is bounded by 2. Show the exact `import` statements needed.
+
+7. **Lean 4 `lake build` and `lean-toolchain` compatibility**: When using Mathlib4, what are common issues with toolchain versions, and how does one ensure the proof compiles with `lake build` without warnings? What flags or options make warnings into errors?
+
+8. **Key Mathlib4 lemmas for this specific problem pattern**:
+   - `sub_nonneg`, `div_le_one`, `inv_pos`, `one_div`
+   - `Finset.sum_le_sum`
+   - `pow_le_pow_right`, `pow_nonneg`
+   - `sub_le_self` for showing `2 - 1/2^n ≤ 2`
+   - How to show `0 ≤ (1:ℚ)/2^n` in Lean 4

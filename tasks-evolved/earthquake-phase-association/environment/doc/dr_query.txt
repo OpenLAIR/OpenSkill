@@ -1,0 +1,46 @@
+Seismic phase association pipeline using SeisBench and ObsPy in Python: complete API guide for building reusable utility functions
+
+I need comprehensive documentation on the following topics for building a Python skill module that performs seismic phase picking and event association:
+
+## 1. ObsPy: Reading MiniSEED and Station Data
+
+- Exact API for `obspy.read()` to load `.mseed` files: function signature, return type (`Stream` object), how to iterate over `Trace` objects, accessing `trace.stats` attributes (network, station, channel, starttime, endtime, sampling_rate, npts).
+- How to read a CSV file of station metadata with pandas and convert it into an `obspy.core.inventory.Inventory` object, or alternatively how to work with station coordinates directly as a dictionary/DataFrame for downstream use.
+- How to properly handle the `response` (instrument sensitivity) column — do we need to remove instrument response before feeding waveforms to deep learning pickers? What is the correct `trace.remove_sensitivity()` or `trace.remove_response()` API?
+- How to group traces by station (e.g., combining BHE, BHN, BHZ channels for the same station into a 3-component stream).
+
+## 2. SeisBench v0.10.2: Deep Learning Phase Picking
+
+- Exact import paths for pretrained phase picking models in SeisBench 0.10.2. Specifically: `seisbench.models.EQTransformer`, `seisbench.models.PhaseNet`, `seisbench.models.GPD` — which are available and what are their `from_pretrained()` arguments (e.g., `"original"`, `"stead"`, `"instance"`, `"geofon"`)?
+- The complete API for running a pretrained picker on an ObsPy Stream:
+  - How to use `model.classify()` — what does it accept (Stream, batch_size, etc.)? What does it return? Specifically, does it return `obspy.core.event.Catalog` or a list of `Pick` objects or annotations as streams?
+  - How to use `model.annotate()` — what does it return (Stream of probability traces)?
+  - What are the key parameters: `P_threshold`, `S_threshold`, `overlap`, `blinding`, `batch_size`? What are good default threshold values for P and S picks (e.g., 0.3, 0.5)?
+- Working code example: loading a .mseed file, running PhaseNet or EQTransformer, and extracting a list of picks with fields: station, phase_type (P or S), pick_time (UTCDateTime), and probability/confidence.
+- How does SeisBench handle 1-component vs 3-component data? Does PhaseNet require ZNE ordering? How to ensure correct channel ordering?
+- Common pitfalls: Does SeisBench require specific sampling rates (100 Hz)? Do we need to resample? Does it handle gaps in traces? What about trace length requirements?
+
+## 3. Seismic Phase Association Algorithms
+
+- How to use `gamma` (GaMMA - Gaussian Mixture Model Association) Python package for phase association: `pip install gamma` or is it `pyocto`? Exact import path, API for configuring velocity model (vp=6.0 km/s, vs=vp/1.75), providing station locations, and input pick format.
+- Alternative: How to use `seisbench` or simple grid-search / clustering-based association. Is there a built-in association method in SeisBench?
+- If GaMMA is not available, how to implement a simple association algorithm:
+  - Given P and S picks at multiple stations, how to associate them into events using arrival time differences?
+  - Travel-time based association: given vp and vs, station locations, and pick times, how to estimate event origin time and location using a simple grid search or iterative approach.
+  - Clustering picks by time windows and then validating clusters using moveout consistency.
+- How to estimate event origin time from associated picks: formula using P-wave arrival, station distance, and velocity model. Or simply using the earliest P pick minus estimated travel time.
+
+## 4. Simple Association Without External Packages
+
+- A working Python implementation of a basic phase associator that:
+  1. Takes a DataFrame of picks (station, phase, time, probability) and station coordinates
+  2. Groups picks into candidate events using temporal clustering (e.g., DBSCAN on pick times or sliding time windows)
+  3. For each candidate event, estimates origin time and location using a 1D velocity model
+  4. Outputs a list of events with origin times
+- What time window is appropriate for grouping picks from a regional earthquake (seconds? tens of seconds?)
+- How to convert station lat/lon to km for distance calculations (e.g., using `obspy.geodetics.gps2dist_azimuth` or simple Haversine formula)
+
+## 5. Output Format and Edge Cases
+
+- How to format UTCDateTime as ISO format string without timezone: `dt.strftime("%Y-%m-%dT%H:%M:%S.%f")` or `str(utcdatetime)` behavior?
+- Common pitfalls: duplicate events, missed events due to too-strict thresholds, time zone issues with ObsPy UTCDateTime.

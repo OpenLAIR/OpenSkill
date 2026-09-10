@@ -1,0 +1,52 @@
+{
+  "task_summary": "Calculate DOTS powerlifting scores by copying relevant columns from 'Data' to 'Dots' sheet, then appending TotalKg and Dots columns with Excel formulas in /root/data/openipf.xlsx",
+  "decomposition_rationale": "This task has two distinct concerns: (1) understanding the data schema and identifying/copying the right columns, and (2) implementing the DOTS formula logic as Excel formulas. However, since both are tightly coupled in a single openpyxl workflow and the task is straightforward, two skills suffice: one for the domain knowledge (DOTS formula, coefficients, edge cases) and one for the openpyxl Excel manipulation pattern.",
+  "skills": [
+    {
+      "name": "evo-powerlifting-dots-formula",
+      "description": "Provides the exact DOTS scoring formula, sex-specific polynomial coefficients, TotalKg computation rules, edge case handling (negative values, Mx category), and the corresponding Excel formula strings for both TotalKg and DOTS columns.",
+      "responsibility": "Domain knowledge: DOTS formula definition, male/female coefficients, valid input handling (negative best lifts, blank values, Mx sex category mapping to male coefficients), required columns from OpenPowerlifting schema (Name, Sex, BodyweightKg, Best3SquatKg, Best3BenchKg, Best3DeadliftKg), and precision requirements (3 decimal places).",
+      "key_functions": [
+        "get_dots_coefficients",
+        "build_totalkg_excel_formula",
+        "build_dots_excel_formula",
+        "get_required_columns"
+      ],
+      "dr_sections": [
+        "1. The Mathematical Framework of the DOTS Scoring System",
+        "1.1 The Exact DOTS Formula and Coefficients",
+        "1.2 Valid Bodyweight Bounds and Edge Cases",
+        "2. OpenPowerlifting Data Schema and Input Variable Handling",
+        "2.1 Essential Schema Columns for DOTS",
+        "2.2 Computing TotalKg and Handling Negative Values",
+        "2.3 Edge Cases: Disqualifications and the Mx Category",
+        "3. Microsoft Excel Formula Implementation",
+        "3.1 The `TotalKg` Formula",
+        "3.2 The `DOTS` Formula"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-openpyxl-sheet-processor",
+      "description": "Provides utilities for loading an Excel workbook with openpyxl, copying selected columns from a source sheet to a destination sheet preserving order and headers, appending formula columns, and saving the workbook. Handles the specific workflow of reading from 'Data' sheet and writing to 'Dots' sheet.",
+      "responsibility": "Excel I/O operations: loading workbook, mapping source column headers to indices, copying column data row-by-row to destination sheet, writing Excel formula strings into new columns, and saving the modified workbook. Handles openpyxl 3.1.5 specifics.",
+      "key_functions": [
+        "load_workbook_safe",
+        "find_column_indices",
+        "copy_columns_to_sheet",
+        "append_formula_column",
+        "save_workbook"
+      ],
+      "dr_sections": [
+        "4. Programmatic Data Processing Using Python's `openpyxl`",
+        "4.1 Working Python Implementation",
+        "5. Advanced Mechanics and Pitfalls in `openpyxl` (Focusing on Version 3.1.5)",
+        "5.1 Formula Evaluation and the `data_only=True` Paradigm",
+        "5.2 Handling of Worksheets"
+      ],
+      "depends_on": [
+        "evo-powerlifting-dots-formula"
+      ]
+    }
+  ]
+}

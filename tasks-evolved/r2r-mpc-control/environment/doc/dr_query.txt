@@ -1,0 +1,33 @@
+Model Predictive Control (MPC) for Roll-to-Roll (R2R) web handling systems: linearized state-space modeling, LQR gain computation, and discrete-time MPC implementation in Python using NumPy and SciPy
+
+I need comprehensive information on the following topics to build a reusable Python skill module for designing and implementing an MPC controller for a 6-section Roll-to-Roll web tension control system:
+
+1. **R2R Web Tension-Velocity Dynamics Linearization**: How to derive the linearized state-space model (A, B matrices) from the nonlinear R2R dynamics equations:
+   - dT_i/dt = (EA/L)*(v_i - v_{i-1}) + (1/L)*(v_{i-1}*T_{i-1} - v_i*T_i)
+   - dv_i/dt = (R²/J)*(T_{i+1} - T_i) + (R/J)*u_i - (fb/J)*v_i
+   
+   where the state vector is [T1, T2, T3, T4, T5, T6, v1, v2, v3, v4, v5, v6] (12 states) and control input is [u1, u2, u3, u4, u5, u6] (6 inputs). I need the exact Jacobian derivation procedure: what are the partial derivatives ∂(dT_i/dt)/∂T_j, ∂(dT_i/dt)/∂v_j, ∂(dv_i/dt)/∂T_j, ∂(dv_i/dt)/∂v_j, and ∂(dv_i/dt)/∂u_j evaluated at the reference operating point? What boundary conditions apply (e.g., T_0 and v_0 as known inlet conditions)? How do the coupling terms between sections affect the Jacobian structure?
+
+2. **Continuous-to-Discrete Conversion**: Using `scipy.signal.cont2discrete` — provide exact function signature, supported methods (e.g., 'zoh', 'bilinear', 'euler'), return values, and working code examples. What is the correct calling convention: `cont2discrete((A_cont, B_cont, C, D), dt, method='zoh')`? What are the shapes of returned matrices? Are there numerical stability concerns for small dt (0.01s) with stiff systems?
+
+3. **LQR Gain Computation in Python**: How to solve the discrete-time algebraic Riccati equation (DARE) using `scipy.linalg.solve_discrete_are` — exact function signature: `solve_discrete_are(A, B, Q, R)` — parameter ordering, matrix dimension requirements, and how to compute K_lqr from the solution P. Provide the exact formula: K = (R + B^T P B)^{-1} B^T P A. Are there pitfalls with matrix conditioning? What if `scipy.linalg.solve_discrete_are` fails — what are fallback approaches?
+
+4. **MPC Implementation Without External Optimization Libraries (using only NumPy/SciPy)**: Since only numpy 1.26.4 and scipy 1.13.0 are available (no cvxpy, no casadi, no OSQP), how to implement a quadratic programming (QP) based MPC controller using `scipy.optimize.minimize` with method='SLSQP' or by formulating the dense QP and solving it. Provide:
+   - How to construct the prediction matrices (Phi, Gamma) from A_d, B_d for horizon N
+   - How to formulate the QP cost function J = x^T Q_bar x + u^T R_bar u as a standard form min 0.5*z^T H z + f^T z
+   - How to solve using `scipy.optimize.minimize` — exact API, constraints format, bounds
+   - Alternative: using `scipy.linalg.solve` to compute the unconstrained MPC solution directly as K_mpc = (Gamma^T Q_bar Gamma + R_bar)^{-1} Gamma^T Q_bar Phi
+   - Working code example of a complete MPC step function
+
+5. **Reference Tracking with Step Changes**: How to handle a reference step change (section 3 tension changing from 20N to 44N at t=0.5s) in MPC. Should I use delta formulation (incremental MPC), reference tracking formulation with augmented state, or simple error-based MPC where the state is defined as deviation from reference? What is the standard approach for tracking a piecewise-constant reference in linear MPC?
+
+6. **Steady-State Target Computation**: When the reference tensions change, the steady-state velocities and control inputs also change. How to compute the new steady-state operating point (x_ss, u_ss) given new reference tensions, so that the MPC tracks deviations from this new steady state? The formula for steady-state velocity computation from the tension dynamics at equilibrium.
+
+7. **Tuning Guidelines for Q and R matrices**: For web tension control in R2R systems, what are typical relative weightings between tension states and velocity states in Q? Why would one use large weights on tensions (e.g., 100) and small weights on velocities (e.g., 0.1)? What is the effect of R weighting on control aggressiveness and settling time? What prediction horizon N (range 3-30) is typical for this type of process control?
+
+8. **Common Pitfalls**:
+   - Sign conventions in the R2R dynamics (tension positive direction, velocity coupling between sections)
+   - Off-by-one errors in section indexing (section i tension depends on rollers i and i-1)
+   - Numerical issues with matrix inversion in MPC gain computation
+   - Ensuring the linearized model captures the correct coupling structure
+   - How to handle the first section where v_{i-1} = v_0 (constant inlet velocity) — does this mean v_0 does not appear as a state?

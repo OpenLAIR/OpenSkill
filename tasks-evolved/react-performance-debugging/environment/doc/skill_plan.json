@@ -1,0 +1,68 @@
+{
+  "task_summary": "Diagnose and fix performance issues in a slow Next.js e-commerce app focusing on API route optimization, bundle size reduction, and excessive re-rendering",
+  "decomposition_rationale": "The task has three distinct performance domains explicitly called out: API routes (backend slowness, artificial delays, sequential fetches), bundle/rendering (excessive client-side code, missing memoization, unnecessary re-renders), and Next.js-specific patterns (useEffect fetching, dynamic imports, client boundaries). These map cleanly to three skills with clear boundaries.",
+  "skills": [
+    {
+      "name": "evo-nextjs-api-optimization",
+      "description": "Identifies and fixes performance anti-patterns in Next.js API routes including artificial delays (setTimeout in production), N+1 sequential fetch patterns, missing caching headers, and unnecessary data processing. Use this skill to diagnose slow API responses.",
+      "responsibility": "API route performance: remove artificial delays, parallelize sequential awaits with Promise.all, add caching (fetch options, Cache-Control headers, in-memory LRU), and optimize data fetching patterns in route handlers",
+      "key_functions": [
+        "find_artificial_delays",
+        "detect_sequential_awaits",
+        "suggest_parallel_fetching",
+        "check_cache_headers",
+        "analyze_api_routes"
+      ],
+      "dr_sections": [
+        "1. Next.js API Route Optimization Patterns",
+        "API Response Caching Configurations",
+        "Request Deduplication",
+        "In-Memory Caching (LRU Cache)",
+        "Detecting and Fixing N+1 Query Patterns",
+        "Cache-Control Headers"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-nextjs-bundle-reduction",
+      "description": "Identifies and fixes bundle size issues including wildcard/barrel imports, missing dynamic imports for heavy components, unnecessary 'use client' directives pushing large trees to client, and useEffect-based data fetching that should be server-side. Use this to reduce JavaScript payload and improve load times.",
+      "responsibility": "Client bundle optimization: tree-shake heavy imports (lodash, icons), apply next/dynamic for code splitting, minimize 'use client' boundary scope, convert client-side useEffect fetches to server-side patterns",
+      "key_functions": [
+        "find_heavy_imports",
+        "suggest_dynamic_imports",
+        "detect_unnecessary_client_directives",
+        "detect_useeffect_fetching",
+        "analyze_bundle_issues"
+      ],
+      "dr_sections": [
+        "2. Bundle Size Reduction in Next.js",
+        "Tree-Shaking Heavy Imports",
+        "Exact Syntax for `next/dynamic`",
+        "Using `@next/bundle-analyzer`",
+        "4. Next.js Specific Performance Patterns",
+        "Minimizing the Client Boundary (`'use client'`)"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-nextjs-render-optimization",
+      "description": "Identifies and fixes excessive React re-rendering issues including missing React.memo, unmemoized objects/functions/computations passed as props, context overloading causing cascading re-renders, and missing/incorrect key props. Use this to fix slow interactions like cart updates and compare page rendering.",
+      "responsibility": "React rendering performance: add useMemo/useCallback for expensive computations and callback stability, apply React.memo to frequently re-rendered components, split overloaded contexts, fix key prop issues in lists",
+      "key_functions": [
+        "detect_unmemoized_computations",
+        "detect_inline_object_props",
+        "detect_context_overloading",
+        "suggest_memo_wrapping",
+        "analyze_render_performance"
+      ],
+      "dr_sections": [
+        "3. Excessive Re-rendering Prevention in React/Next.js",
+        "Reference Equality: The Object/Array/Function Problem",
+        "React.memo and Custom Comparisons",
+        "Context Splitting for Cart State",
+        "5. Common Anti-Patterns in Slow Next.js E-commerce Apps",
+        "7. Specific Code Transformation Patterns"
+      ]
+    }
+  ]
+}

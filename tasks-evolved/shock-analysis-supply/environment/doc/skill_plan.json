@@ -1,0 +1,76 @@
+{
+  "task_summary": "Estimate investment spending shock impact on Georgia's potential GDP using Cobb-Douglas production function, HP filter, and perpetual inventory method in Excel via openpyxl and LibreOffice",
+  "decomposition_rationale": "The task has three distinct concerns: (1) collecting and populating data from multiple online sources into the spreadsheet, (2) building the Excel model with formulas for HP filter, production function, and investment shock calculations, and (3) running LibreOffice Solver to optimize the HP filter. These map to data acquisition, formula construction, and solver execution.",
+  "skills": [
+    {
+      "name": "evo-macro-data-acquisition",
+      "description": "Handles downloading and parsing macroeconomic data from PWT, IMF WEO, and ECB SDW databases for Georgia, and populating the corresponding sheets in the Excel workbook",
+      "responsibility": "Download PWT Excel file and extract rnna, emp, labsh, hc for Georgia; scrape/download IMF WEO real GDP level (NGDP_R) and growth rate (NGDP_RPCH) for 2000-2027; download ECB CFC data for Georgia; populate sheets PWT, WEO_Data, and CFC data in test-supply.xlsx",
+      "key_functions": [
+        "download_pwt_data",
+        "extract_pwt_georgia_variables",
+        "fetch_imf_weo_data",
+        "fetch_ecb_cfc_data",
+        "populate_data_sheets"
+      ],
+      "dr_sections": [
+        "1. Database Structures and Programmatic Acquisition",
+        "1.1 Penn World Table (PWT) Database Structure",
+        "1.2 IMF World Economic Outlook (WEO) Database",
+        "1.3 ECB Statistical Data Warehouse (SDW)"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-macro-excel-formulas",
+      "description": "Constructs all Excel formulas for depreciation rate calculation, Cobb-Douglas production function, HP filter setup, capital stock projection, TREND extrapolation, and investment shock modeling using openpyxl",
+      "responsibility": "Write Excel formulas in sheets Production, WEO_Data, CFC data, and Investment for: depreciation rate from CFC/K, LnK/LnY/LnZ calculations, HP filter objective function and second-order differences, average depreciation rate, K/Y ratio anchoring, TREND function for extending LnZ, Ystar_base and Ystar_with calculations, deltaK and K_With from investment shock, and all linking formulas between sheets",
+      "key_functions": [
+        "build_depreciation_formulas",
+        "build_hp_filter_formulas",
+        "build_production_function_formulas",
+        "build_capital_projection_formulas",
+        "build_investment_shock_formulas",
+        "link_cross_sheet_references"
+      ],
+      "dr_sections": [
+        "2. Macroeconomic Accounting and Calibration",
+        "2.1 Depreciation Rate Calculation",
+        "2.2 Cobb-Douglas Production Function",
+        "3. HP Filter and Trend Extraction",
+        "3.1 The Objective Function and Lambda",
+        "3.2 HP Filter Implementation in Excel Formulas",
+        "4. Python openpyxl Integration",
+        "4.1 Writing Formulas via openpyxl",
+        "4.2 Excel's TREND Function",
+        "4.3 Pitfalls and Formatting",
+        "6. Capital Stock Projection and Investment Shocks",
+        "6.1 Baseline Capital Stock Projection",
+        "6.2 Investment Shock Modeling"
+      ],
+      "depends_on": [
+        "evo-macro-data-acquisition"
+      ]
+    },
+    {
+      "name": "evo-macro-solver-execution",
+      "description": "Executes LibreOffice Calc Solver programmatically to minimize the HP filter objective function, or alternatively implements a Python-based HP filter optimization and writes results back to the spreadsheet",
+      "responsibility": "Run the HP filter optimization either via LibreOffice UNO Solver API or scipy.optimize to find smoothed LnZ trend values that minimize the HP filter objective with lambda=6.25; recalculate all formulas via LibreOffice headless mode; save final results to test-supply.xlsx",
+      "key_functions": [
+        "run_libreoffice_solver",
+        "run_scipy_hp_filter",
+        "recalculate_workbook",
+        "write_solver_results"
+      ],
+      "dr_sections": [
+        "3.1 The Objective Function and Lambda",
+        "5. LibreOffice Calc Solver via Command Line and Python-UNO",
+        "5.1 Invoking LibreOffice UNO",
+        "5.2 Programmatic Solver Implementation"
+      ],
+      "depends_on": [
+        "evo-macro-excel-formulas"
+      ]
+    }
+  ]
+}

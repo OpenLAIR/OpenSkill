@@ -1,0 +1,41 @@
+Python speech-to-text filler word detection with timestamps from video: complete API guide for building a reusable utility module
+
+I need detailed documentation on the following topics for building a Python utility that extracts audio from video, performs word-level speech recognition with precise timestamps, detects filler words, and stitches video clips together:
+
+1. **Whisper model for word-level timestamps**:
+   - OpenAI Whisper (`whisper` package) vs `faster-whisper` vs `openai-whisper`: exact pip package names, import paths, and which one supports word-level timestamps natively.
+   - For `faster-whisper` (CTranslate2-based): exact API for `WhisperModel` class — constructor parameters (`model_size_or_path`, `device`, `compute_type`), the `transcribe()` method signature, and specifically how to enable **word-level timestamps** (`word_timestamps=True` or equivalent parameter).
+   - What does the word-level output look like? Show the exact data structure — does each segment have a `.words` attribute? What are the properties of each word object (`word`, `start`, `end`, `probability`)? Provide working code example.
+   - For standard `openai-whisper` package: `whisper.load_model()` and `whisper.transcribe()` — how to get word-level timestamps. What is the `word_timestamps` parameter? Show complete working code example with correct parameter names.
+   - What model sizes are available (tiny, base, small, medium, large) and which is the best tradeoff for accuracy vs speed for filler word detection in a 1800s timeout on CPU-only environment?
+   - `compute_type` options for CPU: "int8", "float32" — which works on CPU without GPU?
+
+2. **Audio extraction from video using ffmpeg/Python**:
+   - Using `subprocess` to call ffmpeg to extract audio from mp4 to WAV (16kHz mono, which Whisper expects). Exact ffmpeg command line arguments.
+   - Alternative: using `ffmpeg-python` package or just subprocess. Which is more reliable?
+   - Correct WAV format parameters for Whisper input: sample rate 16000, mono channel, pcm_s16le codec.
+
+3. **Filler word detection logic**:
+   - How to normalize Whisper transcript output for matching against a list of filler words/phrases (lowercasing, stripping punctuation).
+   - For multi-word phrases like "you know", "kind of", "i mean", "i guess" — how to detect these from word-level timestamps when Whisper returns individual words? Pattern for sliding window or n-gram matching over word sequences.
+   - How to handle Whisper's tendency to capitalize "I" — case-insensitive matching considerations.
+   - Common Whisper transcription artifacts: does Whisper sometimes output "Hmm" vs "hmm", "Uh" vs "uh", "Um" vs "um"? Does it sometimes merge filler words or skip them?
+   - What `no_speech_threshold`, `log_prob_threshold`, `condition_on_previous_text` settings help with detecting filler words that Whisper might otherwise suppress or skip?
+
+4. **Video clip extraction and concatenation with ffmpeg**:
+   - Given a list of (start_time, end_time) tuples, how to extract short clips from an mp4 using ffmpeg with precise timestamp seeking (`-ss` before `-i` vs after `-i`, keyframe issues).
+   - For sub-second precision: using `-ss` with `-i` and `-to` or `-t` for duration. The `-avoid_negative_ts` flag.
+   - How to use ffmpeg concat demuxer vs concat filter to stitch multiple short clips into one output.mp4. Exact command syntax for both approaches.
+   - Working Python code using subprocess to: (a) extract each clip to a temp file, (b) create a concat list file, (c) concatenate all clips with `ffmpeg -f concat -safe 0 -i list.txt -c copy output.mp4`.
+   - Potential issues with concat copy mode when clips have different codecs or when cutting on non-keyframes. When to use re-encoding (`-c:v libx264 -c:a aac`) instead of stream copy.
+   - How to add a small padding (e.g., 0.1-0.3s) around each filler word's timestamp to capture the complete utterance.
+
+5. **Installation in the given environment**:
+   - The Docker image is `python:3.12-slim` with ffmpeg installed. What pip packages need to be installed? `pip install faster-whisper` or `pip install openai-whisper`? Dependencies like `torch` — does faster-whisper avoid the large torch dependency?
+   - Does `faster-whisper` work on CPU without CUDA? What are the exact install requirements?
+
+6. **Common pitfalls**:
+   - Whisper hallucination on silence — does it generate phantom words? How to filter by word probability/confidence?
+   - Memory issues with large models on CPU — which model size stays under reasonable RAM?
+   - Timestamp accuracy: are Whisper word timestamps accurate to within what tolerance? Do they drift?
+   - `faster-whisper` vs `whisper` — any differences in word timestamp output format or accuracy?

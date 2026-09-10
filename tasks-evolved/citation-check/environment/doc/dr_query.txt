@@ -1,0 +1,28 @@
+Research query:
+
+I need comprehensive technical guidance for building a Python utility module that parses BibTeX files and verifies whether academic citations are real or fake/hallucinated. The module will use `bibtexparser` version 1.4.2 and `requests` version 2.32.3 in Python 3 on Ubuntu 24.04. Please provide the following:
+
+1. **bibtexparser 1.4.2 API usage**: Exact code examples for parsing a `.bib` file using `bibtexparser` version 1.4.2 (NOT version 2.x which has a completely different API). Show the correct import paths, how to load and parse a BibTeX file, how to access entry fields (title, author, year, journal, booktitle, doi, volume, pages, publisher), and how to iterate over all entries. Show the correct way to use `bibtexparser.load()` vs `bibtexparser.loads()`, the `BibTexParser` class and its customization options (especially `common_strings`, `ignore_nonstandard_types`, `homogenize_fields`). Show how to clean/remove BibTeX formatting like curly braces `{}`, LaTeX commands, and special characters from field values.
+
+2. **Academic citation verification techniques using free APIs without API keys**: Detail every free, publicly accessible API that can be used to verify whether an academic paper actually exists. Specifically cover:
+   - **CrossRef REST API** (`api.crossref.org`): Exact endpoint URLs, query parameters for searching by title, author, DOI. Show working Python `requests` code for querying by title (`/works?query.title=...`), filtering by author and year, interpreting the response JSON structure, confidence scoring based on matching fields. What are rate limits? What headers should be sent (e.g., `User-Agent`, `mailto` polite pool)?
+   - **Semantic Scholar API** (`api.semanticscholar.org`): Endpoints for paper search, exact query parameters, response format, rate limits, whether an API key is needed for basic access.
+   - **OpenAlex API** (`api.openalex.org`): How to search for papers by title, response format, rate limits.
+   - **DBLP API** for computer science papers: search endpoint, query format, response parsing.
+   - **DOI resolution** (`doi.org`): How to check if a DOI resolves to a real paper.
+
+3. **Matching and scoring heuristics**: How to determine if a search result from CrossRef/Semantic Scholar matches a BibTeX entry. What string similarity metrics to use (exact match after normalization, Levenshtein distance, token overlap). How to normalize titles for comparison (lowercasing, removing punctuation, removing articles). What constitutes a "close enough" match? What fields beyond title should be cross-checked (authors, year, venue)?
+
+4. **Common characteristics of fake/hallucinated citations**: What patterns do AI-hallucinated citations typically exhibit? Do they have plausible-looking but non-existent DOIs? Do they combine real author names with fake titles? Are there heuristic red flags (e.g., very generic titles, mismatched venues and topics, non-existent journal names)?
+
+5. **Practical code patterns for rate-limited API querying**: How to implement retry logic with exponential backoff for `requests`, how to handle HTTP 429 (rate limit) responses, how to add delays between requests to stay within CrossRef's polite pool limits. How to handle timeouts and connection errors gracefully.
+
+6. **Edge cases and pitfalls**: 
+   - BibTeX entries with missing fields (no DOI, no year, etc.)
+   - Titles containing special LaTeX characters, math formulas, or unicode
+   - bibtexparser 1.4.2 specific gotchas (e.g., field name casing, how it handles `@string` macros, entries without required fields)
+   - CrossRef returning partial matches or very low-confidence results
+   - Papers that are real but too new or too obscure to appear in any API
+   - Conference papers vs journal papers having different metadata structures
+
+7. **Output formatting**: How to produce a clean JSON file with `json.dumps()` ensuring proper encoding, alphabetical sorting of the fake citations list, and cleaned titles free of BibTeX artifacts.

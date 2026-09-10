@@ -1,0 +1,22 @@
+How to use python-docx library version 1.1.2 to find and replace template placeholders like {{PLACEHOLDER}} in Word .docx files, including handling placeholders that are split across multiple runs within the same paragraph. I need detailed working code examples for the following specific scenarios:
+
+1. **Reading and replacing placeholders in paragraphs and tables**: Using `python-docx` (import path `from docx import Document`), show how to iterate over all paragraphs (including paragraphs inside table cells) to find and replace `{{PLACEHOLDER}}` text. Critically, explain the problem where Word splits a single placeholder like `{{CANDIDATE_FULL_NAME}}` across multiple `run` objects within a paragraph (due to formatting changes, spell-check, or XML fragmentation), and provide robust solutions to handle this. Show code that joins all runs in a paragraph, performs the replacement, and then writes the result back — either by clearing all runs and writing to the first one, or by reconstructing runs properly to preserve formatting.
+
+2. **Preserving formatting during replacement**: When replacing placeholder text across runs, how to preserve the original font, size, bold, italic, color, and other run-level formatting. Show the correct `python-docx` API for copying `run.font` properties. What are the exact attributes on `run.font` (e.g., `name`, `size`, `bold`, `italic`, `color.rgb`) and how to clone them?
+
+3. **Handling headers and footers**: Does `Document.paragraphs` include text in headers and footers? If not, show how to access `document.sections[i].header.paragraphs` and `document.sections[i].footer.paragraphs` to also replace placeholders there.
+
+4. **Conditional section removal**: For a pattern like `{{IF_RELOCATION}}...content...{{END_IF_RELOCATION}}`, how to programmatically remove the marker lines AND optionally remove the entire content between them (when the condition is false) or keep the content but strip the markers (when the condition is true). This may span multiple paragraphs. Show how to delete a paragraph from a document using `python-docx` — specifically the technique of accessing `paragraph._element` and calling `paragraph._element.getparent().remove(paragraph._element)` since there is no built-in `delete_paragraph()` method. Are there pitfalls with this approach?
+
+5. **JSON data loading and placeholder mapping**: Best practice Python pattern for loading a JSON file with `json.load()`, then iterating over key-value pairs to replace `{{KEY}}` with the corresponding value in the document.
+
+6. **Common pitfalls with python-docx 1.1.2**: 
+   - Are there any deprecated APIs or breaking changes from earlier versions?
+   - Does `paragraph.text` return the concatenated text of all runs, and is it read-only?
+   - When a placeholder spans table cells or is inside a text box / content control, how to handle that?
+   - What happens with special XML characters in replacement text?
+   - Does `document.save()` preserve the original document's styles, images, and layout?
+
+7. **Accessing all text containers in a document**: Complete code to get every paragraph in the document body, tables (including nested tables), headers, and footers — a comprehensive iterator function that yields all paragraphs from every possible location in the document.
+
+Provide complete, runnable Python code examples using `from docx import Document` with python-docx version 1.1.2, including correct import statements and function signatures suitable for packaging as reusable utility functions.

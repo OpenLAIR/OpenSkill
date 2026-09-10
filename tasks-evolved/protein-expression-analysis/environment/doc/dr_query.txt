@@ -1,0 +1,38 @@
+Research the Python `openpyxl` library (version 3.1.5) for building a reusable skill module that manipulates Excel `.xlsx` files containing protein expression / quantitative proteomics data, where the skill must preserve existing formatting (colors, fonts, cell fills) and write Excel FORMULAS (not computed values) into specific cells. I need a comprehensive reference covering exact APIs, working code patterns, and pitfalls.
+
+Please cover:
+
+1. **Workbook and worksheet loading with openpyxl 3.1.5**
+   - Correct `load_workbook()` signature and parameters: `data_only`, `keep_vba`, `keep_links`, `read_only`. Which combination preserves formulas AND formatting when round-tripping a file? What is the difference between `data_only=True` vs `False` when reading, and what happens to formulas on save?
+   - How to access sheets by name (`wb["Task"]`, `wb["Data"]`), iterate rows, and read cell values.
+   - How to detect a cell's fill color (e.g., identifying "blue" or "yellow" highlighted cells) — exact attribute paths like `cell.fill.fgColor.rgb`, `cell.fill.start_color.rgb`, type coercion issues, and theme-color vs RGB pitfalls.
+
+2. **Writing Excel formulas (not values) to cells**
+   - Exact syntax for writing formulas: `ws["C11"] = "=INDEX(...)"`, escaping, and when openpyxl treats a string as a formula.
+   - Writing `INDEX`/`MATCH` two-way lookup formulas, `AVERAGE`, `STDEV` / `STDEV.S` / `STDEV.P` (which is appropriate for sample standard deviation in Excel?), and exponent formulas like `=2^(...)`.
+   - Using absolute vs relative references (`$A$1`) when generating formulas programmatically.
+   - Pitfalls: formula strings starting with `=`, function name localization, array formulas vs regular formulas in openpyxl, and `ArrayFormula` class.
+
+3. **Preserving formatting on save**
+   - Confirmed behavior of `wb.save()` regarding preservation of cell fills, fonts, conditional formatting, merged cells, column widths, and named styles.
+   - Known issues where openpyxl strips or alters formatting (images, charts, pivot tables, data validations) and how to avoid them.
+   - Whether writing a formula to a pre-formatted cell preserves that cell's existing fill/font.
+
+4. **Data pipeline patterns for this domain**
+   - Reading a header row (sample names in row 10) and a label column (protein IDs in column A) to build lookup indices.
+   - Reading a category/group row (row 9 with "Control"/"Treated" labels) and mapping samples to groups by column index.
+   - Constructing INDEX/MATCH formulas that reference another sheet: `=INDEX(Data!$B$2:$XX$201, MATCH($A11, Data!$A$2:$A$201, 0), MATCH(C$10, Data!$B$1:$XX$1, 0))` — proper sheet-name quoting when sheet names contain spaces.
+   - Converting between numeric column indices and Excel letter references (`openpyxl.utils.get_column_letter`, `column_index_from_string`).
+
+5. **Quantitative proteomics domain conventions**
+   - Standard practice for log2-transformed expression data: why arithmetic mean/stdev (not geometric) is correct on log2 scale.
+   - Log2 fold change definition: `treated_mean - control_mean` on log2 scale; linear fold change = `2^log2FC`.
+   - Sample-name conventions like `MDAMB468_BREAST_TenPx01` (CCLE/TenPx tandem-mass-tag proteomics naming) — any parsing considerations.
+
+6. **Common pitfalls**
+   - Deprecated openpyxl APIs (e.g., `get_sheet_by_name`, `cell(row, column).value` quirks, `Worksheet.iter_rows` parameter changes).
+   - 1-indexed vs 0-indexed row/column in openpyxl vs Python lists.
+   - `data_only=True` returning `None` for formula cells when the file has never been opened by Excel (no cached value), and how this affects skills that need to verify outputs.
+   - Saving over an open file, locale/decimal-separator issues in formulas, and string encoding.
+
+Please provide working, copy-pasteable Python code snippets with correct imports (`from openpyxl import load_workbook`, `from openpyxl.utils import get_column_letter`, etc.) for each pattern above. Prioritize accuracy over breadth, and explicitly flag any APIs that are deprecated or changed in openpyxl 3.1.x.

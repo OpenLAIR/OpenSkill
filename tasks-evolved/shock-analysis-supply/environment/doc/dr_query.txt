@@ -1,0 +1,33 @@
+Research query:
+
+Macroeconomic modeling of investment shocks using Cobb-Douglas production function for a small open economy, with HP filter implementation in Excel using openpyxl Python library. I need detailed technical knowledge on the following topics to build a Python utility module that programmatically manipulates Excel files:
+
+1. **Penn World Table (PWT) database structure**: What are the exact variable names and codes in PWT 10.x for capital stock (rnna or rkna?), labor input (emp), capital share (labsh), and human capital (hc) for Georgia (country code GEO)? What does the PWT metadata sheet contain and how are variables defined? What is the URL structure for downloading PWT data programmatically?
+
+2. **IMF World Economic Outlook (WEO) database**: How to programmatically access IMF WEO data for Georgia? What are the exact subject codes for real GDP level (NGDP_R or NGDP_RPCH?) and real GDP growth rate? What is the WEO database URL structure and API endpoints? How does the WEO data format look (tab-separated, CSV)?
+
+3. **ECB Statistical Data Warehouse - Consumption of Fixed Capital for Georgia**: What is the exact data series key/code for "Consumption of fixed capital" (annual) for Georgia on data.ecb.europa.eu? How to navigate and download this data? What units is it reported in?
+
+4. **Depreciation rate calculation**: How to calculate depreciation rate from consumption of fixed capital (CFC) and capital stock data? The formula δ = CFC / K_previous_year or CFC / K? What are the standard conventions?
+
+5. **Cobb-Douglas production function for potential GDP estimation**: The standard form Y* = A * K^α * L^(1-α) or in log form lnY = lnA + α*lnK + (1-α)*lnL. How is capital's share (α) typically calibrated for small open economies like Georgia? How to compute Solow residual (TFP) lnZ = lnY - α*lnK?
+
+6. **HP Filter implementation in Excel formulas**: The Hodrick-Prescott filter minimizes: Σ(y_t - τ_t)² + λ * Σ[(τ_{t+1} - τ_t) - (τ_t - τ_{t-1})]². What is the standard lambda value for annual data (1600 for quarterly, 6.25 or 100 for annual)? How to set up the HP filter objective function in Excel cells so that Excel Solver can minimize it by changing the trend values? What are the exact formulas for the sum of squared deviations and the sum of squared second differences?
+
+7. **openpyxl Python library (version 3.1.5)**: 
+   - How to read and write Excel formulas (not values) using openpyxl? What is the correct syntax for writing Excel formulas as strings (e.g., ws['A1'] = '=SUM(B1:B10)')?
+   - How to reference cells across sheets in Excel formulas written via openpyxl (e.g., '=PWT!B5')?
+   - How to use Excel's TREND function in a formula string?
+   - How to handle Excel Solver setup - can openpyxl configure Solver, or must it be done via LibreOffice macros?
+   - How to write AVERAGE, LN, EXP, INDEX, MATCH formulas via openpyxl?
+   - What are the pitfalls with openpyxl formula writing (e.g., comma vs semicolon separators, absolute vs relative references)?
+   - How to read existing cell values and formulas from a workbook?
+   - How does openpyxl handle named ranges, merged cells, and sheet references?
+
+8. **LibreOffice Calc Solver via command line**: How to invoke LibreOffice Calc's Solver from command line or via Python macro to minimize an HP filter objective? Can you use a LibreOffice Basic macro or Python-UNO bridge to run Solver programmatically? What are working code examples for setting up and running LibreOffice Solver (GRG Nonlinear or LP) from Python?
+
+9. **Capital stock projection methodology**: How to extend capital stock using K/Y ratio anchoring? The perpetual inventory method: K_{t+1} = (1-δ)*K_t + I_t. How to compute deltaK (change in capital) from investment spending shocks?
+
+10. **Investment shock modeling**: Given an investment of $6.5 billion over 8 years starting 2026, how is this typically distributed (evenly or front-loaded)? How to compute the impact on capital stock and then on potential GDP through the production function? What is Ystar_base vs Ystar_with methodology?
+
+Provide working Python code examples using openpyxl 3.1.5 for each of these operations, with correct import paths and function signatures.

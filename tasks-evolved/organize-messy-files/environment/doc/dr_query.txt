@@ -1,0 +1,44 @@
+Python libraries and APIs for extracting text content from PDF, DOCX, and PPTX files for automated document classification and sorting into topic folders
+
+I need detailed, working code examples and API documentation for building a Python utility module that:
+
+1. **PDF text extraction**: Using PyPDF2 (version 3.0.1) and/or pdfplumber (version 0.11.4):
+   - Exact import paths and function signatures for extracting text from the first 1-3 pages of a PDF (not the entire document, for performance with 100+ files)
+   - PyPDF2: `PdfReader` class usage — is it `from PyPDF2 import PdfReader`? What are the correct method calls — `reader.pages[0].extract_text()`? Are there any known issues with `extract_text()` returning empty strings for certain PDFs?
+   - pdfplumber: `pdfplumber.open(filepath)` usage, `.pages[0].extract_text()` — what does it return when text extraction fails? None or empty string?
+   - Common pitfalls: encrypted PDFs, scanned-image PDFs where text extraction returns nothing, PDFs with unusual encodings
+   - Performance comparison: which library is faster for extracting just the first page or two?
+
+2. **DOCX text extraction**: Using python-docx library:
+   - Correct import: `from docx import Document` — is the package name `python-docx` but import is `docx`?
+   - How to extract all paragraph text: `Document(filepath).paragraphs` and joining `.text` attributes
+   - Does it need to be installed separately or is it available? The Dockerfile doesn't show python-docx being installed — what happens if we try to use it? Alternative approaches using `zipfile` to read `word/document.xml` directly?
+
+3. **PPTX text extraction**: Using python-pptx library:
+   - Correct import path and package name
+   - How to iterate through slides and extract text from all text frames/shapes
+   - The Dockerfile doesn't install python-pptx — alternative approach: using `zipfile` to read PPTX XML content directly, extracting text from `ppt/slides/slide*.xml` files
+   - Working code example for extracting text from PPTX without python-pptx using only stdlib zipfile and xml.etree.ElementTree
+
+4. **Fallback text extraction without external libraries**:
+   - How to extract text from DOCX files using only Python stdlib (`zipfile` + `xml.etree.ElementTree`) — the DOCX format is a ZIP containing `word/document.xml` with namespace `http://schemas.openxmlformats.org/wordprocessingml/2006/main`
+   - How to extract text from PPTX files similarly — ZIP containing `ppt/slides/slide*.xml`
+   - Exact XML namespaces and XPath expressions needed
+
+5. **Keyword-based document classification**:
+   - Best practices for classifying scientific papers into known categories (LLM/AI, quantum computing/trapped ions, black holes/astrophysics, DNA/biology, music history) based on extracted text
+   - Should classification use title + abstract (first page) or full text?
+   - Keyword matching vs. TF-IDF approaches that work without ML libraries
+   - How to handle edge cases where a paper might touch multiple topics — what discriminating keywords work best for each domain?
+
+6. **File operations**:
+   - `shutil.move()` vs `shutil.copy2()` + `os.remove()` — which preserves file names and avoids issues?
+   - `os.makedirs(path, exist_ok=True)` for creating destination folders
+   - Handling files with special characters in names
+
+7. **LibreOffice command-line conversion** (available in the Docker image):
+   - `libreoffice --headless --convert-to pdf` — exact command syntax for converting DOCX/PPTX to PDF as an alternative text extraction approach
+   - Can `pdftotext` (from poppler-utils, installed in Docker) be called via subprocess for reliable PDF text extraction?
+   - `pdftotext` command-line usage: `pdftotext -l 2 input.pdf -` to extract first 2 pages to stdout
+
+Please provide complete, tested code snippets for each extraction method with proper error handling, and note any version-specific deprecations or breaking changes in PyPDF2 3.x (e.g., `PdfFileReader` was renamed to `PdfReader`).

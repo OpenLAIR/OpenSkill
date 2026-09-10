@@ -1,0 +1,36 @@
+python-pptx library comprehensive API guide for manipulating PowerPoint presentations programmatically: exact APIs for the following operations with working code examples, correct imports, parameter types, and common pitfalls:
+
+1. **Reading and iterating slides and shapes in python-pptx**: How to iterate over all slides, access all shapes on each slide, identify text frames and text boxes. What is the correct way to detect "dangling" or orphan text elements — specifically text boxes that contain paper titles (as opposed to regular content placeholders). How to distinguish between placeholder shapes vs. free-standing text boxes using `shape.has_text_frame`, `shape.shape_type`, `shape.placeholder_format`, etc. What are the exact enum values for `MSO_SHAPE_TYPE` and placeholder types?
+
+2. **Font formatting in python-pptx**: Exact API for setting font properties on runs within paragraphs:
+   - `run.font.name = 'Arial'` — does this work or is there a separate method?
+   - `run.font.size` — what unit? Confirm it uses `Pt()` from `pptx.util`. Exact import path for `Pt`.
+   - `run.font.color.rgb` — how to set hex color like #989596? Confirm usage of `RGBColor(0x98, 0x95, 0x96)` from `pptx.dml.color` or `pptx.util`. Exact import path for `RGBColor`.
+   - `run.font.bold = False` — confirm this disables bold.
+   - Do we need to set font properties on every run individually, or can we set at paragraph level? What about inherited/theme fonts — how to override them completely?
+
+3. **Text box sizing and positioning**: 
+   - How to calculate the required width for a single line of text given font name and size in python-pptx? Is there a built-in text measurement API, or do we need an external library like `PIL`/`Pillow` for font metrics?
+   - How to resize a text box: `shape.width`, `shape.height` — what units (EMU)? Conversion between EMU, inches, points, cm using `pptx.util.Inches`, `pptx.util.Emu`, `pptx.util.Pt`.
+   - How to center a text box horizontally on a slide: getting slide width from `presentation.slide_width`, then calculating `shape.left = (slide_width - shape.width) / 2`.
+   - How to position at the bottom of the slide: `shape.top = slide_height - shape.height - margin`.
+   - `shape.text_frame.word_wrap` — how to disable word wrap so text stays on one line?
+   - Auto-fit settings: `text_frame.auto_size` options (`MSO_AUTO_SIZE.NONE`, `MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT`, `MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE`). Exact import path for `MSO_AUTO_SIZE`.
+
+4. **Creating new slides and adding content**:
+   - How to add a new slide at the end: `presentation.slides.add_slide(layout)`. How to pick the right slide layout — getting layouts from `presentation.slide_layouts`, finding one with title and body placeholders.
+   - How to set the slide title: accessing `slide.placeholders[0].text` or `slide.shapes.title.text`.
+   - How to add bulleted text to the body placeholder: `slide.placeholders[1].text_frame`. How to add multiple paragraphs with auto-numbered bullet points (numbered list). 
+   - **Critical**: How to create NUMBERED (auto-numbered) bullet points in python-pptx? Does python-pptx support numbered lists natively, or do we need to manipulate the underlying XML (`<a:buAutoNum>` element)? Provide exact lxml manipulation code to set numbered bullets using `pPr` (paragraph properties) with `buAutoNum` type attribute. What are valid `type` values like `arabicPeriod`, `arabicParenR`, etc.?
+
+5. **Working with lxml to manipulate OOXML directly in python-pptx**:
+   - How to access the XML element of a paragraph: `paragraph._p` 
+   - How to add `<a:buAutoNum>` to paragraph properties using `lxml.etree.SubElement`
+   - The correct namespace URI for drawingML (`a:` prefix): `http://schemas.openxmlformats.org/drawingml/2006/main`
+   - Using `pptx.oxml.ns.qn()` function for namespace-qualified names — exact import and usage.
+   - How to remove existing bullet formatting before adding numbered bullets.
+
+6. **IMPORTANT PITFALLS**:
+   - Note that python-pptx is NOT in the Dockerfile — only lxml, defusedxml, and six are installed. This means we likely need to work with raw OOXML using lxml directly, or python-pptx might be available as a dependency. Clarify: can python-pptx work with just lxml+defusedxml? What is python-pptx's dependency list? If python-pptx is NOT available, provide complete working code to parse and modify .pptx files using only lxml and zipfile (since .pptx is a ZIP archive containing XML files).
+   - Structure of a .pptx ZIP archive: what XML files contain slide content (`ppt/slides/slide1.xml`, etc.), presentation properties (`ppt/presentation.xml`), slide layouts, relationships files.
+   - How to detect text content that represents "paper titles" — heuristics for identifying academic paper titles in presentation text boxes.

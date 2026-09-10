@@ -1,0 +1,62 @@
+Research query:
+
+DC Optimal Power Flow (DCOPF) with spinning reserve co-optimization in Python: complete implementation guide for building reusable utility functions
+
+I need comprehensive information on the following topics to build a Python utility module that solves a DC-OPF problem with spinning reserve requirements, reads MATPOWER-format JSON data, and produces structured dispatch reports:
+
+1. **MATPOWER Case Format in JSON**: What is the exact structure of a MATPOWER case exported as JSON? Specifically:
+   - What are the field names and column indices for `bus`, `gen`, `gencost`, and `branch` arrays?
+   - MATPOWER bus data columns: bus_i, type, Pd, Qd, Gs, Bs, area, Vm, Va, baseKV, zone, Vmax, Vmin — what are the exact 0-based indices?
+   - MATPOWER gen data columns: bus, Pg, Qg, Qmax, Qmin, Vg, mBase, status, Pmax, Pmin — exact indices?
+   - MATPOWER branch data columns: fbus, tbus, r, x, b, rateA, rateB, rateC, ratio, angle, status, angmin, angmax — exact indices?
+   - MATPOWER gencost data columns: model (1=piecewise, 2=polynomial), startup, shutdown, ncost, cost coefficients — exact indices? How are polynomial cost coefficients ordered (highest degree first or lowest)?
+   - How is generator indexing handled (1-based vs 0-based)? How do generator IDs map?
+
+2. **DC Power Flow Formulation**: 
+   - The DC power flow equations: P_injection = B * theta, where B is the susceptance matrix built from branch reactance x
+   - How to build the B-bus matrix (Bbus) from branch data: B_ij = 1/x for connected buses, diagonal = sum of connected susceptances
+   - How to compute line flows from bus angles: flow_ij = (theta_i - theta_j) / x_ij
+   - How to handle the slack/reference bus (theta = 0)
+   - Branch flow limits using rateA (MVA rating) — when rateA = 0, does that mean unlimited?
+
+3. **DC-OPF with Spinning Reserves as a Linear Program**:
+   - Complete LP formulation: minimize generation cost subject to power balance, generator limits, transmission constraints, and reserve requirements
+   - Decision variables: Pg (generation dispatch) and Rg (reserve allocation) per generator
+   - Constraints:
+     - Power balance: sum of generation at each bus = sum of demand at each bus + net power flow out
+     - Generator limits: Pmin ≤ Pg ≤ Pmax, Rg ≥ 0, Pg + Rg ≤ Pmax
+     - Transmission limits: -rateA ≤ flow ≤ rateA using PTDF or B-theta formulation
+     - Spinning reserve requirement: sum(Rg) ≥ reserve_requirement — what is the "standard capacity coupling" reserve requirement? Is it typically the largest generator's Pmax, or a percentage of total load, or some other standard?
+   - How to compute Power Transfer Distribution Factors (PTDF) matrix from the B matrix and branch data for use in LP constraints
+   - Working Python code using scipy.optimize.linprog or PuLP to solve this LP
+
+4. **Python Implementation with scipy.optimize.linprog**:
+   - Exact function signature: `scipy.optimize.linprog(c, A_ub, b_ub, A_eq, b_eq, bounds, method, options)`
+   - How to set up the objective vector c for quadratic cost functions approximated as linear, or how to use scipy.optimize.minimize for quadratic costs
+   - For quadratic costs (model=2, cost = c2*Pg^2 + c1*Pg + c0), can we use `scipy.optimize.minimize` with method='SLSQP' or 'trust-constr'? What are the exact calling conventions?
+   - Alternatively, how to use `scipy.optimize.linprog` for piecewise linear cost approximation
+   - What about using `cvxpy` for quadratic programming? Exact install (`pip install cvxpy`), import paths, and a working DCOPF example with reserve constraints
+
+5. **Building the PTDF Matrix in Python** (numpy-based):
+   - Step-by-step algorithm: build Bbus, remove reference bus row/column, invert, compute PTDF = diag(1/x) * Cf * inv(Bbus_reduced)
+   - Where Cf is the branch-bus incidence matrix
+   - Working numpy code example
+
+6. **Computing Line Loading Percentages**:
+   - loading_pct = |flow_MW| / rateA * 100
+   - How to handle branches with rateA = 0 (unlimited rating)
+
+7. **Operating Margin Calculation**:
+   - "Remaining operating margin (uncommitted capacity beyond energy and reserves)" = sum(Pmax - Pg - Rg) for all online generators
+
+8. **Common Pitfalls**:
+   - Off-by-one errors in MATPOWER indexing (1-based bus numbers vs 0-based Python arrays)
+   - Generators with status=0 (offline) should be excluded
+   - Branches with status=0 should be excluded
+   - gencost polynomial coefficient ordering in MATPOWER (highest degree first: cn, cn-1, ..., c1, c0)
+   - rateA=0 meaning unlimited vs. zero capacity
+   - Reference bus selection for DC power flow
+   - Numerical issues with singular B matrices
+   - How scipy.linprog handles infeasible problems
+
+9. **Available Python packages in a bare Ubuntu 24.04 with python3 and pip**: What packages are available by default? Will I need to `pip install` numpy, scipy, cvxpy, or PuLP? What are the exact pip install commands?

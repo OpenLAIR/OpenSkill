@@ -1,0 +1,41 @@
+Suricata 7.0 rule writing comprehensive guide for detecting HTTP POST requests with specific path, header, and body content patterns using content matching and PCRE
+
+I need detailed information on the following topics for building a Python utility that generates and validates Suricata rules:
+
+1. **Suricata 7.0.x HTTP rule keywords — exact syntax and semantics:**
+   - `http.method` (sticky buffer) — how to match exactly "POST". Is it `content:"POST"; http.method;` or `http.method; content:"POST";`? What is the correct ordering of keyword and content in Suricata 7.0?
+   - `http.uri` vs `http.uri.raw` — which sticky buffer matches the request path exactly `/telemetry/v2/report`? Does `http.uri` include query string? How to match an exact path without partial matches (using `startswith`, `endswith`, `bsize` or other modifiers)?
+   - `http.header` vs `http.header.raw` — how to match a specific header name-value pair like `X-TLM-Mode: exfil` inside request headers. Does `http.header` contain all headers concatenated? What is the exact format (with or without CRLF, with or without colon-space)?
+   - `http.request_header` with specific header name — Suricata 7.0 introduced `http.request_header` with a name parameter. What is the exact syntax: `http.request_header, name:"X-TLM-Mode"; content:"exfil";`? Is this available in 7.0.11?
+   - `http.request_body` — sticky buffer for matching POST body content. How to match `blob=` followed by base64 characters of at least 80 chars, and `sig=` followed by exactly 64 hex characters.
+
+2. **PCRE in Suricata rules — syntax for body matching:**
+   - How to write PCRE patterns within Suricata rules that operate on HTTP request body. What is the correct modifier: `/P` for HTTP request body, `/H` for header? Are these still valid in Suricata 7.0 or deprecated in favor of sticky buffers?
+   - Can PCRE be used within a sticky buffer context (e.g., after `http.request_body;`)? What is the correct syntax?
+   - Example PCRE for: matching `blob=` followed by at least 80 base64 characters `[A-Za-z0-9+/=]{80,}`
+   - Example PCRE for: matching `sig=` followed by exactly 64 hex characters `[0-9a-fA-F]{64}` (and NOT more)
+
+3. **Combining multiple match conditions in a single Suricata rule:**
+   - How to write a rule with multiple sticky buffers (http.method AND http.uri AND http.header AND http.request_body) all in one rule. Are they implicitly AND-ed?
+   - Can you have multiple `content` and `pcre` keywords within the same sticky buffer scope?
+   - What is the correct way to have two separate body matches (one for `blob=...` pattern and one for `sig=...` pattern) in the same rule?
+
+4. **Rule structure and syntax:**
+   - Complete working example of a Suricata 7.0 rule with `alert http` action, proper header, sid, rev, msg, and multiple content/pcre matches
+   - The `flow:established,to_server` keyword — is it required or recommended for HTTP request matching?
+   - Difference between `alert http` and `alert tcp` — which is correct when using HTTP sticky buffers?
+
+5. **Critical pitfalls and edge cases:**
+   - Does `content:"/telemetry/v2/report"; http.uri;` do a substring match or exact match? How to ensure exact match (not matching `/telemetry/v2/report/extra`)?
+   - Does `http.uri` include leading slash?
+   - When using `http.request_body`, does Suricata handle URL-encoded body content or does it see raw bytes?
+   - TCP stream reassembly requirements — does Suricata 7.0 handle reassembled HTTP by default, or do config settings in suricata.yaml affect this?
+   - `bsize` keyword for enforcing exact buffer sizes
+   - `depth`, `offset`, `distance`, `within` modifiers with sticky buffers — which are valid?
+   - Common mistakes: using legacy HTTP keywords (like `uricontent`) vs new sticky buffers, forgetting semicolons, incorrect PCRE delimiter usage
+
+6. **Running Suricata from command line for pcap analysis:**
+   - Exact command: `suricata -r file.pcap -S rules.rules -l output_dir` — what are the correct flags?
+   - How to read results from `eve.json` — format of alert entries, how `sid` appears in the JSON output
+
+Provide complete working Suricata rule examples that combine HTTP method, URI, header, and body content/PCRE matching in a single rule for Suricata 7.0.x.

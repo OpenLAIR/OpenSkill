@@ -1,0 +1,49 @@
+Research the Python libraries and techniques needed to build a reusable skill module for detecting exoplanet transit periods in TESS lightcurves that are contaminated by stellar activity (rotational modulation, starspots). The skill will provide helper functions for: (1) loading a text-format TESS lightcurve, (2) quality-filtering and outlier rejection, (3) detrending/removing stellar variability, and (4) period detection of the underlying transit signal. Provide concrete, working Python code examples with exact imports, function signatures, parameter defaults, and return types.
+
+Specifically, please cover:
+
+1. **lightkurve 2.4.2 API** (Python 3.9, NumPy 1.24.3):
+   - How to construct a `LightCurve` object from raw NumPy arrays (time in MJD, flux, flux_err, quality) — exact constructor signature and attribute names.
+   - How to mask by quality flag (keeping only quality == 0).
+   - The `.remove_outliers(sigma=...)` method — parameters and defaults.
+   - The `.flatten(window_length=..., polyorder=..., break_tolerance=..., return_trend=...)` method (Savitzky-Golay detrending) — exact signature, what window_length values are appropriate for removing stellar rotation (days-to-weeks) while preserving transits (hours).
+   - The `.normalize()` method behavior.
+   - Whether `time.value` / `time.format` returns MJD or BTJD and how to handle MJD inputs (TimeSeries time formats: 'mjd', 'btjd', etc.).
+   - Any deprecations between lightkurve 2.x versions (e.g., `LightCurve.from_timeseries`, `flux_quantity`, removed attributes).
+
+2. **transitleastsquares 1.32 API**:
+   - Exact import path (`from transitleastsquares import transitleastsquares`).
+   - Constructor signature: `transitleastsquares(t, y, dy=None)` — input requirements (must flux be normalized to 1? must NaNs be removed?).
+   - `.power(period_min=..., period_max=..., n_transits_min=..., oversampling_factor=..., duration_grid_step=..., use_threads=...)` — key parameters and sensible defaults for TESS short-baseline data.
+   - The returned results object attributes: `results.period`, `results.SDE`, `results.T0`, `results.duration`, `results.depth`, `results.power`, `results.periods`.
+   - Performance considerations and threading.
+   - Known pitfalls: minimum data length, requirement that flux median ≈ 1, handling of flux uncertainties.
+
+3. **Box Least Squares (BLS) via astropy**:
+   - `from astropy.timeseries import BoxLeastSquares` — constructor and `.power(periods, durations)` and `.autopower(durations)` methods.
+   - How to extract best period from the periodogram.
+   - Comparison with TLS for transit detection sensitivity.
+
+4. **Stellar variability removal techniques**:
+   - Savitzky-Golay filtering parameters appropriate for separating multi-day stellar rotation from few-hour transits.
+   - Alternative: median filtering, spline detrending, biweight filtering (`wotan` library if relevant — is it installed? probably not given Dockerfile, so focus on scipy/lightkurve built-ins).
+   - Lomb-Scargle (`astropy.timeseries.LombScargle`) for identifying the stellar rotation period before detrending — exact API.
+   - Why iterative sigma-clipping + flattening is important; the danger of in-transit points biasing the detrending.
+
+5. **Data loading pitfalls**:
+   - Reading whitespace-delimited text with `numpy.loadtxt` or `pandas.read_csv` — column ordering: Time (MJD), Normalized flux, Quality flag, Flux uncertainty.
+   - Handling MJD vs BJD/BTJD in TESS contexts.
+   - Typical TESS sector cadence (2-min or 30-min) and how it informs window_length choices.
+
+6. **Output format**:
+   - Writing a single float rounded to 5 decimals to a text file in Python (`f"{value:.5f}"` formatting).
+
+7. **Common pitfalls** that would cause wrong period detection:
+   - Failing to remove stellar variability before BLS/TLS (period detector locks onto rotation harmonic).
+   - Wrong window_length (too small destroys transits, too large leaves variability).
+   - Not masking quality != 0 points.
+   - NaN or inf values crashing TLS.
+   - Confusing detected stellar rotation period with the transit period.
+   - Period aliases / harmonics in the periodogram.
+
+Please provide actual code snippets demonstrating the full pipeline from text file to period value, citing current (2024) lightkurve and transitleastsquares documentation.

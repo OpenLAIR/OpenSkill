@@ -1,0 +1,80 @@
+{
+  "task_summary": "Unify hierarchical product category taxonomies from Amazon, Facebook, and Google Shopping into a single 5-level taxonomy via offline semantic clustering.",
+  "decomposition_rationale": "The task splits naturally into data ingestion/normalization, semantic embedding + hierarchical clustering, and cluster naming/output formatting. Three skills keep each concern self-contained without overlap.",
+  "skills": [
+    {
+      "name": "evo-taxonomy-data-pipeline",
+      "description": "Load, normalize, and output e-commerce category taxonomy data using Pandas 2.2.0-safe patterns. Use when ingesting source CSVs (Amazon/Facebook/Google), splitting hierarchical paths, deduplicating, and writing the final unified taxonomy CSVs.",
+      "responsibility": "CSV I/O, schema normalization across the three platforms, path splitting, text cleanup, deduplication, and writing final output files (unified_taxonomy_full.csv and unified_taxonomy_hierarchy.csv).",
+      "key_functions": [
+        "load_source_csvs",
+        "normalize_category_paths",
+        "split_hierarchy_columns",
+        "write_unified_outputs",
+        "compute_source_entropy"
+      ],
+      "dr_sections": [
+        "5. Pandas 2.2.0 Data Pipeline Patterns",
+        "5.1 Ingress and Schema Normalization",
+        "5.2 Handling Pandas 2.2.0 `FutureWarning`s",
+        "5.3 Code Implementation: Safe Pandas Parsing",
+        "6. Ensuring Even Source Distribution",
+        "6.1 Distribution Metrics",
+        "6.2 Post-Hoc Verification"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-semantic-hierarchical-clustering",
+      "description": "Generate sentence embeddings for category strings and build a balanced 5-level hierarchy via recursive top-down agglomerative clustering. Use when needing offline semantic embeddings and SciPy/Sklearn-based hierarchical clustering with size constraints.",
+      "responsibility": "Offline embedding generation using sentence-transformers 2.5.1, condensed distance matrix computation, recursive top-down clustering with min/max children constraints to produce strictly nested 5-level cluster IDs.",
+      "key_functions": [
+        "generate_normalized_embeddings",
+        "compute_condensed_distance",
+        "recursive_top_down_cluster",
+        "extract_flat_clusters",
+        "enforce_size_balance"
+      ],
+      "dr_sections": [
+        "1. Sentence-Transformers 2.5.1: Embedding Short Category Strings",
+        "1.1 Model Selection and Specifications",
+        "1.2 Exact API Signature and Usage",
+        "1.3 Handling Offline Execution and Truncation",
+        "1.4 Code Implementation: Embedding Generation",
+        "2. Scikit-learn 1.4.0 and SciPy 1.12.0 Hierarchical Clustering APIs",
+        "2.1 Scikit-Learn 1.4.0: `AgglomerativeClustering`",
+        "2.2 SciPy 1.12.0: `linkage`, `fcluster`, and the Condensed Distance Matrix",
+        "2.3 Code Implementation: Distance Matrix and SciPy Linkage",
+        "3. Multi-Level Taxonomy Construction Patterns",
+        "3.1 Bottom-Up Dendrogram Cutting",
+        "3.2 Top-Down Recursive Clustering",
+        "3.3 Code Implementation: Recursive Top-Down Hierarchy",
+        "7. Common Pitfalls Specifically for this Task"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-cluster-naming",
+      "description": "Assign human-readable, non-overlapping representative names to clusters using centroid-nearest selection and TF-IDF, with sibling Jaccard-overlap checks. Use when labeling clustered taxonomy nodes with concise multi-word names.",
+      "responsibility": "Cluster naming via centroid proximity and TF-IDF top n-grams, enforcement of '<5 words' and ' | ' separator formatting, parent-child name overlap avoidance, and sibling distinctness via Jaccard overlap thresholds.",
+      "key_functions": [
+        "compute_centroid_name",
+        "extract_tfidf_top_terms",
+        "format_category_label",
+        "check_sibling_overlap",
+        "deduplicate_parent_child_names"
+      ],
+      "dr_sections": [
+        "4. Category-Name Selection and Text Normalization",
+        "4.1 NLTK 3.8.1 Offline Handling",
+        "4.2 Cluster Naming via Centroid and TF-IDF",
+        "4.3 Preventing Name Overlap (Jaccard Similarity)",
+        "4.4 Code Implementation: Representative Naming",
+        "8. Consolidated Skill Pipeline: The `TaxonomyUnifier` Class"
+      ],
+      "depends_on": [
+        "evo-semantic-hierarchical-clustering"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "task_summary": "Parse a .Civ6Map SQLite file, compute hex adjacencies, and optimally place city centers and districts to maximize total adjacency bonuses for Civilization VI scenario 3.",
+  "decomposition_rationale": "The task naturally decomposes into three concerns: (1) parsing the binary map format from SQLite, (2) encoding all Civ6 district adjacency rules and computing bonuses, and (3) orchestrating the search/optimization for optimal placements. Separating map I/O from game rules from optimization logic keeps each skill focused and testable.",
+  "skills": [
+    {
+      "name": "evo-civ6-map-parser",
+      "description": "Parses .Civ6Map SQLite database files to extract map dimensions, terrain, features, resources, and river edge data into Python data structures. Provides hex coordinate utilities (offset-to-cube conversion, neighbor enumeration) for the odd-r pointy-top hex grid used by Civ6.",
+      "responsibility": "All SQLite I/O, map data extraction (Plots, PlotRivers, PlotFeatures, PlotResources, MapAttributes), coordinate system math (odd-r offset to cube and back), and neighbor computation. Does NOT compute game rules or adjacency bonuses.",
+      "key_functions": [
+        "parse_civ6map",
+        "get_map_dimensions",
+        "offset_to_cube",
+        "cube_to_offset",
+        "get_hex_neighbors",
+        "is_tile_river_adjacent",
+        "get_tile_terrain",
+        "get_tile_feature",
+        "get_tile_resource"
+      ],
+      "dr_sections": [
+        "Part I: Hexagonal Grid Coordinate System in Civilization VI",
+        "Part II: The `.Civ6Map` Binary File Format Specification",
+        "5.2 Hexagonal Coordinate Math (Offset to Cube)",
+        "5.3 Parsing the SQLite Database"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-civ6-adjacency-rules",
+      "description": "Encodes all Civilization VI Gathering Storm district adjacency bonus rules, placement validity checks, population-based district limits, and civilization-specific modifiers. Computes the adjacency bonus for any district placed at any tile given current map state and placed districts.",
+      "responsibility": "District placement validation (terrain restrictions, distance limits, resource blocking), population-to-district-slot calculation, complete adjacency bonus computation for all district types (Campus, Commercial Hub, Industrial Zone, Holy Site, Theater Square, Harbor, Aqueduct, etc.), civilization-specific overrides (Japan, Germany, Korea, Australia, Brazil, Netherlands, Mali), and minor bonus floor rounding.",
+      "key_functions": [
+        "is_valid_district_placement",
+        "max_specialty_districts",
+        "calculate_adjacency_bonus",
+        "get_available_district_types",
+        "is_specialty_district",
+        "apply_civ_modifiers"
+      ],
+      "dr_sections": [
+        "Part III: District Placement and Population Rules",
+        "Part IV: Complete District Adjacency Bonus Rules",
+        "4.1 Base Districts (Gathering Storm Ruleset)",
+        "4.2 Unique Civilization Adjacency Modifiers",
+        "5.4 Validating District Placement",
+        "5.5 Adjacency Bonus Calculator Engine"
+      ],
+      "depends_on": [
+        "evo-civ6-map-parser"
+      ]
+    },
+    {
+      "name": "evo-civ6-placement-optimizer",
+      "description": "Searches for optimal city center and district placements to maximize total adjacency bonuses given scenario constraints (num_cities, population, civilization). Reads scenario JSON, uses map parser and adjacency rules to evaluate candidates, and writes the solution JSON output.",
+      "responsibility": "Loading scenario configuration, enumerating candidate city center locations, enumerating valid district placement combinations within city working range (3 tiles), running optimization/search (brute force, greedy, or heuristic) to maximize total adjacency, handling multi-city scenarios, and writing the final output JSON in the required format.",
+      "key_functions": [
+        "load_scenario",
+        "find_optimal_placements",
+        "enumerate_city_center_candidates",
+        "enumerate_district_combinations",
+        "evaluate_placement",
+        "write_solution_json"
+      ],
+      "dr_sections": [
+        "Part III: District Placement and Population Rules",
+        "Part IV: Complete District Adjacency Bonus Rules",
+        "5.6 JSON Scenario Output"
+      ],
+      "depends_on": [
+        "evo-civ6-map-parser",
+        "evo-civ6-adjacency-rules"
+      ]
+    }
+  ]
+}

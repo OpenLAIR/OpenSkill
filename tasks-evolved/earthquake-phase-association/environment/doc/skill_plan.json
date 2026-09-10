@@ -1,0 +1,72 @@
+{
+  "task_summary": "Load seismic waveform and station data, pick P/S phases using SeisBench deep learning models, associate picks into earthquake events, and output event catalog as CSV.",
+  "decomposition_rationale": "The task has three distinct functional domains: (1) data loading and preparation, (2) deep learning phase picking with SeisBench, and (3) phase association to group picks into earthquake events. Combining picking and association into fewer skills risks unclear boundaries, while separating data I/O from computation keeps each skill focused and reusable.",
+  "skills": [
+    {
+      "name": "evo-seismic-data-io",
+      "description": "Loads MiniSEED waveform data and CSV station metadata, groups traces by station for 3-component processing, and provides station coordinate lookups.",
+      "responsibility": "Reading waveform files with ObsPy, parsing station CSV with Pandas, grouping traces by network.station, and building station dictionaries/DataFrames for downstream use.",
+      "key_functions": [
+        "load_waveforms",
+        "load_stations",
+        "group_traces_by_station",
+        "get_station_dict"
+      ],
+      "dr_sections": [
+        "1. ObsPy: Reading MiniSEED and Station Data",
+        "1.1 Reading MiniSEED Files",
+        "1.2 Creating an Inventory from CSV Station Metadata",
+        "1.4 Grouping Traces by Station"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-seismic-phase-picking",
+      "description": "Runs SeisBench deep learning models (PhaseNet/EQTransformer) on grouped station waveforms to produce P and S phase picks with timestamps and probabilities.",
+      "responsibility": "Loading pretrained SeisBench models, running classify() on per-station streams, extracting pick times/phases/probabilities into a structured DataFrame.",
+      "key_functions": [
+        "load_picker_model",
+        "pick_phases_for_stream",
+        "pick_all_stations",
+        "picks_to_dataframe"
+      ],
+      "dr_sections": [
+        "2. SeisBench v0.10.2: Deep Learning Phase Picking",
+        "2.1 Available Models and Import Paths",
+        "2.2 Model API: `classify()` vs `annotate()`",
+        "2.3 Handling Components, Gaps, and Sampling Rates",
+        "2.4 Working Code Example: Complete Picking Pipeline"
+      ],
+      "depends_on": [
+        "evo-seismic-data-io"
+      ]
+    },
+    {
+      "name": "evo-seismic-phase-association",
+      "description": "Associates phase picks from multiple stations into earthquake events using temporal clustering (DBSCAN) and travel-time validation with a uniform velocity model, then outputs event catalog as CSV.",
+      "responsibility": "Clustering picks temporally, validating clusters against expected P/S travel times using station coordinates and velocity model (vp=6km/s, vs=vp/1.75), estimating event origin times, deduplicating events, and writing results CSV with ISO-formatted timestamps.",
+      "key_functions": [
+        "associate_picks",
+        "validate_cluster",
+        "estimate_origin_time",
+        "write_event_catalog"
+      ],
+      "dr_sections": [
+        "3. Seismic Phase Association Algorithms",
+        "3.1 PyOcto (Highly Recommended)",
+        "3.2 GaMMA (Gaussian Mixture Model Association)",
+        "4. Simple Association Without External Packages",
+        "4.1 Theoretical Framework",
+        "4.2 Distance Calculation",
+        "4.3 Working Implementation of a Basic Associator",
+        "5. Output Format and Edge Cases",
+        "5.1 Formatting UTCDateTime",
+        "5.2 Common Pitfalls in the Pipeline"
+      ],
+      "depends_on": [
+        "evo-seismic-data-io",
+        "evo-seismic-phase-picking"
+      ]
+    }
+  ]
+}

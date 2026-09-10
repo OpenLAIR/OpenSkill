@@ -1,0 +1,70 @@
+{
+  "task_summary": "Parse a binary STL file with Material IDs in attribute bytes, find the largest connected component, look up material density, compute volume and mass, and output results as JSON.",
+  "decomposition_rationale": "This task involves three distinct concerns: (1) binary STL parsing with Material ID extraction, (2) mesh topology analysis for connected component filtering, and (3) volume computation with unit conversion and mass calculation. Combining topology and volume into one geometric analysis skill keeps the count manageable while maintaining clear boundaries.",
+  "skills": [
+    {
+      "name": "evo-stl-binary-parser",
+      "description": "Parses binary STL files using Python's struct module, extracting triangle vertices, normals, and the 2-byte attribute byte count (used as Material ID). Provides filtering by Material ID.",
+      "responsibility": "Read binary STL file layout (80-byte header, 4-byte count, 50-byte facet records), unpack all triangle data, and expose vertices and material IDs as structured data. Also parse the material density markdown table.",
+      "key_functions": [
+        "parse_binary_stl",
+        "parse_material_density_table",
+        "filter_facets_by_material_id",
+        "detect_material_id"
+      ],
+      "dr_sections": [
+        "The Binary STL File Format Specification",
+        "Exact Byte Layout",
+        "Endianness and the Attribute Byte Count",
+        "Common Pitfalls in Binary STL Recognition",
+        "Parsing Binary STL Using Python's `struct` Module",
+        "Struct Format Strings",
+        "Pure Python Implementation"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-mesh-geometry-analysis",
+      "description": "Performs connected component analysis on triangle meshes using Union-Find and computes mesh volume via the signed tetrahedron method (Divergence Theorem). Handles unit conversion and mass calculation.",
+      "responsibility": "Identify the largest connected component of triangles via vertex adjacency (Union-Find with coordinate snapping), compute closed mesh volume using the scalar triple product formula, convert units from mm³ to cm³, and calculate mass given density.",
+      "key_functions": [
+        "get_largest_connected_component",
+        "compute_mesh_volume",
+        "convert_volume_mm3_to_cm3",
+        "calculate_mass"
+      ],
+      "dr_sections": [
+        "Topological Filtering: Connected Components",
+        "Adjacency Structures",
+        "Implementation of Union-Find for Triangle Meshes",
+        "Edge Case: Filtering by Material ID vs. Connected Components",
+        "Calculating the Signed Volume of a Closed Mesh",
+        "Mathematical Derivation of the Divergence Theorem",
+        "The Signed Tetrahedron Formula",
+        "Common Pitfalls in Volume Calculation",
+        "Python Implementation using NumPy",
+        "Unit Conventions and Conversion"
+      ],
+      "depends_on": [
+        "evo-stl-binary-parser"
+      ]
+    },
+    {
+      "name": "evo-mass-report-output",
+      "description": "Orchestrates the full pipeline: parses STL, determines material, filters debris, computes mass, and writes the JSON report in the required format.",
+      "responsibility": "Coordinate the end-to-end workflow: invoke STL parsing, determine the dominant Material ID, filter by material, find largest connected component, compute volume and mass, round results, and serialize to /root/mass_report.json with the exact required schema.",
+      "key_functions": [
+        "run_mass_calculation_pipeline",
+        "write_mass_report_json"
+      ],
+      "dr_sections": [
+        "JSON Data Finalization",
+        "Complete Integrated Python Script"
+      ],
+      "depends_on": [
+        "evo-stl-binary-parser",
+        "evo-mesh-geometry-analysis"
+      ]
+    }
+  ]
+}

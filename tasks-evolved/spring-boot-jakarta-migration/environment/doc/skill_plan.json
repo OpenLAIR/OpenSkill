@@ -1,0 +1,62 @@
+{
+  "task_summary": "Migrate a Java 8/Spring Boot 2.7 user management microservice to Java 21/Spring Boot 3.2, updating all dependencies, namespaces, security config, Hibernate compatibility, and RestTemplate to RestClient",
+  "decomposition_rationale": "The migration has three distinct concern areas: (1) build configuration and namespace changes that form the foundation, (2) security and JWT library migration which is a self-contained domain, and (3) Hibernate/JPA and RestClient changes plus remaining fixes. This decomposition follows dependency order and separates the most complex domains.",
+  "skills": [
+    {
+      "name": "evo-springboot3-pom-namespace",
+      "description": "Handles Maven POM upgrades (Spring Boot parent, Java version, compiler plugin, JJWT library split) and the comprehensive javax-to-jakarta namespace migration across all Java source files. This is the foundational skill that must be applied first.",
+      "responsibility": "Update pom.xml for Spring Boot 3.2, Java 21, maven-compiler-plugin, JJWT 0.12.x split artifacts, and perform global javax.persistence/javax.validation/javax.servlet to jakarta.* import replacements in all .java files while preserving javax.crypto and other Java SE packages",
+      "key_functions": [
+        "upgrade_pom_xml",
+        "migrate_javax_to_jakarta_imports",
+        "update_jjwt_dependencies",
+        "update_compiler_settings"
+      ],
+      "dr_sections": [
+        "1. Maven POM Dependency Changes",
+        "2. Javax to Jakarta Namespace Migration"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-springboot3-security-jwt",
+      "description": "Migrates Spring Security configuration from WebSecurityConfigurerAdapter to SecurityFilterChain bean with Lambda DSL, updates antMatchers to requestMatchers, authorizeRequests to authorizeHttpRequests, and migrates JJWT API calls from 0.9.x to 0.12.x pattern (parser/builder/verifyWith/parseSignedClaims).",
+      "responsibility": "Refactor SecurityConfig class to remove WebSecurityConfigurerAdapter, adopt Lambda DSL, update path matchers, and rewrite JWT token generation/parsing code to use JJWT 0.12.x immutable builder API",
+      "key_functions": [
+        "migrate_security_config",
+        "migrate_jwt_filter",
+        "migrate_jjwt_api_calls",
+        "update_password_encoder_config"
+      ],
+      "dr_sections": [
+        "3. Spring Security 6 Migration from Spring Security 5",
+        "8. Common Pitfalls and Breaking Changes"
+      ],
+      "depends_on": [
+        "evo-springboot3-pom-namespace"
+      ]
+    },
+    {
+      "name": "evo-springboot3-hibernate-restclient",
+      "description": "Handles Hibernate 6 compatibility changes (ID generation strategy, dialect removal), RestTemplate to RestClient migration, application.properties updates, trailing slash handling, and test migration adjustments.",
+      "responsibility": "Update JPA entity ID generation strategies for Hibernate 6, remove deprecated dialect configurations, migrate RestTemplate usage to RestClient with fluent API, update application properties, and fix test configurations for Spring Security 6 compatibility",
+      "key_functions": [
+        "migrate_id_generation_strategy",
+        "remove_deprecated_dialects",
+        "migrate_resttemplate_to_restclient",
+        "update_application_properties",
+        "fix_test_configurations"
+      ],
+      "dr_sections": [
+        "4. Hibernate 6 Compatibility with Spring Boot 3.2",
+        "5. RestTemplate to RestClient Migration",
+        "6. application.properties / application.yml Changes",
+        "7. Test Migration",
+        "8. Common Pitfalls and Breaking Changes"
+      ],
+      "depends_on": [
+        "evo-springboot3-pom-namespace"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+Research query:
+
+Python multiprocessing and concurrent.futures for parallelizing TF-IDF document indexing and similarity search. I need comprehensive, practical information for building a reusable skill module that parallelizes a sequential TF-IDF search engine. Specifically:
+
+1. **`concurrent.futures.ProcessPoolExecutor` and `multiprocessing.Pool` APIs**: Exact function signatures for `ProcessPoolExecutor`, `Pool.map`, `Pool.starmap`, `Pool.apply_async`, `map` vs `submit` semantics, `chunksize` parameter behavior, and how `num_workers=None` defaults (e.g., `os.cpu_count()`). Provide working code examples showing how to split a list of documents into chunks, process each chunk in parallel, and merge results. What are the correct import paths? Show examples with `from concurrent.futures import ProcessPoolExecutor` and `from multiprocessing import Pool`.
+
+2. **Parallelizing inverted index construction for TF-IDF**: How to split a document corpus into chunks (e.g., `chunk_size=500`), compute term frequencies and document frequencies per chunk in parallel worker functions, and then merge/reduce partial inverted indices into a single global index. What is the correct pattern for computing IDF across parallel chunks — do you need a two-pass approach (first compute DF globally, then compute TF-IDF), or can you merge partial DF counts? Show code examples for merging dictionaries of term->document_frequency counts from multiple workers using `collections.Counter` or similar.
+
+3. **Parallelizing batch query search with TF-IDF cosine similarity**: How to distribute multiple queries across workers where each worker computes TF-IDF similarity scores against a shared index. Show the pattern for passing a read-only index structure to worker processes — should it be passed as an argument (serialized via pickle), or use `multiprocessing.shared_memory`, or use `fork` semantics where the parent's memory is inherited? What are the tradeoffs and pitfalls of each approach? How does `ProcessPoolExecutor` handle large objects passed to workers — pickle overhead, and how to minimize it (e.g., using module-level globals with initializer functions)?
+
+4. **Worker initializer pattern**: Show the exact code pattern for using `Pool(initializer=init_worker, initargs=(shared_data,))` or `ProcessPoolExecutor(initializer=...)` to set up a global variable in each worker process so that a large index doesn't need to be pickled with every task. Include the correct way to define the initializer function and access the global in worker functions.
+
+5. **Ensuring identical results to sequential version**: What are the common pitfalls when parallelizing TF-IDF that cause results to differ from sequential? Floating point ordering issues? Dictionary ordering? How to ensure deterministic results — sorting, using the same tie-breaking logic, ensuring document IDs are consistent across chunks.
+
+6. **Performance considerations for achieving 1.5x-2x speedup with 4 workers**: What is the overhead of process creation, pickling, and IPC in Python multiprocessing? When does `ProcessPoolExecutor` outperform `multiprocessing.Pool` and vice versa? What chunk sizes are optimal? How to avoid the GIL — confirm that `multiprocessing` (not `threading`) bypasses the GIL for CPU-bound TF-IDF computation. Is there a minimum problem size below which parallelization hurts performance?
+
+7. **TF-IDF computation details**: Standard formulas for TF (raw count, log-normalized, etc.) and IDF (log(N/df), log(1+N/df), etc.). How does scikit-learn's `TfidfVectorizer` compute these vs. a custom implementation? If the sequential code uses a custom TF-IDF implementation with an inverted index and `SearchResult` named tuples, what are the key data structures (inverted index as `dict[term, list[(doc_id, tf)]]`, document norms, idf values)?
+
+8. **`namedtuple` and dataclass patterns**: How to define `ParallelIndexingResult` and `SearchResult` as named tuples or dataclasses that are picklable for multiprocessing. Show correct definitions and ensure they work across process boundaries.
+
+9. **Common pitfalls**: 
+   - Deadlocks with `multiprocessing` when using `fork` on macOS vs Linux
+   - Objects that aren't picklable (lambda functions, file handles)
+   - Memory issues when each worker gets a full copy of the document corpus
+   - `if __name__ == '__main__'` guard requirements
+   - Zombie processes if exceptions occur — proper cleanup with context managers
+   - Version-specific behavior in Python 3.11 for multiprocessing APIs
+
+10. **Merging partial results**: Efficient patterns for combining partial inverted indices, partial document frequency counts, and partial norm calculations from multiple workers into a single coherent TF-IDF index. Show code examples using `dict.update`, `collections.defaultdict`, `Counter` addition.

@@ -1,0 +1,26 @@
+{
+  "task_summary": "Write a Node.js script to load a Three.js object definition, apply Y-up to Z-up coordinate transformation, and export it as a Wavefront OBJ file for Blender",
+  "decomposition_rationale": "This is a focused pipeline task with a single clear workflow: load Three.js scene → apply coordinate transform → export OBJ. All steps are tightly coupled and share the same Three.js/Node.js context, so a single skill covering the entire export pipeline is most appropriate to avoid artificial boundaries.",
+  "skills": [
+    {
+      "name": "evo-threejs-obj-export",
+      "description": "Generates a Node.js ES module script that dynamically imports a Three.js object definition file, constructs a scene graph, applies a -90° X-rotation for Y-up to Z-up coordinate conversion (Blender compatibility), forces world matrix updates in the headless environment, serializes the scene to Wavefront OBJ format using OBJExporter, and writes the result to disk.",
+      "responsibility": "Handle the complete pipeline: dynamic import of the Three.js object.js file, scene graph construction, coordinate system transformation (Y-up → Z-up via -π/2 X-rotation), explicit matrixWorld update, OBJ serialization via OBJExporter, and file I/O to write the .obj output",
+      "key_functions": [
+        "generate_export_script",
+        "create_obj_export_node_script"
+      ],
+      "dr_sections": [
+        "1. Architectural Paradigms: Three.js within Node.js (v0.175.0)",
+        "2. The OBJExporter Module: API and Internal Mechanics",
+        "3. Geometry Instantiation and Export Compatibility",
+        "4. Coordinate System Transformations: Aligning Y-Up with Z-Up",
+        "5. Dynamic Evaluation and Ingestion of Scene Files",
+        "6. File System I/O and Output Generation",
+        "7. Diagnostics, Limitations, and Common Pitfalls",
+        "8. Comprehensive End-to-End Algorithmic Implementation"
+      ],
+      "depends_on": []
+    }
+  ]
+}

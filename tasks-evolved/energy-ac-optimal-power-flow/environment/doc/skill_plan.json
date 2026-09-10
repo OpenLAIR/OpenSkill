@@ -1,0 +1,73 @@
+{
+  "task_summary": "Parse a PowerModels JSON network file, solve AC Optimal Power Flow using Pyomo+IPOPT, and produce a structured JSON report with generation dispatch, voltage profile, branch loading, and feasibility checks.",
+  "decomposition_rationale": "The task naturally decomposes into three concerns: (1) parsing and preparing network data from the JSON format into solver-ready structures, (2) building and solving the ACOPF mathematical model with Pyomo/IPOPT, and (3) extracting results and producing the structured report. Separating parsing from solving allows reuse and easier debugging, while report generation has distinct formatting logic.",
+  "skills": [
+    {
+      "name": "evo-acopf-network-parser",
+      "description": "Parses PowerModels.jl/Matpower-style network.json files into Python data structures suitable for ACOPF formulation. Handles per-unit conventions, Pi-section branch model computation, transformer tap/shift parameters, generator cost coefficients, load/shunt aggregation by bus, and bus-type identification (reference buses).",
+      "responsibility": "All data ingestion, validation, and transformation from network.json into clean dictionaries/structures for the optimization model. No optimization logic.",
+      "key_functions": [
+        "parse_network_json",
+        "compute_branch_pi_params",
+        "aggregate_loads_by_bus",
+        "aggregate_shunts_by_bus",
+        "map_generators_to_buses",
+        "identify_reference_buses",
+        "get_branch_bus_mappings"
+      ],
+      "dr_sections": [
+        "Parsing Network Data in JSON Format",
+        "JSON Structure Breakdown",
+        "Python Parsing Implementation",
+        "Common Pitfalls in ACOPF Modeling"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-acopf-solver",
+      "description": "Builds and solves the full AC Optimal Power Flow problem using Pyomo and IPOPT. Implements polar-coordinate formulation with branch power flow expressions, nodal power balance, thermal limits, angle difference constraints, reference bus constraints, and quadratic generation cost objective. Handles solver installation via idaes-pse.",
+      "responsibility": "Constructing the Pyomo ConcreteModel with all ACOPF variables, constraints, expressions, and objective; configuring and invoking IPOPT; returning the solved model and solver results. No data parsing or report formatting.",
+      "key_functions": [
+        "install_solver",
+        "build_acopf_model",
+        "solve_acopf",
+        "build_and_solve_acopf"
+      ],
+      "dr_sections": [
+        "Mathematical Formulation in Polar Coordinates",
+        "Branch Power Flow Expressions",
+        "Nodal Power Balance Constraints",
+        "Thermal and Angle Constraints",
+        "Objective Function",
+        "Working Pyomo ACOPF Code Example",
+        "Python Libraries for ACOPF Formulations",
+        "IPOPT Solver Interface",
+        "Installing IPOPT on Ubuntu without Root Compilation",
+        "Common Pitfalls in ACOPF Modeling"
+      ],
+      "depends_on": [
+        "evo-acopf-network-parser"
+      ]
+    },
+    {
+      "name": "evo-acopf-report-generator",
+      "description": "Extracts solution values from a solved Pyomo ACOPF model, computes derived quantities (losses, branch loading percentages, power mismatches, voltage violations), and writes the structured report.json file matching the required ISO operator format with proper unit conversions from per-unit to MW/MVAr/degrees.",
+      "responsibility": "All post-solve extraction, unit conversion (per-unit to physical), feasibility checking, most-loaded-branch identification, summary statistics computation, and JSON report file generation.",
+      "key_functions": [
+        "extract_generator_results",
+        "extract_bus_results",
+        "compute_branch_flows_and_loading",
+        "compute_feasibility_check",
+        "compute_summary_statistics",
+        "generate_report_json"
+      ],
+      "dr_sections": [
+        "Post-Solve Calculations",
+        "Common Pitfalls in ACOPF Modeling"
+      ],
+      "depends_on": [
+        "evo-acopf-solver"
+      ]
+    }
+  ]
+}

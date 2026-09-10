@@ -1,0 +1,31 @@
+Research query:
+
+How to build a Python utility module for chemical similarity search using RDKit Morgan fingerprints with Tanimoto similarity. I need detailed, working code examples and exact API signatures for the following pipeline:
+
+1. **PDF text extraction of chemical names**: Using `pdfplumber` (version 0.11.9) in Python — exact API for opening a PDF, extracting text page by page, and parsing out chemical/molecule names from the extracted text. Show `pdfplumber.open()` usage, `page.extract_text()` return types, and best practices for cleaning extracted text to get a list of chemical names. Also cover `pypdf` (version 6.6.0) as an alternative — `PdfReader` usage and `page.extract_text()`.
+
+2. **Converting chemical names to SMILES using PubChem**: Using `pubchempy` (version 1.0.5) — exact function signatures for `pubchempy.get_compounds(name, 'name')`, what it returns (list of Compound objects), how to access the `isomeric_smiles` or `canonical_smiles` attribute from a Compound object. What happens when a chemical name is not found? What exceptions can be raised? Are there rate limits? What are the correct import paths (`import pubchempy as pcp`)? Show working code for converting a chemical name string to a SMILES string. Are there alternative PubChem lookup methods (by synonym, by IUPAC name) that handle edge cases better?
+
+3. **RDKit Morgan fingerprints with Tanimoto similarity (radius=2, chirality=True)**: Using `rdkit` (version 2025.09.3) — exact current API for:
+   - Converting SMILES to molecule object: `Chem.MolFromSmiles(smiles)` — what does it return when SMILES is invalid? 
+   - Generating Morgan fingerprints: What is the CURRENT correct function? Is it `AllChem.GetMorganFingerprintAsBitVect()` or `rdFingerprintGenerator.GetMorganGenerator()`? The `GetMorganFingerprintAsBitVect` function — exact parameters: `mol, radius=2, nBits=2048, useChirality=True` — are these the correct parameter names? What is the default nBits? 
+   - **CRITICAL**: In recent RDKit versions (2024+, 2025), has `GetMorganFingerprintAsBitVect` been deprecated? What is the new recommended API using `rdFingerprintGenerator`? Show exact code for `rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)` with chirality enabled — what is the parameter name for chirality in the new API?
+   - Computing Tanimoto similarity: `DataStructs.TanimotoSimilarity(fp1, fp2)` — exact import path, parameter types (ExplicitBitVect), return type (float).
+   - Show complete working code from SMILES string → Morgan fingerprint → Tanimoto similarity score between two molecules.
+
+4. **Common pitfalls and edge cases**:
+   - RDKit `Chem.MolFromSmiles()` returning `None` for invalid SMILES — how to handle gracefully
+   - PubChem name resolution failures — chemicals with common names vs IUPAC names
+   - Morgan fingerprint parameter `useChirality` vs `includeChirality` — which is correct in which API version?
+   - Deprecated RDKit APIs in version 2025 — specifically `AllChem.GetMorganFingerprintAsBitVect` vs the new fingerprint generator API
+   - Sorting results: when Tanimoto similarities are equal (ties), sorting alphabetically by chemical name — Python sorting with multiple keys using `sorted()` with `key` parameter for descending similarity then ascending alphabetical
+
+5. **Data pipeline pattern**: Show a complete reusable function pattern that:
+   - Reads a PDF file to extract chemical names
+   - Looks up each chemical name via PubChem to get SMILES
+   - Converts SMILES to RDKit Mol objects and generates Morgan fingerprints
+   - Computes pairwise Tanimoto similarity against a target molecule
+   - Returns top-k results sorted by descending similarity with alphabetical tiebreaking
+   - Function signature: `topk_tanimoto_similarity_molecules(target_molecule_name: str, molecule_pool_filepath: str, top_k: int) -> list`
+
+Please provide exact import statements, correct parameter names for the installed versions, and highlight any version-specific behavior differences.

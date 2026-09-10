@@ -1,0 +1,62 @@
+Research query:
+
+QuTiP 4.7.0 open Dicke model steady state simulation and Wigner function calculation: complete API guide for building reusable Python utility functions
+
+I need comprehensive documentation and working code examples for the following topics, all targeting QuTiP version 4.7.0 (with numpy 1.23.0 and scipy 1.8.0):
+
+1. **Composite Hilbert space construction for Dicke model in QuTiP 4.7.0:**
+   - How to construct a tensor product Hilbert space combining a Fock (cavity) space and N two-level systems (qubits/spins).
+   - Exact API for `qutip.tensor()`, `qutip.basis()`, `qutip.destroy()`, `qutip.create()`, `qutip.sigmax()`, `qutip.sigmay()`, `qutip.sigmaz()`, `qutip.sigmap()`, `qutip.sigmam()`, `qutip.identity()`, `qutip.qeye()` — their signatures, return types, and how to embed them in a composite space.
+   - How to use `qutip.jmat()` for collective spin operators J_z, J_+, J_- for N spin-1/2 particles. What is the correct spin quantum number j for N=4 spins in the symmetric (Dicke) subspace? Is j = N/2 = 2? Show exact usage: `qutip.jmat(j, 'z')`, `qutip.jmat(j, '+')`, `qutip.jmat(j, '-')`.
+   - **Critical question**: Should I use the full 2^N Hilbert space for N qubits (dimension 16 for N=4), or can I use the symmetric Dicke subspace (dimension N+1=5 for N=4) using collective angular momentum operators `qutip.jmat(N/2, ...)`? What are the implications for the Lindblad collapse operators — do local dissipation channels (acting on individual spins) break the symmetry and require the full Hilbert space, or can they be expressed in the Dicke basis?
+   - How to properly construct the tensor product of cavity (Fock space, dimension n_max+1=17) with the spin subspace using `qutip.tensor()`.
+
+2. **Dicke Hamiltonian construction:**
+   - Working code to build H = ω₀ J_z + ωc a†a + g(a† + a)(J₊ + J₋) in QuTiP 4.7.0.
+   - How to embed cavity operators and spin operators into the composite Hilbert space using `qutip.tensor()` with identity operators.
+
+3. **Lindblad master equation collapse operators for the open Dicke model:**
+   - **Cavity loss**: collapse operator √κ · a — how to construct in composite space.
+   - **Local dephasing** (γ_φ): For each spin i, collapse operator √γ_φ · σ_z^(i). If using Dicke subspace, how to handle this — is it √(γ_φ·N) · J_z or something else? What is the correct mapping from local operators to collective operators?
+   - **Local pumping** (γ↑): collapse operator √γ↑ · σ₊^(i) for each spin. Collective equivalent?
+   - **Local emission** (γ↓): collapse operator √γ↓ · σ₋^(i) for each spin. Collective equivalent?
+   - **Collective pumping** (γ⇑): collapse operator √γ⇑ · J₊.
+   - **Collective emission** (γ⇓): collapse operator √γ⇓ · J₋.
+   - **Key question**: For local dissipation in the Dicke (symmetric) subspace, the standard approach from papers (e.g., arXiv:1608.06293, arXiv:1611.03342) uses specific formulas. What are the correct collective Lindblad dissipators for local processes? Specifically: D[σ₋^(i)] summed over i — does this become a specific superoperator involving J operators? Provide the exact mathematical mapping and QuTiP code.
+
+4. **Liouvillian construction and steady state solver in QuTiP 4.7.0:**
+   - `qutip.liouvillian()` — exact signature, parameters, what it returns.
+   - `qutip.steadystate()` — all available methods ('direct', 'eigen', 'iterative-gmres', 'iterative-lgmres', 'svd', 'power'), their parameters, which method works best for moderate-sized Hilbert spaces (dimension ~85 = 17×5 or ~272 = 17×16).
+   - How to pass Hamiltonian and collapse operators to `steadystate()`. Does it accept a list of collapse operators directly, or must I first build the Liouvillian?
+   - Common pitfalls: convergence issues, memory problems, sparse vs dense solver selection.
+   - Return type of `steadystate()` — is it a density matrix (Qobj with type 'oper')?
+
+5. **Partial trace to get cavity reduced density matrix:**
+   - `qutip.ptrace()` or `Qobj.ptrace()` — exact API. If the composite system is tensor(cavity, spins), which index do I trace over to get the cavity state? Is it `rho.ptrace(0)` for the cavity?
+   - Correct indexing convention in QuTiP 4.7.0 for `ptrace()`.
+
+6. **Wigner function calculation in QuTiP 4.7.0:**
+   - `qutip.wigner()` — exact function signature, all parameters.
+   - How to specify the x and p grid: does it accept xvec and yvec as 1D arrays? What is the convention — is xvec the real part (x = Re(α)) and yvec the imaginary part (p = Im(α)), or is there a factor of √2?
+   - For a 1000×1000 grid over [-6, 6], show exact code: `xvec = np.linspace(-6, 6, 1000)` and pass to `qutip.wigner(rho_cavity, xvec, yvec)`.
+   - What does `qutip.wigner()` return? Is it a 2D numpy array? What are its dimensions — (len(xvec), len(yvec)) or transposed?
+   - Available methods in `qutip.wigner()`: 'clenshaw', 'iterative', 'laguerre', 'fft'. Which is fastest/most accurate for n_max=16?
+   - The `g` parameter in `qutip.wigner()` — what is its default value and what does it control (scaling factor √2)?
+
+7. **Saving Wigner function data as CSV:**
+   - Best practice for saving a 1000×1000 numpy array to CSV using `numpy.savetxt()` or `pandas.DataFrame.to_csv()`.
+   - Should the CSV include x,p coordinate columns, or just the 1000×1000 Wigner values? What format is most standard?
+   - Performance considerations for writing large CSV files.
+
+8. **Performance and memory considerations:**
+   - For a Hilbert space of dimension ~85 (17×5 Dicke) or ~272 (17×16 full), how long does `steadystate()` typically take?
+   - Is the Wigner function computation for n_max=16 on a 1000×1000 grid computationally expensive? Any optimization tips?
+   - Memory usage for 1000×1000 float64 arrays.
+
+9. **Common pitfalls with QuTiP 4.7.0 specifically:**
+   - Any deprecated functions or changed APIs compared to newer versions?
+   - Issues with `steadystate()` not converging — recommended solver parameters.
+   - Numerical precision issues with Wigner function for mixed states.
+   - Operator ordering conventions in `tensor()` — does QuTiP use the same convention as standard physics (leftmost = first subsystem)?
+
+10. **Working end-to-end code example** for a simpler open quantum system (e.g., driven-dissipative Jaynes-Cummings model) that demonstrates the complete workflow: Hamiltonian construction → collapse operators → steady state → partial trace → Wigner function → save to file. This serves as a template pattern.

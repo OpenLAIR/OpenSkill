@@ -1,0 +1,36 @@
+Adaptive Cruise Control (ACC) simulation using PID controllers in Python: complete implementation guide for building reusable utility modules
+
+I need detailed information on the following topics to build a Python skill module for an ACC simulation system:
+
+1. **PID Controller Implementation in Python (from scratch, no external control library)**:
+   - Exact implementation of a discrete PID controller with anti-windup (integral clamping). Show a complete Python class with `__init__(self, kp, ki, kd)`, `reset()`, and `compute(error, dt)` methods. What is the correct discrete-time formulation for the derivative term — should it use `(error - prev_error) / dt` or derivative-on-measurement? How should integral windup be handled when the output is clamped by acceleration limits? Show working code with proper handling of the first timestep (when there's no previous error).
+
+2. **ACC Mode Selection Logic**:
+   - How does a standard ACC system decide between cruise mode, follow mode, and emergency braking mode? Specifically:
+     - When `lead_speed` is None/NaN (no vehicle detected), use cruise mode with speed PID targeting set_speed.
+     - When a lead vehicle is present, compute desired following distance as `time_headway * ego_speed + min_distance`. The distance PID controls based on `distance_error = actual_distance - desired_distance`.
+     - Emergency mode: when Time-To-Collision (TTC) falls below a threshold. What is the correct TTC formula? Is it `distance / (ego_speed - lead_speed)` only when ego_speed > lead_speed, and infinity otherwise? What acceleration command should emergency braking use (max deceleration)?
+   - How should the ACC blend or switch between speed control and distance control outputs? Common approaches: take the minimum acceleration of (speed_controller, distance_controller)? Or switch entirely based on mode?
+
+3. **PID Tuning for ACC — Practical Parameter Ranges and Methodology**:
+   - For a vehicle simulation with set_speed=30 m/s, acceleration limits [-8.0, 3.0] m/s², and dt=0.1s: what are reasonable PID gains for the speed controller to achieve rise time <10s with <5% overshoot and <0.5 m/s steady-state error? What are reasonable PID gains for the distance controller to achieve <2m steady-state error while keeping minimum distance >5m?
+   - Typical kp ranges (0-10), ki ranges [0-5), kd ranges [0-5) — what starting values work well? How does Ziegler-Nichols or manual tuning apply here? What's the relationship between aggressive kp and overshoot in this specific vehicle dynamics context?
+   - Given that the vehicle starts at 0 m/s and must reach 30 m/s with max acceleration 3.0 m/s², the minimum rise time is 10s — so the speed PID must essentially command max acceleration initially. What gain values produce this behavior?
+
+4. **Vehicle Dynamics Simulation Loop**:
+   - For a simple 1D longitudinal simulation with `ego_speed += acceleration * dt` and acceleration clamped to [-8.0, 3.0]: show the complete simulation loop structure. How should distance be updated when a lead vehicle appears — should it use `distance += (lead_speed - ego_speed) * dt`? Or should we use the sensor_data.csv distance values directly as the "measured" distance?
+   - Critical question: In this simulation, should the ego vehicle dynamics be simulated independently (ignoring the ego_speed column in sensor_data.csv), using only the lead_speed column from sensor_data.csv as external input? Or should the simulation use both lead_speed and distance from the CSV?
+
+5. **Reading YAML and CSV with PyYAML and pandas**:
+   - Exact code for `yaml.safe_load()` to read nested config like `config['acc_settings']['set_speed']`.
+   - Reading sensor_data.csv with pandas, handling empty/NaN values in lead_speed and distance columns. What does `pd.read_csv()` produce for empty CSV cells — NaN? How to check with `pd.isna()` vs `math.isnan()` vs `numpy.isnan()`?
+   - Writing simulation_results.csv with exactly 1501 rows and columns: `time,ego_speed,acceleration_cmd,mode,distance_error,distance,ttc`. How to write rows where some columns (distance_error, distance, ttc) should be empty (not 0, not NaN string) when in cruise mode? Use `df.to_csv(index=False)` — does it write NaN as empty string by default, or do you need `na_rep=''`?
+
+6. **Writing tuning_results.yaml**:
+   - Exact `yaml.dump()` syntax to produce a YAML file with nested structure `pid_speed: {kp: ..., ki: ..., kd: ...}` and `pid_distance: {kp: ..., ki: ..., kd: ...}`. What `default_flow_style` parameter produces block format?
+
+7. **Common Pitfalls**:
+   - Division by zero in TTC calculation when ego_speed equals lead_speed.
+   - Integral windup causing oscillation when switching between cruise and follow modes — should the PID be reset on mode transitions?
+   - Off-by-one errors in 1501-row simulation (t=0.0 to t=150.0 inclusive with dt=0.1).
+   - pandas NaN handling when comparing with None vs np.nan.

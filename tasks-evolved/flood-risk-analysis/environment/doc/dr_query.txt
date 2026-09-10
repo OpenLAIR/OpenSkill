@@ -1,0 +1,38 @@
+Research query: How to build a Python skill module for detecting flooding events at USGS streamflow gauging stations using the `dataretrieval` Python package (version 1.0.10) and pandas 2.2.3.
+
+Please provide comprehensive technical documentation covering the following:
+
+1. **USGS dataretrieval Python package (v1.0.10) API**:
+   - Correct import statements (e.g., `from dataretrieval import nwis` vs `import dataretrieval.nwis as nwis`)
+   - Function signatures for `nwis.get_record()`, `nwis.get_dv()` (daily values), `nwis.get_iv()` (instantaneous values), and `nwis.get_stats()`
+   - Required and optional parameters: `sites`, `service` (values like 'dv', 'iv', 'site', 'stat'), `start`, `end`, `parameterCd`, `statCd`
+   - The USGS parameter code for streamflow/discharge (00060) and stat code for daily mean (00003)
+   - Return types: what dataframes are returned, their index types (DatetimeIndex with timezone?), column naming conventions (e.g., '00060_Mean', '00060_Mean_cd')
+   - How to retrieve flood stage / flood thresholds — note that USGS NWIS does NOT directly provide flood stage; flood thresholds come from NWS AHPS. Discuss alternatives: using statistical thresholds (e.g., 90th percentile, percentile-based flood definition from `nwis.get_stats()`), or using the `service='stat'` endpoint with `statReportType='daily'` to get historical percentiles per day-of-year
+   - Working code example for fetching daily streamflow for multiple sites over a date range
+
+2. **Defining "flooding" from streamflow data**:
+   - Common operational definitions: exceedance of NWS flood stage, exceedance of statistical percentile (e.g., 90th, 95th percentile of historical daily mean), or recurrence-interval-based thresholds
+   - How USGS WaterWatch classifies flood conditions using percentiles
+   - How to compute per-station flood thresholds using `get_stats(sites=..., parameterCd='00060', statReportType='daily')` — what columns it returns (`p75_va`, `p90_va`, `p95_va`, `max_va`, `month_nu`, `day_nu`) and how to join these against daily observations by month/day
+
+3. **Reading a stations list file**:
+   - Patterns for reading `michigan_stations.txt` — could be one station ID per line, or a delimited file; how to robustly parse with pandas, preserving the leading-zero 8-digit (or longer) USGS site numbers as strings (NOT integers)
+
+4. **Pipeline patterns**:
+   - Iterating over many station IDs robustly with try/except handling (sites with no data, HTTP errors, empty dataframes)
+   - Filtering a date range (April 1-7, 2025) — handling timezone-aware vs naive timestamps
+   - Counting days where discharge exceeds threshold, grouping by station
+   - Writing results to CSV with pandas (`to_csv`, `index=False`)
+
+5. **Common pitfalls**:
+   - Deprecated `dataretrieval` APIs or attributes in v1.0.10
+   - Site numbers being coerced to int (losing leading zeros)
+   - Timezone issues comparing dates
+   - Empty/missing data and qualifier codes (column ending in `_cd`)
+   - Rate limiting / chunking requests for many sites
+   - Difference between `get_record(service='dv')` and `get_dv()` return value (tuple vs dataframe)
+
+6. **Output format**: best practices for emitting a two-column CSV (`station_id`, `flood_days`) with only stations having ≥1 flood day.
+
+Provide working, copy-pasteable Python code snippets for each step.

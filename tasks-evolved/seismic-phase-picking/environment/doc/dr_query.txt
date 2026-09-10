@@ -1,0 +1,45 @@
+Comprehensive guide to seismic phase picking in Python using SeisBench library: exact API usage, pretrained models, and data pipeline patterns for processing earthquake waveform data stored as NumPy .npz files.
+
+Specifically, I need to know:
+
+1. **SeisBench Installation and Imports**: What is the correct pip install command for SeisBench? What are the exact import paths for models and data utilities? e.g., `seisbench.models`, `seisbench.generate`, etc. What version is current and are there any deprecated APIs?
+
+2. **Pretrained Models for Phase Picking**: What pretrained deep learning models are available in SeisBench for P and S wave arrival time picking? Specifically:
+   - How to load PhaseNet, EQTransformer, GPD, and other picker models with `from_pretrained()`. What are the exact model class names and their import paths?
+   - What pretrained weight options are available (e.g., `"original"`, `"stead"`, `"instance"`, `"ethz"`, `"geofon"`)? Which pretrained weights give best generalization performance?
+   - What is the expected input shape, sampling rate, and number of channels for each model? Do they expect (3, N) or (N, 3)? What channel order (Z, N/1, E/2 vs E, N, Z)?
+   - What is the default window length each model expects (e.g., 3000 samples at 100 Hz for PhaseNet)?
+
+3. **Data Pipeline - Loading .npz files and preparing input for SeisBench models**:
+   - How to load waveform data from NumPy .npz files containing `data` (12000×3), `dt` (sampling interval), and `channels` fields
+   - How to convert channel names like "DPE,DPN,DPZ" to the correct channel ordering expected by the model (typically Z, N, E)
+   - How to resample data if the sampling rate doesn't match the model's expected rate (e.g., model expects 100 Hz but data is at a different rate). What resampling utilities does SeisBench or ObsPy provide? Show working code with `scipy.signal.resample` or ObsPy trace resampling.
+   - How to handle the case where data has 12000 samples but the model expects a different window size - does SeisBench handle sliding windows automatically?
+
+4. **Running Inference with SeisBench Models**:
+   - What is the exact API for running predictions? Is it `model.annotate()` or `model.classify()` or direct `model()` forward pass?
+   - For `model.annotate()` - what is the input format? Does it accept ObsPy Stream/Trace objects or raw numpy arrays? What are the parameters for overlap, batch size, blinding?
+   - How to use `model.annotate()` with raw numpy arrays without converting to ObsPy objects? Or how to create minimal ObsPy Stream objects from numpy arrays?
+   - What does the output look like? Does it return probability time series, or discrete picks, or both?
+   - How to extract discrete pick indices from the probability outputs - what threshold to use? Does SeisBench have built-in peak picking utilities?
+
+5. **Pick Extraction from Model Output**:
+   - How to convert model probability outputs to discrete phase picks (indices). Show working code for scipy.signal.find_peaks or SeisBench's built-in pick extraction.
+   - What probability threshold and minimum peak height/distance parameters give good results? What are typical values used in practice (e.g., threshold=0.3 for P, threshold=0.3 for S)?
+   - How to handle multiple picks per trace vs single pick per trace.
+   - How to convert pick indices back to the original sampling rate if resampling was applied.
+
+6. **ObsPy Integration** (if needed for SeisBench):
+   - How to create an ObsPy `Stream` with multiple `Trace` objects from numpy arrays, setting the correct sampling rate, channel codes, and station metadata.
+   - Minimal code to construct `obspy.Trace` from numpy array with `stats` dictionary.
+   - What fields in `stats` are required for SeisBench model annotation to work correctly?
+
+7. **Common Pitfalls**:
+   - Channel ordering mismatches (E/N/Z vs Z/N/E) - how does this affect results?
+   - Data normalization - do SeisBench models handle normalization internally or must it be applied manually?
+   - Integer vs float data type issues with numpy arrays
+   - Handling traces with missing channels or unusual sampling rates
+   - GPU vs CPU inference - how to force CPU mode
+   - Memory issues with batch processing 100 files
+
+8. **Working End-to-End Code Example**: A complete Python script that loads a numpy array of seismic data, creates appropriate input for a SeisBench PhaseNet or EQTransformer model, runs inference, extracts P and S picks with indices, and outputs results to CSV.

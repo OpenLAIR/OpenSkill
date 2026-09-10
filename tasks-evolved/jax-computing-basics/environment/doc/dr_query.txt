@@ -1,0 +1,24 @@
+JAX 0.8.x Python programming: comprehensive guide for building reusable utility functions covering the following exact operations. I need working code examples with correct imports, exact function signatures, parameter defaults, return types, and common pitfalls for each:
+
+1. **Data loading patterns for JAX workflows**: How to load `.npy` files with `numpy.load()` and `.npz` files with `numpy.load()` and convert to JAX arrays using `jnp.array()`. What are the correct patterns for extracting named arrays from `.npz` files (e.g., `data['x']`, `data['y']`)? Are there dtype conversion pitfalls between numpy and JAX arrays (especially float32 vs float64)? What is JAX's default float precision and how does `jax.config.update("jax_enable_x64", ...)` affect results?
+
+2. **`jnp.mean` with axis parameter**: Exact behavior of `jnp.mean(x, axis=1)` for 2D arrays — does it reduce along columns to produce per-row means? Show the exact function signature and return shape for a (10, 5) input.
+
+3. **`jnp.square` for element-wise squaring**: Is `jnp.square(x)` the correct vectorized way to square each element? What is the difference between `jnp.square(x)`, `x**2`, and `jax.vmap(lambda xi: xi**2)(x)`?
+
+4. **`jax.grad` for computing gradients of scalar loss functions**: Exact usage of `jax.grad(loss_fn)(params)` where `loss_fn` returns a scalar. Specifically for logistic loss: how to implement `jnp.logaddexp(0, -y * logits)` correctly, compute the mean, and take the gradient with respect to weight vector `w`. What are the argnums defaults? Does `jax.grad` differentiate with respect to the first argument by default? Show a complete working example of computing gradient of logistic loss `mean(logaddexp(0, -y * (X @ w)))` with respect to `w`.
+
+5. **`jax.lax.scan` for RNN forward pass**: Complete working example of implementing an RNN forward pass using `jax.lax.scan`. The RNN step is: `h_new = tanh(x_t @ Wx + h @ Wh + b)`. What is the exact signature of `jax.lax.scan(f, init, xs)`? What should `f(carry, x)` return — `(new_carry, output)` or `(new_carry, stacked_output)`? Does `scan` stack the outputs along axis 0? For an RNN that processes a sequence of shape (T, H) with initial hidden state of shape (H,), what is the exact shape of the scan output? Should the function return the final hidden state, all hidden states, or both? Show the exact pattern for `jax.lax.scan` where carry is the hidden state and the scanned output is the sequence of hidden states.
+
+6. **`jax.jit` for compiling a 2-layer MLP**: How to implement `jit_mlp = jax.jit(mlp_forward)` where `mlp_forward` computes `relu(X @ W1 + b1) @ W2 + b2`. What is the correct JAX function for ReLU — is it `jax.nn.relu`, `jnp.maximum(0, x)`, or something else? Show working code for a JIT-compiled 2-layer MLP forward pass. Does `jax.jit` affect numerical results or only performance?
+
+7. **Saving JAX arrays to numpy files**: How to correctly save JAX arrays using `np.save(path, np.array(jax_array))`? Do you need to explicitly convert JAX arrays to numpy before saving with `np.save`? What happens if you pass a JAX array directly to `np.save` — does it work in JAX 0.8.x or does it silently produce wrong results?
+
+8. **Common pitfalls in JAX 0.8.x**: 
+   - Are there any breaking changes in JAX 0.8.x compared to earlier versions (0.4.x)?
+   - Is `jax.numpy` still the correct import path or has it changed?
+   - Does `jnp.logaddexp` work with scalar 0 as first argument (i.e., `jnp.logaddexp(0, x)`) or does it need `jnp.float32(0)`?
+   - Are there any issues with `jax.lax.scan` signature changes in recent JAX versions?
+   - What is the correct way to handle random seeds in JAX if needed?
+
+For each topic, provide the exact import statements, complete working code snippets, expected output shapes, and document any version-specific behavior for JAX 0.8.x with jaxlib 0.8.2 on CPU.

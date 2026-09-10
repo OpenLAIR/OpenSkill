@@ -1,0 +1,55 @@
+{
+  "task_summary": "Extract text from 100+ PDF/DOCX/PPTX files and classify them into 5 subject folders (LLM, trapped_ion_and_qc, black_hole, DNA, music_history) based on content.",
+  "decomposition_rationale": "The task has two distinct concerns: (1) extracting text from multiple document formats (PDF, DOCX, PPTX) using available libraries and stdlib fallbacks, and (2) classifying documents into 5 predefined categories using keyword matching on extracted text, then moving files. Separating these keeps extraction logic reusable and classification/routing logic independent.",
+  "skills": [
+    {
+      "name": "evo-document-text-extraction",
+      "description": "Extracts text from PDF, DOCX, and PPTX files using PyPDF2, pdfplumber, pdftotext CLI, and stdlib zipfile+XML fallbacks. Provides a unified interface that auto-detects file type by extension and returns extracted text. For PDFs, reads only first 2-3 pages for speed. For DOCX/PPTX, uses zipfile+ElementTree since python-docx and python-pptx are not installed.",
+      "responsibility": "All text extraction from any supported document format. No classification or file movement logic.",
+      "key_functions": [
+        "extract_text",
+        "extract_text_pdf",
+        "extract_text_docx",
+        "extract_text_pptx",
+        "extract_text_pdftotext_cli"
+      ],
+      "dr_sections": [
+        "1. PDF Text Extraction Strategies and Implementations",
+        "1.1 PyPDF2 (Version 3.0.1)",
+        "1.2 pdfplumber (Version 0.11.4)",
+        "1.3 Performance Comparison and Best Practices",
+        "2. DOCX Text Extraction Methodologies",
+        "2.2 Fallback: Native Python stdlib Extraction (Zipfile + XML)",
+        "3. PPTX Text Extraction Methodologies",
+        "3.2 Fallback: Native Python stdlib Extraction (Zipfile + XML)",
+        "4. Command-Line Interface (CLI) Extraction Methods",
+        "4.2 pdftotext (Poppler-Utils) via Python Subprocess"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-document-classify-and-sort",
+      "description": "Classifies extracted document text into one of 5 categories (LLM, trapped_ion_and_qc, black_hole, DNA, music_history) using weighted keyword matching, then moves files into the corresponding folders. Uses comprehensive keyword dictionaries tuned to the specific 5 subjects. Handles folder creation, file routing with shutil.move, and ensures every file is placed in exactly one folder.",
+      "responsibility": "Document classification based on text content, folder creation, and file movement. No text extraction logic.",
+      "key_functions": [
+        "classify_document",
+        "create_category_folders",
+        "sort_files_into_folders",
+        "get_category_keywords"
+      ],
+      "dr_sections": [
+        "5. Keyword-Based Document Classification",
+        "5.1 Classification Scope: First Page vs. Full Text",
+        "5.2 Discriminating Keywords per Domain",
+        "5.3 Implementation: Term Frequency-Inverse Document Frequency (TF-IDF)",
+        "6. Robust File Operations and Folder Management",
+        "6.1 Creating Destination Folders",
+        "6.2 The Anatomy of shutil.move() vs shutil.copy2() + os.remove()",
+        "7. Integrated Pipeline Architecture"
+      ],
+      "depends_on": [
+        "evo-document-text-extraction"
+      ]
+    }
+  ]
+}

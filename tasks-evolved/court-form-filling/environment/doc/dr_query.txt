@@ -1,0 +1,40 @@
+How to programmatically fill PDF form fields in a California SC-100 Small Claims Court form using Python libraries pypdf, fillpdf, pdfrw, PyPDF2, and reportlab. I need detailed information on the following:
+
+1. **Exact PDF form field names in the California SC-100 form (rev 2024)**: What are the exact AcroForm field names/keys used in the official California Judicial Council SC-100 (Plaintiff's Claim and ORDER to Go to Small Claims Court) PDF? I need the complete list of fillable field names including fields for: plaintiff name, plaintiff address (street, city, state, zip), plaintiff phone, plaintiff email, defendant name, defendant address, claim amount, claim description, date of filing, court name/address, checkbox fields for "sued in this court because" reasons, number of plaintiffs/defendants, whether plaintiff has filed other small claims in the past 12 months, date range of the claim/incident, and any other standard fields. How can I programmatically enumerate all form field names from this PDF using pypdf or PyPDF2?
+
+2. **Working code examples for reading PDF form field names using pypdf (version 5.1.0)**: Show exact Python code with correct imports to read all AcroForm field names and their types (text, checkbox, radio button, dropdown) from a PDF. Specifically:
+   - `from pypdf import PdfReader` — how to use `reader.get_fields()` and `reader.get_form_text_fields()` to list all field names
+   - How to distinguish between text fields, checkboxes, and radio buttons in the field dictionary
+   - How to read the current/default values of fields
+
+3. **Working code examples for filling PDF form fields using pypdf (version 5.1.0)**: Show exact Python code to fill form fields and save the result:
+   - `from pypdf import PdfReader, PdfWriter` — the correct method signature for `writer.update_page_form_field_values(page, fields_dict)` 
+   - How to handle checkbox fields — what values to use (e.g., `/Yes`, `Yes`, `1`, `On`, `/On`, `True`) and how to determine the correct "on" value for a specific checkbox
+   - How to handle radio button groups
+   - How to ensure filled fields are visible (not flattened vs flattened, the NeedAppearances flag)
+   - The critical `/NeedAppearances` flag: how to set it using `writer._root_object["/AcroForm"].update({NameObject("/NeedAppearances"): BooleanObject(True)})` and why this is necessary
+   - How to preserve the original PDF structure while only updating specific fields
+
+4. **Alternative approaches using fillpdf (version 0.7.3)**: 
+   - `from fillpdf import fillpdfs` — `fillpdfs.get_form_fields()`, `fillpdfs.write_fillable_pdf()` — exact function signatures, parameters, and return types
+   - Does fillpdf handle checkboxes differently from pypdf?
+   - Common issues with fillpdf (e.g., dependency on pdftk)
+
+5. **Alternative approaches using pdfrw (version 0.4)**:
+   - How to read and fill form fields using pdfrw
+   - Working code pattern for filling AcroForm fields with pdfrw
+
+6. **Critical pitfalls and edge cases**:
+   - Fields that appear filled in code but render blank in PDF viewers (the NeedAppearances issue)
+   - Checkbox values that differ between PDF forms — how to inspect the correct "on" value using `/AP` (appearance) dictionary or `/V` values
+   - Unicode/encoding issues with field values
+   - The difference between `/V` (value) and `/AS` (appearance state) for checkboxes
+   - Multiple pages — ensuring all pages are copied to the output, not just the ones with filled fields
+   - Read-only or flattened fields that cannot be modified
+   - pypdf vs PyPDF2 API differences (PyPDF2 is deprecated in favor of pypdf)
+
+7. **SC-100 specific domain knowledge**: 
+   - The SC-100 form structure: how many pages, which fields are court-use-only vs plaintiff-filled
+   - The "filed in this court because" section — typical checkbox options (defendant lives in this district, etc.)
+   - How claim amounts and dates are typically formatted on this form
+   - Whether the form uses separate fields for city/state/zip or combined address fields

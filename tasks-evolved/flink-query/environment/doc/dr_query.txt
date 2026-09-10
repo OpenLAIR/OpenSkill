@@ -1,0 +1,40 @@
+Apache Flink 1.20 Java DataStream API: implementing session window aggregation over keyed streams with event-time processing for Google cluster trace data
+
+I need comprehensive documentation and working code examples for the following topics to build a reusable skill for implementing a Flink job that processes Google cluster-usage trace data (2011 version 2) to identify task submission stages per job using session windows:
+
+1. **Google Cluster Data 2011 v2 Schema**: What are the exact CSV column orderings for `task_events` and `job_events` tables? Specifically:
+   - task_events columns: timestamp, missing info, job ID, task index, machine ID, event type, user, scheduling class, priority, CPU request, memory request, disk space request, different-machines constraint. What are the integer codes for event types (SUBMIT=0, SCHEDULE=1, EVICT=2, FAIL=3, FINISH=4, KILL=5, LOST=6, UPDATE_PENDING=7, UPDATE_RUNNING=8)?
+   - job_events columns: timestamp, missing info, job ID, event type, user, scheduling class, job name, logical job name. What integer codes map to job event types?
+   - Are timestamps in microseconds from some epoch?
+
+2. **Flink 1.20 DataStream API - Reading gzipped CSV files**: How to read `.csv.gz` files using `DataStream` API? Exact code for using `StreamExecutionEnvironment.readTextFile()` or `FileSource` with gzipped CSV. Does Flink automatically decompress `.gz` files when using `readTextFile()`? What are the correct import paths?
+
+3. **Flink 1.20 Event Time and Watermarks**: 
+   - How to assign timestamps and watermarks from event data using `WatermarkStrategy.forBoundedOutOfOrderness()` or `forMonotonousTimestamps()`?
+   - Exact API: `assignTimestampsAndWatermarks()` with `WatermarkStrategy`, `TimestampAssigner`, `SerializableTimestampAssigner` - correct import paths and working examples.
+   - How to handle timestamps in microseconds (the data uses microseconds but Flink watermarks use milliseconds)?
+
+4. **Flink 1.20 Session Windows (EventTimeSessionWindows)**:
+   - Exact API for `EventTimeSessionWindows.withGap(Time.minutes(10))` - correct imports, how to apply on a keyed stream.
+   - Complete working example: `.keyBy(...)` → `.window(EventTimeSessionWindows.withGap(...))` → `.aggregate()` or `.apply()` or `.process()` with a `ProcessWindowFunction`.
+   - How to count elements in a session window per key? What's the simplest approach - using `.process()` with a `ProcessWindowFunction` that counts elements, or using `.aggregate()` with a counting `AggregateFunction`?
+   - Import path: `org.apache.flink.streaming.api.windowing.assigners.EventTimeSessionWindows`?
+
+5. **Flink 1.20 - Finding maximum across multiple windows per key**:
+   - After computing session window counts per (jobId), how to find the session with the maximum task count per job? Should I use another `keyBy().reduce()` or `keyBy().process()` after the windowed aggregation?
+   - Working code pattern for: stream of (jobId, sessionCount) → keyBy(jobId) → reduce to find max sessionCount per jobId.
+
+6. **Flink 1.20 - Filtering streams**: How to filter a DataStream to only include SUBMIT events (event type == 0)? `stream.filter(new FilterFunction<T>() {...})` pattern.
+
+7. **Flink 1.20 - Writing output to a local file**:
+   - How to use `DataStream.writeAsText()` (is it deprecated in 1.20?) or `FileSink` to write output to a single local file?
+   - How to format output as `(jobId,count)` tuples - using `Tuple2<Long,Long>` whose `.toString()` produces `(value1,value2)`?
+   - If `writeAsText` is deprecated, what is the current replacement and how to configure it to write a single file?
+
+8. **Flink 1.20 POJO vs Tuple requirements**: What are the requirements for custom data types (POJOs) in Flink? Do they need public no-arg constructor, public fields or getters/setters? How does `Tuple2`, `Tuple3` etc. work - import paths and field access patterns?
+
+9. **Common pitfalls**:
+   - Does `readTextFile()` in Flink process files in batch mode (bounded) or streaming mode? How does this affect watermark generation and window firing?
+   - Parallelism issues with writing to a single output file - do I need `.setParallelism(1)` on the sink?
+   - Are there issues with event-time processing when reading bounded sources where the final watermark (MAX_WATERMARK) needs to be emitted to close windows?
+   - `AppBase` pattern commonly used in Flink training exercises - what methods does it typically provide (e.g., `taskEventSourcePath`, `jobEventSourcePath`)?

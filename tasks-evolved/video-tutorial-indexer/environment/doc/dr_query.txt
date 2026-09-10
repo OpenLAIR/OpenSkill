@@ -1,0 +1,37 @@
+Python openai-whisper library API for transcribing video audio and detecting chapter/topic transitions in tutorial videos. I need to build a reusable Python skill module with utility functions for:
+
+1. **Whisper transcription with timestamps**: Exact API for `whisper.load_model()` and `model.transcribe()` with word-level and segment-level timestamps. What are the correct parameters for `transcribe()` to get accurate timestamps? Specifically:
+   - How to use `word_timestamps=True` parameter
+   - The exact return structure of `model.transcribe()` — what keys are in the result dict, what does `result["segments"]` contain, what fields each segment has (start, end, text, words)
+   - How to get the most accurate timestamps with the "tiny" model vs larger models
+   - What is the `condition_on_previous_text` parameter and should it be True or False for better accuracy?
+   - What `language="en"` and other parameters improve transcription quality?
+
+2. **FFmpeg audio extraction from MP4**: How to use `ffmpeg` command line or `subprocess` in Python to extract audio from an MP4 file to WAV/MP3 format suitable for Whisper input. What sample rate does Whisper expect (16kHz)? Exact ffmpeg command with correct parameters.
+
+3. **Whisper segment timestamp accuracy and alignment**: Known issues with Whisper timestamp accuracy, especially with the "tiny" model. Are there techniques to improve timestamp alignment? What is the typical timestamp drift or error margin?
+
+4. **Text matching and chapter detection patterns**: Given a list of expected chapter titles and a full transcript with timestamps, what are effective Python approaches to find where each chapter topic begins? String matching techniques (fuzzy matching with difflib, fuzzywuzzy/thefuzz), sliding window over transcript segments, keyword extraction.
+
+5. **Video frame analysis with Python**: How to use OpenCV (`cv2.VideoCapture`) or ffmpeg to extract frames at specific timestamps from a video to detect visual chapter transitions (title cards, scene changes). Exact API:
+   - `cv2.VideoCapture` — how to seek to a specific timestamp and read a frame
+   - Frame differencing to detect scene changes
+   - OCR on video frames using any available tools to read on-screen text/titles
+
+6. **Common pitfalls**:
+   - Does `whisper.load_model('tiny')` work with the `openai-whisper==20250625` package version? Any breaking API changes in recent versions?
+   - Memory issues with processing 23-minute videos
+   - Whisper's handling of silence, music, or non-speech segments
+   - Timestamp format: does Whisper return seconds as float? Integer?
+   - Is there a `whisper.available_models()` function?
+
+7. **YouTube chapter timestamp extraction**: The VIDEO_INFO.md mentions the source YouTube URL (https://www.youtube.com/watch?v=94kAIpRnhcY) and that there are 29 official YouTube chapters. Can yt-dlp or youtube-dl extract chapter information from YouTube videos? What is the exact API/command? What does the chapter metadata structure look like? Note: this may not be available in the Docker environment but is worth knowing about.
+
+8. **Working code example**: Provide a complete working Python example that:
+   - Loads a video file
+   - Extracts audio
+   - Transcribes with Whisper getting segment-level timestamps
+   - Searches transcript for keyword matches to find chapter boundaries
+   - Outputs JSON with chapter timestamps
+
+Please include exact import statements, function signatures, and return types for all APIs mentioned.

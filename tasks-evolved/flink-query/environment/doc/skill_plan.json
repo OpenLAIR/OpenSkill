@@ -1,0 +1,61 @@
+{
+  "task_summary": "Implement a Flink job that reads Google cluster trace data, identifies job stages based on SUBMIT event sessions (10-min inactivity gap), and outputs the largest stage size per job.",
+  "decomposition_rationale": "This task involves three distinct concerns: (1) understanding the existing project structure and AppBase pattern to correctly scaffold data types and integrate with the skeleton, (2) implementing the core Flink pipeline logic including CSV parsing, event-time session windows, and aggregation, and (3) handling file I/O (reading gzipped CSVs and writing output in the correct format). These are tightly coupled enough that 2 skills suffice: one for data model/schema setup and one for the complete Flink pipeline implementation.",
+  "skills": [
+    {
+      "name": "evo-cluster-data-model",
+      "description": "Provides guidance and utility patterns for defining Flink-compatible POJO data types (TaskEvent, JobEvent) based on the Google Cluster Trace 2011 v2 schema, including CSV parsing logic with proper field indexing and type handling for gzipped headerless CSVs.",
+      "responsibility": "Define the TaskEvent and JobEvent data type classes under clusterdata.datatypes, ensuring they meet Flink POJO serialization requirements (public fields, no-arg constructor). Provide CSV line parsing logic with correct column indices, handling of empty/missing fields, and microsecond timestamp semantics.",
+      "key_functions": [
+        "parse_task_event_from_csv",
+        "parse_job_event_from_csv",
+        "get_event_type_constants"
+      ],
+      "dr_sections": [
+        "1. Google Cluster Data 2011 v2 Schema Configuration",
+        "1.1 Table Schemas",
+        "1.2 Event Type Integer Codes",
+        "1.3 Timestamp Semantics",
+        "3. Flink 1.20 POJO vs. Tuple Requirements",
+        "3.1 POJO Requirements"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-flink-session-window-pipeline",
+      "description": "Provides complete implementation guidance for the LongestSessionPerJob Flink job: reading gzipped CSV sources, assigning event-time watermarks with microsecond-to-millisecond conversion, filtering SUBMIT events, applying session windows with 10-minute gap, counting tasks per session via AggregateFunction, finding the max session per job via reduce, and writing output as (jobId,count) tuples to a local file using FileSink or writeAsText.",
+      "responsibility": "Implement the full Flink DataStream pipeline in LongestSessionPerJob.java: FileSource/readTextFile for gzipped input, WatermarkStrategy with bounded out-of-orderness and timestamp extraction, filter for event type 0 (SUBMIT), keyBy jobId, EventTimeSessionWindows with Duration.ofMinutes(10), aggregate+process window for counting, reduce for max session per job, and sink output in the required tuple format.",
+      "key_functions": [
+        "build_flink_pipeline",
+        "configure_watermark_strategy",
+        "session_window_aggregation",
+        "find_max_session_per_job",
+        "configure_output_sink"
+      ],
+      "dr_sections": [
+        "2. Flink 1.20 DataStream API: Reading Gzipped CSV Files",
+        "2.1 Transparent Gzip Decompression",
+        "2.2 Implementing FileSource",
+        "4. Event Time and Watermarks in Flink 1.20",
+        "4.1 Timestamp Assignment and Microsecond Conversion",
+        "4.2 WatermarkStrategy API",
+        "5. Filtering the DataStream",
+        "6. Flink 1.20 Session Windows",
+        "6.1 The Transition to Duration",
+        "6.2 Aggregation Strategy",
+        "7. Finding the Maximum Across Multiple Windows Per Key",
+        "8. Flink 1.20: Writing Output to a Local File",
+        "8.1 The Deprecation of writeAsText()",
+        "8.2 Implementing FileSink",
+        "9. Common Pitfalls and Architectural Patterns",
+        "9.1 Bounded vs. Streaming Mode and Final Watermarks",
+        "9.2 The Parallelism 1 Sink Bottleneck",
+        "9.3 The AppBase Pattern",
+        "10. Comprehensive Working Code Example"
+      ],
+      "depends_on": [
+        "evo-cluster-data-model"
+      ]
+    }
+  ]
+}

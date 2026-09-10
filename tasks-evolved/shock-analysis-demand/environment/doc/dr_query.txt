@@ -1,0 +1,42 @@
+Macroeconomic demand-side accounting framework for estimating investment spending shocks in a small open economy: detailed methodology, formulas, and Excel implementation patterns
+
+I need comprehensive information on the following topics to build a Python utility module that can programmatically manipulate Excel files (using openpyxl) to implement a macro demand-side investment shock analysis for a small open economy like Georgia:
+
+1. **IMF WEO Database structure and data extraction:**
+   - What specific variables/indicators from the IMF World Economic Outlook database are needed for demand-side macro accounting? Specifically for Georgia: nominal GDP, real GDP, GDP deflator, real GDP growth rates, and their WEO subject codes (e.g., NGDP, NGDPD, NGDP_R, NGDP_D, PCPIPCH, etc.)
+   - What are the exact WEO subject codes for: Nominal GDP (national currency), Nominal GDP (USD), Real GDP, GDP deflator, Real GDP growth rate, and related series?
+   - How to project GDP deflator forward using average growth rate of recent 4 years as a fixed anchor — what is the exact formula?
+   - How to extend real GDP using a constant growth rate assumption from 2027 to 2043?
+
+2. **Supply and Use Table (SUT) methodology for import content share estimation:**
+   - How is the import content share calculated from a Supply and Use Table (38x38 industry classification) from GeoStat (National Statistics Office of Georgia)?
+   - What is the exact formula for estimating import content share from SUT data? Specifically, how do you link supply-side imports to use-side intermediate consumption and final demand to derive an import content ratio for investment?
+   - What rows/columns from a standard SUT are relevant: total supply at basic prices, imports, total use, intermediate consumption, gross fixed capital formation?
+   - What does "Column C-H" in a SUT Calc sheet typically contain — is this about calculating import shares by product category and then weighting them?
+
+3. **Demand-side macro accounting framework for investment shock analysis:**
+   - What is the standard formula for estimating the GDP impact of an investment spending shock on the demand side?
+   - How does the demand multiplier work in a small open economy context? Why is 0.8 typical for small open economies (leakage through imports)?
+   - What is the "bell shape" project allocation pattern for an 8-year investment project? What are the typical annual percentage allocations (e.g., ramp-up in early years, peak in middle years, wind-down)? Common bell-shaped distributions used in infrastructure project spending profiles — is this typically something like {2%, 7%, 15%, 22%, 24%, 18%, 9%, 3%} or similar?
+   - How to convert USD investment to local currency (Georgian Lari) using a fixed exchange rate and then deflate using GDP deflator as investment deflator?
+   - The formula chain: Total investment (USD) → annual allocation (bell shape) → convert to Lari → nominal investment shock → real investment shock (deflated) → net of import leakage → apply demand multiplier → GDP impact as % of baseline GDP?
+
+4. **Scenario analysis structure:**
+   - Baseline scenario: demand multiplier = 0.8, estimated import content share from SUT
+   - Scenario 2: demand multiplier = 1.0 (everything else same)
+   - Scenario 3: import content share = 0.5 (everything else same as baseline)
+   - How are the GDP impact results typically presented — as percentage point additions to baseline real GDP growth?
+
+5. **openpyxl Excel manipulation patterns for this task:**
+   - How to read existing Excel workbook with multiple sheets, preserve formatting, and write formulas (not values) using openpyxl 3.1.5?
+   - How to write Excel formulas as strings (e.g., "=B5*C5") in cells using openpyxl so they evaluate when opened in Excel/LibreOffice?
+   - How to copy sheet structures and cell references between sheets?
+   - How to handle cell references across sheets (e.g., "='WEO_Data'!B5")?
+   - Common pitfalls: openpyxl data_only mode, formula preservation, merged cells, named ranges?
+   - How to use LibreOffice command line to recalculate formulas in an xlsx file on Ubuntu?
+
+6. **Critical numerical details:**
+   - Georgian Lari/USD exchange rate: 2.746 (given)
+   - Total investment: 6.5 billion USD over 8 years starting 2026
+   - What base year does GeoStat typically use for constant prices in their SUT?
+   - Standard bell-shape allocation percentages for 8-year infrastructure megaprojects used by IMF/World Bank in similar analyses

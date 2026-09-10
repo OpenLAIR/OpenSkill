@@ -1,0 +1,57 @@
+Research query:
+
+DBSCAN clustering with custom distance metric in scikit-learn 1.2.2: complete API guide for optimization pipeline
+
+I need comprehensive technical documentation to build a Python utility module for the following workflow: running DBSCAN with a custom weighted Euclidean distance metric, performing greedy matching between cluster centroids and ground truth points, computing F1 scores, and finding Pareto-optimal frontiers. Please provide:
+
+1. **scikit-learn 1.2.2 DBSCAN API with custom metric**:
+   - Exact function signature for `sklearn.cluster.DBSCAN` constructor — all parameters, defaults, and types
+   - How to pass a custom distance metric to DBSCAN. Specifically: can you pass `metric='precomputed'` with a precomputed distance matrix, or use `metric=callable`? What is the exact calling convention for a callable metric function? Does it receive individual point pairs `(a, b)` or full arrays?
+   - Working code example of DBSCAN with a callable custom metric function
+   - How to extract cluster labels from fitted DBSCAN (`.labels_` attribute), and how noise points are labeled (is it -1?)
+   - How to compute cluster centroids from DBSCAN labels (handling noise label -1)
+   - Performance implications: is `metric=callable` slow because it uses pairwise distance computation? Would `metric='precomputed'` with `scipy.spatial.distance.pdist`/`squareform` be faster?
+
+2. **scipy.spatial.distance with custom metric**:
+   - `scipy.spatial.distance.pdist` with a custom callable metric — exact signature and usage
+   - `scipy.spatial.distance.squareform` — converting condensed to square distance matrix
+   - `scipy.spatial.distance.cdist` for computing distances between two different point sets
+   - Working code for computing a weighted Euclidean distance: `d(a,b) = sqrt((w*dx)^2 + ((2-w)*dy)^2)` using both pdist and cdist
+
+3. **Greedy matching algorithm between two point sets**:
+   - Given cluster centroids and expert points, compute all pairwise standard Euclidean distances
+   - Greedy matching: sort all pairs by distance, assign closest unmatched pairs first, with a maximum distance threshold of 100 pixels
+   - Working Python code for this greedy matching that returns matched pairs, true positives, false positives, false negatives
+   - How to compute F1 score from TP, FP, FN — and handle edge cases where TP=0
+
+4. **Pareto frontier computation using `paretoset` library version 1.2.3**:
+   - Exact import path and function signature for `paretoset.paretoset()`
+   - What input format does it expect (numpy array, pandas DataFrame)?
+   - How to specify optimization direction — which parameter controls maximize vs minimize for each objective?
+   - The `sense` parameter: what are the valid values? Is it `["max", "min"]` or `["maximize", "minimize"]`?
+   - Working code example finding Pareto-optimal points from a DataFrame with two objectives (one to maximize, one to minimize)
+   - Return type: boolean mask or indices?
+
+5. **pandas 2.2.2 patterns for this pipeline**:
+   - Reading CSV files and grouping by a column (`file_rad`)
+   - Efficient groupby iteration pattern for processing per-image data
+   - Writing output CSV with specific decimal precision using `to_csv` with `float_format` or rounding beforehand
+
+6. **joblib 1.3.2 for parallel grid search**:
+   - `joblib.Parallel` and `joblib.delayed` — exact signatures and usage
+   - How to parallelize a loop over hyperparameter combinations
+   - `n_jobs=-1` behavior, `backend` options, and `prefer='processes'` vs `prefer='threads'`
+   - Working code example parallelizing a grid search where each job processes all images for one hyperparameter combination
+   - How to collect results from `Parallel` — does it return a list?
+
+7. **numpy 1.24.3 specifics**:
+   - `numpy.nanmean` for averaging while ignoring NaN values — exact behavior
+   - `numpy.mean` behavior when array contains NaN
+   - Computing centroids: mean of x and y coordinates grouped by cluster label
+
+8. **Common pitfalls**:
+   - DBSCAN with callable metric: does it require `algorithm='brute'`? What happens if you don't set this?
+   - Edge cases: what happens when DBSCAN assigns all points to noise? When there's only one point?
+   - F1 computation edge cases: division by zero when precision + recall = 0
+   - Performance: precomputed distance matrix vs callable for datasets of varying sizes
+   - Any deprecation warnings in scikit-learn 1.2.2 DBSCAN API?

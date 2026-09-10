@@ -1,0 +1,25 @@
+{
+  "task_summary": "Fix CVE-2025-32433 in Erlang/OTP SSH server by adding authentication check to ssh_connection.erl to block pre-auth connection protocol messages",
+  "decomposition_rationale": "This is a single well-defined code patch task: inserting one pattern-matching clause into one Erlang source file. The vulnerability, fix location, and exact code change are precisely documented. A single skill covering vulnerability identification and patching is sufficient.",
+  "skills": [
+    {
+      "name": "evo-erlang-ssh-cve-patch",
+      "description": "Identifies and patches CVE-2025-32433 in Erlang/OTP SSH server source code by inserting an authentication-state check in ssh_connection.erl that rejects connection protocol messages (IDs >= 80) received before authentication is complete. The fix adds a pattern-matching clause for handle_msg/4 that matches unauthenticated server connections and returns a disconnect tuple.",
+      "responsibility": "Locate lib/ssh/src/ssh_connection.erl in the OTP source tree, find the handle_msg/4 function clauses, verify the vulnerability exists (no authenticated=false guard), and insert the correct catch-all clause after the ssh_msg_disconnect handler but before any channel/connection message handlers.",
+      "key_functions": [
+        "find_ssh_connection_erl",
+        "check_if_already_patched",
+        "apply_cve_2025_32433_patch",
+        "validate_patch_applied"
+      ],
+      "dr_sections": [
+        "1. Exact CVE Details and Root Cause",
+        "2. Affected Erlang/OTP Source Files and Functions",
+        "3. The Official Patch/Fix",
+        "5. Version-Specific Details for OTP 27.3.2",
+        "8. File Paths within OTP Source Tree"
+      ],
+      "depends_on": []
+    }
+  ]
+}

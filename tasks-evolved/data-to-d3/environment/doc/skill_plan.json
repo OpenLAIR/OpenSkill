@@ -1,0 +1,68 @@
+{
+  "task_summary": "Build a single-page D3.js v6 web app with a force-simulation bubble chart (sector-clustered, market-cap-sized) and an interactive data table, connected via click highlighting, using Python to generate all output files.",
+  "decomposition_rationale": "The task has two distinct concerns: (1) Python-side orchestration to set up the output directory, copy data, fetch D3.js, and generate the HTML/CSS/JS files, and (2) the actual D3.js visualization logic (force simulation, bubble chart, table, interactions). Splitting these keeps file-generation logic separate from the complex visualization code, making each skill focused and reusable.",
+  "skills": [
+    {
+      "name": "evo-web-scaffold-generator",
+      "description": "Python utility that creates the output directory structure, copies input data, downloads d3.v6.min.js locally, and writes the index.html and style.css files for the stock visualization dashboard.",
+      "responsibility": "Directory setup, data copying, D3.js library fetching, HTML boilerplate generation, and CSS stylesheet creation. Does NOT contain visualization logic.",
+      "key_functions": [
+        "setup_output_directory",
+        "copy_input_data",
+        "download_d3_library",
+        "generate_index_html",
+        "generate_style_css"
+      ],
+      "dr_sections": [
+        "7. Python Utility Functions for File Generation",
+        "4.1 HTML/CSS Div Overlays"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-d3v6-stock-visualization",
+      "description": "Generates the complete visualization.js file implementing a D3.js v6 force-simulation bubble chart with sector clustering, an interactive data table, tooltips, legends, and bidirectional click-based highlighting between chart and table.",
+      "responsibility": "All D3.js v6 client-side visualization logic: CSV loading/parsing, force simulation setup (forceX/forceY/forceCollide), scaleSqrt for bubble sizing, ordinal color scale for sectors, legend rendering, tooltip with v6 event handling, HTML table generation with formatted market cap, and bidirectional click interaction with scroll-into-view.",
+      "key_functions": [
+        "generate_visualization_js",
+        "build_force_simulation_code",
+        "build_bubble_chart_code",
+        "build_data_table_code",
+        "build_interaction_code"
+      ],
+      "dr_sections": [
+        "1. D3.js v6 Force Simulation API for Bubble Charts with Sector Clustering",
+        "1.1 The Physics of D3 Force Simulations",
+        "1.2 Exact API Signatures and Chaining in D3 v6",
+        "1.3 Sector Clustering Using Custom Accessors",
+        "1.4 Setting forceCollide with Dynamic Accessors",
+        "1.5 Sizing Bubbles with d3.scaleSqrt()",
+        "1.6 Handling the tick Event and Simulation State",
+        "2. D3.js v6 CSV Loading and Data Parsing",
+        "2.1 Promise-Based Fetch API in D3 v6",
+        "2.2 Loading Multiple Files with Promise.all",
+        "2.3 Data Parsing and Type Coercion",
+        "3. D3.js v6 Color Scales for Categorical Data (Sectors)",
+        "3.1 d3.scaleOrdinal and Categorical Schemes",
+        "3.2 Building a Color Legend",
+        "4. D3.js v6 Tooltip Implementation",
+        "4.2 The v6 Event Handler Breaking Change and d3.pointer",
+        "5. D3.js v6 Interactive Data Table with Click-Based Highlighting",
+        "5.1 Generating an HTML Table using selection.join",
+        "5.2 Custom Number Formatting: Replacing G with B",
+        "5.3 Bidirectional Click Interaction and Auto-Scrolling",
+        "6. D3.js v6 Text Labels Inside Circles",
+        "6.1 Using SVG Groups <g>",
+        "6.2 text-anchor and dominant-baseline",
+        "8. Common Pitfalls in D3 v6",
+        "8.1 The Event Handler Signature Break",
+        "8.2 Force Simulation Initial Positions",
+        "8.3 CSV Parsing Coercion",
+        "8.4 Promise Handling Missteps"
+      ],
+      "depends_on": [
+        "evo-web-scaffold-generator"
+      ]
+    }
+  ]
+}

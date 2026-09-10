@@ -1,0 +1,43 @@
+Apache Druid 0.20.0 JavaScript-based Remote Code Execution vulnerability (CVE-2021-25646): comprehensive technical research for patching the Druid Java source code
+
+I need detailed information to build a Python utility skill that helps an AI coding agent patch the Apache Druid 0.20.0 source code (Java/Maven project) to fix the CVE-2021-25646 vulnerability. The vulnerability allows authenticated users to bypass the `druid.javascript.enabled=false` security check by injecting an empty-key `""` JSON object alongside the `"type": "javascript"` field in indexing/sampler/filter/aggregator specs. Please research:
+
+1. **CVE-2021-25646 root cause analysis**: 
+   - Exact Java classes and files in the Apache Druid 0.20.0 codebase that handle JavaScript-based functionality (JavaScriptDimFilter, JavaScriptAggregatorFactory, JavaScriptExtractionFn, JavaScriptPostAggregator, JavaScriptParser, JavaScriptWorkerSelectStrategy, JavaScriptServerSelectorStrategy, JavaScriptConfig, etc.)
+   - The file paths within the Druid git repository (e.g., `processing/src/main/java/org/apache/druid/...`, `indexing-service/src/main/java/...`)
+   - How `JavaScriptConfig.getEnabledInstance()` and `JavaScriptConfig.isEnabled()` are used as security gates
+   - Why the empty-key `""` JSON deserialization bypasses the check (Jackson `@JsonProperty` deserialization behavior with unknown/empty keys, `@JsonCreator` constructor handling)
+   - The official upstream fix commits on the apache/druid GitHub repository that resolved CVE-2021-25646 (commit hashes, PR numbers, what files they modified)
+
+2. **Official patch details**:
+   - The exact changes made in the upstream fix: what validation was added, where `JavaScriptConfig.getEnabledInstance()` checks were inserted in constructors, and how the deserialization was hardened
+   - Whether the fix involved adding `@JsonCreator` annotations, validating in factory methods, or rejecting malformed JSON
+   - List of every Java source file that needed modification
+
+3. **Git patch file format for Maven Java projects**:
+   - How to write unified diff patches (`.patch` files) compatible with the `patch` command and `git apply`
+   - Correct `diff --git a/path b/path` headers, hunk format, and line numbering
+   - How to handle patches against a checked-out git tag (`druid-0.20.0`)
+   - Common errors: trailing whitespace, incorrect line counts in `@@` hunks, CRLF vs LF
+
+4. **Apache Druid build system specifics**:
+   - Maven multi-module build for the `indexing-service` module and its dependencies (`processing`, `core`, `server`)
+   - Which JARs the indexing-service produces and where they end up in `target/`
+   - The artifact naming convention (e.g., `druid-indexing-service-0.20.0.jar`, `druid-processing-0.20.0.jar`)
+   - How `/opt/druid/lib/` is structured and which JARs get replaced when deploying a fix
+
+5. **JavaScript filter/aggregator JSON schema in Druid 0.20.0**:
+   - Full JSON structure accepted by `/druid/indexer/v1/sampler` endpoint
+   - The expected fields for `"type": "javascript"` filters (`function`, `config` with `enabled`)
+   - Why an empty-key field is accepted by Jackson and how `JsonInclude`/`JsonAnySetter`/`JsonAnyGetter` may cause this
+
+6. **Jackson deserialization pitfalls relevant to the fix**:
+   - How Jackson handles duplicate/empty keys in JSON
+   - `@JsonCreator` vs setter-based deserialization
+   - Best practices for validating injected `JavaScriptConfig` in constructors
+
+7. **Testing the fix**:
+   - How to send the malicious payload via `curl` to verify the patch blocks it
+   - Expected HTTP response codes/error messages when JavaScript is disabled
+
+Please provide concrete file paths, code snippets from the actual Druid 0.20.0 source, the upstream fix diff if available, and any references to the Apache security advisory or GitHub security advisory GHSA for CVE-2021-25646.

@@ -1,0 +1,39 @@
+{
+  "task_summary": "Parse a Three.js createScene() file to extract part-level structure, exporting individual meshes per part and merged part assemblies as OBJ files.",
+  "decomposition_rationale": "The task is cohesive—parse a Three.js scene in headless Node.js and export OBJs in two structured forms. A single skill covering headless execution, scene traversal, and OBJ export keeps related logic together without artificial separation.",
+  "skills": [
+    {
+      "name": "evo-threejs-scene-parser",
+      "description": "Parse a Three.js createScene() file in headless Node.js, identify part-level structure (Groups and standalone Meshes), and export OBJ files for both individual sub-meshes per part and merged part assemblies (links). Use when extracting decomposed 3D object structure from Three.js scene definitions.",
+      "responsibility": "Headless Three.js execution, scene graph traversal/classification, world-matrix resolution, per-mesh and merged-part OBJ export with the required output directory layout.",
+      "key_functions": [
+        "run_threejs_parser",
+        "generate_node_harness",
+        "export_part_meshes_and_links"
+      ],
+      "dr_sections": [
+        "1. Three.js Scene Graph and Primitive Geometries (v0.170.0)",
+        "1.2 Hierarchy, Transform Theory, and `Object3D` Properties",
+        "1.3 `updateMatrixWorld` vs `updateWorldMatrix`",
+        "1.4 Traversal Algorithms",
+        "2. Mesh Geometry Internals",
+        "2.2 Applying Matrices Directly to Vertices",
+        "2.3 Merging BufferGeometries via `BufferGeometryUtils`",
+        "3. OBJ Export from Three.js",
+        "3.1 The `OBJExporter` API (v0.170.0)",
+        "4. Executing Three.js Code from a Headless Node.js Environment",
+        "4.2 Handling ESM and \"exports\" Maps",
+        "4.3 Polyfills for Browser Globals",
+        "4.4 Evaluating the Target `object.js`",
+        "5. Parsing Strategy for Extracting Part Structure",
+        "5.1 Heuristics for Part Identification",
+        "5.2 Nested Hierarchies",
+        "6. Recommended Implementation Approach for the Skill",
+        "7. OBJ File Format Specifics",
+        "8. Known Pitfalls and Version-Specific Notes for Three.js 0.170.0",
+        "9. Comprehensive Node.js Code Snippets"
+      ],
+      "depends_on": []
+    }
+  ]
+}

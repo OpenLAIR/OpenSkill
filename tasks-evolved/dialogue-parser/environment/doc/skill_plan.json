@@ -1,0 +1,58 @@
+{
+  "task_summary": "Implement a dialogue script parser that converts a structured text file into a validated JSON graph and Graphviz DOT visualization",
+  "decomposition_rationale": "The task has three clear functional domains: (1) parsing text into a graph data structure, (2) validating graph constraints and serializing to JSON, and (3) generating DOT visualization. However, these are tightly coupled and the research document provides a near-complete implementation, so two skills suffice: one for parsing/validation/serialization (the core logic) and one for DOT visualization generation.",
+  "skills": [
+    {
+      "name": "evo-dialogue-parser",
+      "description": "Parses structured dialogue script text into a graph with nodes and edges, validates graph constraints (reachability, edge target existence), and serializes to JSON. Handles node type detection (line vs choice), implicit terminal node synthesis, tag extraction from choices, and BFS reachability validation.",
+      "responsibility": "Text parsing via regex, graph data structure construction, node type classification, implicit node generation, graph validation (BFS reachability, edge target existence), and JSON serialization",
+      "key_functions": [
+        "parse_script",
+        "validate_graph",
+        "save_json",
+        "synthesize_implicit_nodes"
+      ],
+      "dr_sections": [
+        "1. Text Parsing Patterns for Dialogue Scripts",
+        "1.1 Regular Expression (Regex) Fundamentals in Python",
+        "1.2 Formulating Patterns for Script Elements",
+        "1.3 Pitfalls in Multi-line Text Parsing",
+        "2. Graph Data Structure for Dialogue Trees",
+        "2.1 JSON Schema Representation",
+        "2.2 Differentiating Node Types",
+        "2.3 Handling Terminal and Implicit Nodes",
+        "4. JSON Output Serialization in Python",
+        "4.1 Serialization Best Practices",
+        "4.2 Potential Pitfalls",
+        "5. Graph Validation Algorithms",
+        "5.1 Reachability Using Breadth-First Search (BFS)",
+        "5.2 Evaluating Circular References",
+        "6. Edge Cases and Pitfalls for Dialogue Parsing",
+        "6.1 Nodes with Homogeneous Contents",
+        "6.2 Tag Processing in Choices",
+        "6.3 Spaces and Special Formatting in Arrows"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-dialogue-dotgen",
+      "description": "Generates Graphviz DOT visualization files from the parsed dialogue graph structure using the graphviz 0.20.3 Python API. Handles label escaping, node shape styling by type, and edge label formatting including tags.",
+      "responsibility": "DOT file generation using graphviz Python API, label escaping with graphviz.escape(), visual styling of nodes and edges, and saving DOT source files without rendering",
+      "key_functions": [
+        "generate_dot",
+        "escape_label",
+        "style_node"
+      ],
+      "dr_sections": [
+        "3. Python `graphviz` Version 0.20.3 API",
+        "3.1 Object Instantiation and Core Methods",
+        "3.2 Escaping Labels and Special Characters",
+        "3.3 Exporting DOT Source (`save` vs `render`)",
+        "7. Python Module Structure for Reusable Skills"
+      ],
+      "depends_on": [
+        "evo-dialogue-parser"
+      ]
+    }
+  ]
+}

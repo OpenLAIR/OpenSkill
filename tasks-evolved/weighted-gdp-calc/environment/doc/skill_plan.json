@@ -1,0 +1,46 @@
+{
+  "task_summary": "Populate specified Task-sheet ranges from Data using two-key lookups, compute GCC net exports as a share of GDP plus summary stats, and calculate the GCC weighted mean in gdp.xlsx without altering workbook formatting or sheet structure.",
+  "decomposition_rationale": "This task is best split into one foundational spreadsheet I/O and lookup skill and one computation/formula-targeting skill. The first isolates safe workbook manipulation and 2D data retrieval, while the second handles the domain math and placement of formulas or computed results in the Task sheet.",
+  "skills": [
+    {
+      "name": "evo-spreadsheet-lookup-population",
+      "description": "Safely load and edit the existing workbook, read the Data sheet into a two-dimensional lookup structure keyed by series code and year, and populate the specified Task-sheet yellow ranges while preserving formatting.",
+      "responsibility": "Workbook-safe I/O, Excel coordinate/range handling, source-table extraction from the Data sheet, and writing retrieved values or lookup formulas into H12:L17, H19:L24, and H26:L31 only.",
+      "key_functions": [
+        "load_workbook_preserve_structure",
+        "extract_series_year_lookup",
+        "populate_task_lookup_ranges",
+        "atomic_save_workbook"
+      ],
+      "dr_sections": [
+        "Openpyxl 3.1.5 Workbook Input/Output and Sheet Access",
+        "Reading Excel Headers and Source Tables Robustly",
+        "Writing Excel Formulas with Openpyxl",
+        "Mapping Between Excel Ranges and Python Structures",
+        "Common Pitfalls and Deprecations"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-economic-metrics-weighted-summary",
+      "description": "Compute net exports as a percentage of GDP for the six GCC countries, generate summary statistics, and calculate the GDP-weighted GCC mean using Excel-compatible logic such as SUMPRODUCT.",
+      "responsibility": "Economic and statistical calculations only: derive net exports % of GDP in H35:L40, calculate min/max/median/simple mean/25th percentile/75th percentile, and compute the weighted mean for GCC using valid source values and weights.",
+      "key_functions": [
+        "compute_net_exports_pct",
+        "compute_summary_statistics",
+        "compute_excel_percentile_inc",
+        "compute_weighted_mean_sumproduct"
+      ],
+      "dr_sections": [
+        "Implementing Domain Calculations in Reusable Python Helpers",
+        "Statistical Functions Parity with Excel",
+        "Writing Excel Formulas with Openpyxl",
+        "The Challenge of Formula Evaluation",
+        "Formula Recalculation and Evaluation Outside Excel"
+      ],
+      "depends_on": [
+        "evo-spreadsheet-lookup-population"
+      ]
+    }
+  ]
+}

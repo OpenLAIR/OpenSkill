@@ -1,0 +1,44 @@
+{
+  "task_summary": "Build a Python function that parses CIF files, extracts Wyckoff position multiplicities and representative fractional coordinates (as rationalized fractions), and returns them in a specified dictionary format.",
+  "decomposition_rationale": "The task has three clear concerns: (1) CIF file parsing and structure loading, (2) symmetry analysis to extract Wyckoff positions with multiplicities and coordinates, and (3) floating-point to rational fraction conversion. However, these are tightly coupled in a single pipeline with a single entry function, so two skills suffice: one for CIF parsing + symmetry/Wyckoff extraction (the core crystallography pipeline), and one for coordinate rationalization (the numerical formatting concern).",
+  "skills": [
+    {
+      "name": "evo-crystallography-wyckoff-analysis",
+      "description": "Parses CIF files using pymatgen, performs space group symmetry analysis via SpacegroupAnalyzer, and extracts Wyckoff position letters, multiplicities, and representative atom fractional coordinates from the symmetrized structure.",
+      "responsibility": "CIF file loading (via CifParser/parse_structures), structure symmetry analysis (SpacegroupAnalyzer with appropriate symprec), extraction of wyckoff_symbols, equivalent_sites, multiplicities, and the first atom's fractional coordinates for each unique Wyckoff position.",
+      "key_functions": [
+        "load_structure_from_cif",
+        "get_symmetrized_structure",
+        "extract_wyckoff_multiplicities",
+        "extract_representative_coordinates",
+        "analyze_wyckoff_position_multiplicities_and_coordinates"
+      ],
+      "dr_sections": [
+        "1. Pymatgen CIF Parsing API",
+        "2. Pymatgen SpacegroupAnalyzer API",
+        "3. Wyckoff Position Multiplicities",
+        "4. Wyckoff Position Coordinates",
+        "6. Handling Edge Cases and Pitfalls",
+        "7. Complete Working Code Pattern",
+        "8. Version-Specific Concerns for Pymatgen 2025.10.7"
+      ],
+      "depends_on": [
+        "evo-crystallography-fraction-format"
+      ]
+    },
+    {
+      "name": "evo-crystallography-fraction-format",
+      "description": "Converts floating-point fractional coordinates to clean rational fraction strings with bounded denominators (≤12), handling edge cases like near-zero/near-one wrapping and integer values.",
+      "responsibility": "Floating-point to rational number conversion using sympy.Rational.limit_denominator, coordinate wrapping to [0,1), boundary snapping for near-0 and near-1 values, and string formatting of fractions.",
+      "key_functions": [
+        "float_to_fraction_string",
+        "rationalize_coordinate_vector"
+      ],
+      "dr_sections": [
+        "5. Converting Float Coordinates to Simple Fractions Using SymPy",
+        "6. Handling Edge Cases and Pitfalls"
+      ],
+      "depends_on": []
+    }
+  ]
+}

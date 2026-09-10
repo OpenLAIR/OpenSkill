@@ -1,0 +1,39 @@
+Research query:
+
+How to diagnose and fix Python build failures in GitHub repositories, specifically for the AgentOps-AI/agentops Python package. I need to build a reusable Python utility module (skill) that helps an AI coding agent automatically:
+
+1. **Analyze Python build failures**: What are the common patterns for Python build/test failures? How to programmatically parse and identify errors from:
+   - Python syntax errors and import errors
+   - pytest test failures and their tracebacks
+   - setup.py / pyproject.toml / setup.cfg configuration errors
+   - Missing or incompatible dependency versions
+   - CI/CD configuration issues (GitHub Actions workflows, tox.ini, Makefile)
+   - Type checking errors (mypy, pyright)
+   - Linting errors (flake8, ruff, pylint, black formatting)
+
+2. **Generating and applying diffs programmatically in Python**: 
+   - How to generate standard unified diff format files using Python's `difflib` module — exact API: `difflib.unified_diff()` function signature, parameters (`fromfile`, `tofile`, `lineterm`), and output format
+   - How to produce diffs compatible with `git apply` and GNU `patch` — what headers and format are required?
+   - How to apply `.diff` files using `subprocess` calls to `git apply` or `patch` — correct command-line flags, especially `--directory`, `--strip`, `--reject`
+   - Common pitfalls: line ending issues (CR/LF), missing newline at end of file markers, incorrect path prefixes (a/ b/ prefix conventions), whitespace sensitivity
+
+3. **Python AST and code analysis for error detection**:
+   - Using `ast.parse()` to detect syntax errors with exact error locations
+   - Using `importlib` to check for missing imports
+   - How to parse Python tracebacks programmatically to extract file paths, line numbers, and error types
+
+4. **Build system specifics for the agentops package**:
+   - Common build tools: poetry, setuptools, flit, hatch, pdm — how each reports errors
+   - How to run builds and capture output: `python -m build`, `pip install -e .`, `pytest` exit codes and output parsing
+   - `pyproject.toml` parsing in Python using `tomllib` (Python 3.11+) or `tomli` — correct import paths and usage patterns
+
+5. **BugSwarm reproduction framework**: How BugSwarm cached Docker images work, what the `/home/github/build/failed/<repo>/<id>` directory structure looks like, how to find the original build script (`run_failed.sh`) and replicate the failing build to capture error output
+
+6. **Common pitfalls**:
+   - Difference between `git diff` and `diff -u` output formats
+   - How `git apply` handles paths differently than `patch`
+   - Python version compatibility issues (f-strings, walrus operator, type hints syntax differences between 3.7-3.12)
+   - Encoding issues when reading/writing Python source files
+   - How to handle files that don't end with a newline in unified diff format
+
+Provide working Python code examples for: parsing build output to extract errors, generating valid unified diff files, applying patches programmatically, and AST-based syntax validation. Include exact function signatures, import statements, and return types.

@@ -1,0 +1,47 @@
+Research query:
+
+Comprehensive guide to solving AC Optimal Power Flow (ACOPF) in Python for large-scale power systems, focusing on building reusable utility functions. I need detailed information on the following:
+
+1. **Python libraries for ACOPF**: What are the best Python packages for formulating and solving AC Optimal Power Flow problems? Specifically cover:
+   - **Pyomo** for optimization modeling: exact API for creating complex-valued power flow constraints, nonlinear programming (NLP) formulation, working code examples for ACOPF with bus voltage variables (rectangular vs polar form), generator dispatch variables, branch flow constraints using pi-section model with complex transformer taps.
+   - **IPOPT solver**: How to install and use IPOPT with Pyomo on Ubuntu. Exact Pyomo solver interface calls (`SolverFactory('ipopt')`, solver options for convergence tolerances, max iterations). What are the correct `pip install` commands for `pyomo` and IPOPT (e.g., `cyipopt`, `idaes-pse` for prebuilt IPOPT binaries via `idaes get-extensions`)?
+   - Alternative: **Julia's PowerModels.jl** called from Python, or **pandapower** for ACOPF — but focus primarily on Pyomo + IPOPT.
+
+2. **Parsing network data in JSON format for ACOPF**: The input is a `network.json` file that likely follows the **PowerModels.jl / Matpower** data format exported to JSON. Describe the exact structure: bus dictionaries with `vmin`, `vmax`, `va`, `vm`, `bus_type`; generator dictionaries with `pmin`, `pmax`, `qmin`, `qmax`, `cost` (polynomial cost coefficients `c2, c1, c0`), `gen_bus`; branch dictionaries with `br_r`, `br_x`, `b_fr`, `b_to` (charging susceptance), `tap`, `shift` (transformer tap ratio and phase shift), `rate_a` (MVA limit), `angmin`, `angmax`; load data with `pd`, `qd`; shunt data with `gs`, `bs`; and `baseMVA`. Provide Python code to parse this JSON and build admittance matrices or per-branch pi-section parameters (Yij series admittance, Yc_fr, Yc_to charging, complex tap ratio T_ij).
+
+3. **Mathematical formulation details for ACOPF in polar coordinates using Pyomo**:
+   - How to implement bus power balance constraints: `sum(Sg_k for k in G_i) - sum(Sd_k for k in L_i) - sum(Ys_k * |Vi|^2 for k in S_i) = sum(S_ij for branches from i)` decomposed into real and imaginary parts.
+   - Branch power flow expressions using pi-section model with transformer tap: `S_ij = V_i * conj(I_ij)` where the current depends on `Y_ij`, `Y^c_ij`, `T_ij`, and voltages at both ends. Provide explicit real/imaginary decomposition in terms of `vm_i, va_i, vm_j, va_j, g_ij, b_ij, g_fr, b_fr, g_to, b_to, tap, shift`.
+   - Thermal limit constraints: `|S_ij|^2 <= (s^u_ij)^2` or `|S_ij| <= s^u_ij`.
+   - Voltage angle difference constraints.
+   - Reference bus angle = 0 constraint.
+   - Quadratic cost objective function.
+
+4. **Working Pyomo ACOPF code example**: A complete, runnable Python example that:
+   - Reads bus/gen/branch/load/shunt data from dictionaries
+   - Creates a ConcreteModel with variables `vm` (voltage magnitude), `va` (voltage angle), `pg` (active generation), `qg` (reactive generation)
+   - Adds all ACOPF constraints
+   - Solves with IPOPT
+   - Extracts results (voltage profile, generation dispatch, branch flows, losses)
+   - Show exact Pyomo syntax: `model.vm = Var(buses, bounds=...)`, `model.power_balance_p = Constraint(buses, rule=...)`, etc.
+
+5. **Post-solve calculations**:
+   - How to compute branch flows (from-side and to-side complex power) from solved voltages
+   - How to compute branch loading percentage: `flow_MVA / rate_a * 100`
+   - How to compute total system losses: `total_generation - total_load` or `sum of branch losses`
+   - How to compute power balance mismatches for feasibility verification
+   - How to identify the most loaded branches and sort them
+
+6. **Common pitfalls**:
+   - Per-unit system: all values in network.json are typically in per-unit on `baseMVA` base — must convert to MW/MVAr for reporting by multiplying by `baseMVA`.
+   - Transformer tap/shift handling: the complex tap ratio `T = tap * exp(j*shift)` and how it enters the pi-section model. Off-nominal tap ratios and phase shifters.
+   - Branch with zero or missing `rate_a` — how to handle unconstrained branches.
+   - Generator cost coefficients: are they on per-unit or MW basis? Typically cost is `c2*(pg*baseMVA)^2 + c1*(pg*baseMVA) + c0` or `c2*pg^2 + c1*pg + c0` where pg is in MW — clarify the convention in PowerModels JSON format.
+   - Bus types: type 3 = reference/slack, type 2 = PV, type 1 = PQ. How reference bus angle constraint works.
+   - Solver convergence: good initial points (flat start vm=1.0, va=0.0), IPOPT options like `tol`, `max_iter`, `linear_solver` (mumps vs ma27).
+   - Handling buses with no generators or no loads.
+   - `ncost` and cost model type in the data format (polynomial vs piecewise linear).
+
+7. **Installing IPOPT on Ubuntu without root compilation**: Best approaches — `pip install pyomo` then using `pyomo`'s built-in download, or `conda install -c conda-forge ipopt`, or using IDAES (`pip install idaes-pse && idaes get-extensions`), or `apt-get install coinor-libipopt-dev`. Which approach works in a bare Ubuntu 24.04 Docker container with only pip available?
+
+8. **Alternative approach using pandapower**: If Pyomo+IPOPT is too complex to set up, can `pandapower` solve ACOPF? Show the API: `pandapower.create_empty_network()`, adding buses/lines/generators/loads, `pandapower.runopp()` for optimal power flow. How to extract results. Does pandapower support quadratic cost functions? What solver does it use internally? Can it handle the full ACOPF formulation with all constraints?

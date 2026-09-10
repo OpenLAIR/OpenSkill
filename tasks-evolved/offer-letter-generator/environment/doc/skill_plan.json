@@ -1,0 +1,29 @@
+{
+  "task_summary": "Fill placeholders in a Word template with employee data from JSON, handle conditional relocation section, and save the result as a .docx file.",
+  "decomposition_rationale": "This task involves two distinct concerns: (1) robust text replacement in OOXML documents handling split runs, text boxes, headers/footers, and tables, and (2) conditional block processing for IF/END_IF markers. These are tightly coupled and share the same document traversal logic, so a single comprehensive skill is most appropriate to avoid fragmentation.",
+  "skills": [
+    {
+      "name": "evo-docx-template-filler",
+      "description": "A utility module for filling Word document templates (.docx) with data from JSON files. Handles split-run-aware text replacement to preserve formatting, traverses all document containers (body, tables, nested tables, headers, footers, text boxes), and processes conditional IF/END_IF blocks by keeping or removing content based on data values.",
+      "responsibility": "Load JSON data, iterate all document containers (paragraphs, tables, headers, footers, text boxes), replace {{PLACEHOLDER}} tokens with values using run-level manipulation to preserve formatting, process {{IF_*}}...{{END_IF_*}} conditional blocks (keep content but remove markers when condition is true, remove entire block when false), and save the output document.",
+      "key_functions": [
+        "load_json_data",
+        "iter_all_paragraphs",
+        "replace_text_in_paragraph",
+        "process_conditional_blocks",
+        "delete_paragraph",
+        "handle_textbox_paragraphs",
+        "apply_template_data"
+      ],
+      "dr_sections": [
+        "1. The OOXML Architecture and the \"Split Run\" Problem",
+        "2. Strategies for Replacing Text and Preserving Formatting",
+        "3. Comprehensive Iteration Across Document Containers",
+        "4. Advanced Pattern Matching and Conditional Deletion",
+        "5. Implementation: The Complete Production-Ready Code",
+        "6. Common Pitfalls and Limitations in python-docx 1.1.2"
+      ],
+      "depends_on": []
+    }
+  ]
+}

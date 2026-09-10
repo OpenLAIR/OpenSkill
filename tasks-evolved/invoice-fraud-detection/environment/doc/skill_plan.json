@@ -1,0 +1,71 @@
+{
+  "task_summary": "Extract invoice data from PDF, cross-reference against vendor and PO databases, detect fraud based on 5 priority-ordered criteria, and output flagged invoices as JSON.",
+  "decomposition_rationale": "The task has three distinct functional domains: (1) PDF text extraction and field parsing, (2) reference data ingestion from Excel/CSV, and (3) cross-reference fraud detection logic with fuzzy matching. Combining extraction and parsing into one skill, data loading into another, and the fraud detection pipeline into a third keeps responsibilities cleanly separated while maintaining manageable complexity.",
+  "skills": [
+    {
+      "name": "evo-pdf-invoice-parser",
+      "description": "Extracts text from each page of a PDF invoice file using pdfplumber and parses structured fields (vendor name, IBAN, PO number, invoice amount) using regular expressions. Handles whitespace normalization, locale-specific amount formats, and spaced IBANs.",
+      "responsibility": "PDF text extraction and regex-based field parsing for invoice data. Returns a list of parsed invoice records with page numbers.",
+      "key_functions": [
+        "extract_all_invoices",
+        "extract_invoice_fields_from_text",
+        "extract_iban",
+        "extract_invoice_amount",
+        "extract_po_number",
+        "extract_vendor_name"
+      ],
+      "dr_sections": [
+        "2. PDF Text Extraction Mechanisms: pdfplumber vs. pypdf",
+        "2.1 The pdfplumber API (Version 0.11.x)",
+        "2.1.2 Common Pitfalls with pdfplumber",
+        "3. Parsing Invoice Fields via Regular Expressions",
+        "3.1 Extracting International Bank Account Numbers (IBAN)",
+        "3.2 Parsing Monetary Amounts",
+        "3.3 Extracting Purchase Order (PO) Numbers",
+        "3.4 Vendor Name Extraction"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-reference-data-loader",
+      "description": "Loads and normalizes vendor master data from Excel (.xlsx) and purchase order data from CSV. Handles dtype management, whitespace stripping, and creates lookup dictionaries for downstream cross-referencing.",
+      "responsibility": "Ingesting, cleaning, and structuring reference data from vendors.xlsx and purchase_orders.csv into Python dictionaries suitable for lookup operations.",
+      "key_functions": [
+        "load_vendor_database",
+        "load_po_database"
+      ],
+      "dr_sections": [
+        "4. Ingesting Reference Data: pandas and openpyxl",
+        "4.1 Excel File Ingestion using openpyxl (openpyxl 3.1.5, pandas 2.3.3)",
+        "4.2 CSV File Ingestion and Cleaning"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-invoice-fraud-detector",
+      "description": "Implements the full fraud detection pipeline: fuzzy-matches vendor names against the vendor database using rapidfuzz, then applies the 5 priority-ordered fraud checks (Unknown Vendor, IBAN Mismatch, Invalid PO, Amount Mismatch, Vendor Mismatch). Outputs flagged invoices as a JSON report.",
+      "responsibility": "Fuzzy vendor matching, priority-ordered fraud rule evaluation, and JSON report generation. Orchestrates parsed invoice data against reference data to produce the final fraud_report.json.",
+      "key_functions": [
+        "find_vendor_match",
+        "check_invoice_fraud",
+        "run_fraud_detection_pipeline",
+        "save_fraud_report"
+      ],
+      "dr_sections": [
+        "5. Fuzzy String Matching with rapidfuzz (Version 3.14.x)",
+        "5.1 API Specifications and Import Paths",
+        "5.2 Scorer Selection for Corporate Entity Names",
+        "5.3 Execution and Return Types",
+        "6. Output Formatting and Serialization via JSON",
+        "7. Data Pipeline Architectural Patterns for Fraud Detection",
+        "7.1 \"First Matching Reason Wins\" Algorithm",
+        "7.2 Edge Cases and Tolerances",
+        "8. Common Pipeline Pitfalls"
+      ],
+      "depends_on": [
+        "evo-pdf-invoice-parser",
+        "evo-reference-data-loader"
+      ]
+    }
+  ]
+}

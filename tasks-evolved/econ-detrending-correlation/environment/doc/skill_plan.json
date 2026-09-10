@@ -1,0 +1,56 @@
+{
+  "task_summary": "Calculate Pearson correlation between HP-filtered cyclical components of real PCE and real PFI (1973-2024) using ERP tables and CPI data.",
+  "decomposition_rationale": "The task is a single end-to-end pipeline with tightly coupled steps (parse, deflate, filter, correlate). Splitting into more than 2 skills would create artificial boundaries. Two skills cleanly separate data ingestion/cleaning from the econometric analysis pipeline.",
+  "skills": [
+    {
+      "name": "evo-macro-data-ingestion",
+      "description": "Parses ERP .xls tables and FRED CPI .xlsx files, handles multi-row headers, extracts annual totals, computes partial-year averages from quarterly data, and produces clean annual CPI series.",
+      "responsibility": "All data reading, parsing, cleaning, and temporal aggregation from raw Excel files into clean pandas Series indexed by integer year.",
+      "key_functions": [
+        "parse_erp_annual_total",
+        "compute_partial_year_average",
+        "process_cpi_annual"
+      ],
+      "dr_sections": [
+        "1. Parsing and Processing the Economic Report of the President (ERP) Data",
+        "1.1 Understanding the `xlrd` 2.0.1 Limitation",
+        "1.2 Navigating ERP Table Structures",
+        "1.3 Handling Partial Year Data (2024)",
+        "2. Processing and Deflating with FRED Consumer Price Index Data",
+        "2.1 Structure of FRED CPI Downloads",
+        "2.2 Converting Monthly CPI to Annual Frequency",
+        "5.1 The `xlrd` 2.0.1 `.xlsx` Compatibility Trap",
+        "5.2 ERP Table Index Artifacts"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-macro-cycle-correlation",
+      "description": "Deflates nominal series to real values using CPI, applies log transformation and Hodrick-Prescott filter to extract cyclical components, and computes Pearson correlation between two cyclical series.",
+      "responsibility": "Deflation, log-transformation, HP filtering with lambda=100, temporal alignment (1973-2024), Pearson correlation computation, and formatted output.",
+      "key_functions": [
+        "deflate_nominal_to_real",
+        "extract_hp_cycle",
+        "compute_cycle_pearson_correlation",
+        "run_full_pipeline"
+      ],
+      "dr_sections": [
+        "2.3 The Deflation Formula",
+        "3. Cycle-Trend Decomposition Using the Hodrick-Prescott Filter",
+        "3.1 Theoretical Formulation",
+        "3.2 Implementation in `statsmodels` 0.14.4",
+        "3.3 Handling NaNs with the HP Filter",
+        "4. Statistical Alignment and Pearson Correlation Computation",
+        "4.1 Temporal Alignment (1973-2024 Inclusive)",
+        "4.2 Pearson Correlation Functions",
+        "5.3 `np.log` vs `np.log10`",
+        "5.4 Exclusive vs. Inclusive Indexing Off-By-One Errors",
+        "5.5 String Formatting and Float Rounding",
+        "6. Complete Working Code Implementation"
+      ],
+      "depends_on": [
+        "evo-macro-data-ingestion"
+      ]
+    }
+  ]
+}

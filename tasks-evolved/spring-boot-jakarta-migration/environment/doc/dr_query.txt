@@ -1,0 +1,53 @@
+Comprehensive guide for migrating a Java Spring Boot 2.7 microservice to Spring Boot 3.2 with Java 21, focusing on all specific code transformations needed. I need detailed information on each of the following areas with exact before/after code examples, correct import paths, and common pitfalls:
+
+1. **Maven POM dependency changes**: Exact groupId/artifactId/version coordinates for Spring Boot 3.2.x parent POM, spring-boot-starter-web, spring-boot-starter-security, spring-boot-starter-data-jpa, spring-boot-starter-validation, spring-boot-starter-test, and JJWT (io.jsonwebtoken) compatible versions for Java 21/Spring Boot 3.2. What is the correct maven.compiler.source/target or maven.compiler.release property for Java 21? What version of the maven-compiler-plugin is needed?
+
+2. **javax to jakarta namespace migration**: Complete list of all javax.* packages that must change to jakarta.* in Spring Boot 3.2. Specifically:
+   - javax.persistence.* → jakarta.persistence.* (all JPA annotations: @Entity, @Table, @Id, @GeneratedValue, @Column, @ManyToOne, @OneToMany, @Enumerated, etc.)
+   - javax.validation.* → jakarta.validation.* (@Valid, @NotNull, @NotBlank, @Email, @Size, @Pattern, etc.)
+   - javax.servlet.* → jakarta.servlet.* (HttpServletRequest, HttpServletResponse, FilterChain, Filter, etc.)
+   - Are there any javax packages that should NOT be migrated (e.g., javax.crypto)?
+
+3. **Spring Security 6 migration from Spring Security 5**: 
+   - WebSecurityConfigurerAdapter is removed — what is the exact replacement pattern using @Bean SecurityFilterChain? Show complete working example with JWT filter, role-based access control, CSRF configuration, session management, and authentication provider.
+   - authorizeRequests() → authorizeHttpRequests() — exact method signature differences
+   - antMatchers() → requestMatchers() — exact replacement
+   - .and() chaining removed — how to replace with lambda DSL
+   - SecurityContextHolder strategy changes
+   - How to properly register a custom OncePerRequestFilter for JWT authentication in Spring Security 6
+   - cors() and csrf() configuration changes
+
+4. **Hibernate 6 compatibility with Spring Boot 3.2**:
+   - What Hibernate version ships with Spring Boot 3.2?
+   - Changes to ID generation strategies (GenerationType.AUTO behavior change, need for @GenericGenerator replacements)
+   - PostgreSQL/H2 dialect class name changes (org.hibernate.dialect.H2Dialect → what?)
+   - spring.jpa.properties.hibernate.dialect — is it still needed in Spring Boot 3.2?
+   - Any changes to @Column columnDefinition, @Enumerated behavior?
+
+5. **RestTemplate to RestClient migration**:
+   - What is RestClient in Spring Boot 3.2? Exact import path (org.springframework.web.client.RestClient)?
+   - How to create a RestClient bean (RestClient.builder().baseUrl().build())
+   - GET, POST, PUT, DELETE examples with RestClient showing .get().uri().retrieve().body() pattern
+   - How to add headers, handle errors, and set timeouts
+   - RestClient vs WebClient — which is the direct RestTemplate replacement for synchronous calls?
+
+6. **application.properties / application.yml changes**:
+   - Any property name changes between Spring Boot 2.7 and 3.2?
+   - spring.jpa.hibernate.ddl-auto, spring.datasource.* — any changes?
+   - JWT/security related property changes?
+
+7. **Test migration**:
+   - Changes to @SpringBootTest, @WebMvcTest, @DataJpaTest for Spring Boot 3.2
+   - MockMvc and security test changes (SecurityMockMvcRequestPostProcessors)
+   - Any JUnit 5 specific changes needed?
+   - @AutoConfigureMockMvc changes
+   - How to test security endpoints with JWT in Spring Boot 3.2
+
+8. **Common pitfalls and breaking changes**:
+   - JJWT library version compatibility (0.9.x vs 0.11.x vs 0.12.x) — which works with Java 21? The io.jsonwebtoken:jjwt 0.9.1 uses javax.xml.bind which is removed in Java 21 — what is the migration path?
+   - Jackson configuration changes
+   - Bean definition overriding (spring.main.allow-bean-definition-overriding)
+   - Circular dependency handling changes
+   - PathPatternParser vs AntPathMatcher as default
+
+For each area, provide the EXACT before (Spring Boot 2.7/Java 8) and after (Spring Boot 3.2/Java 21) code with correct import statements, so I can build a comprehensive transformation reference.

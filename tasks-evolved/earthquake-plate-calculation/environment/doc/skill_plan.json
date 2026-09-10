@@ -1,0 +1,48 @@
+{
+  "task_summary": "Find the earthquake furthest from the Pacific plate boundary within the Pacific plate using GeoPandas projections, and output results to JSON.",
+  "decomposition_rationale": "This task involves three distinct concerns: (1) handling antimeridian-aware tectonic plate geometry loading and normalization, (2) earthquake data parsing and spatial filtering within the Pacific plate, and (3) projected distance computation and result formatting. However, these are tightly coupled in a single pipeline, so two skills suffice: one for antimeridian-safe geometry handling of plate data, and one for the full earthquake analysis pipeline.",
+  "skills": [
+    {
+      "name": "evo-geospatial-antimeridian-plates",
+      "description": "Load and process PB2002 tectonic plate boundaries and polygons with antimeridian-safe coordinate normalization (0-360 longitude shift) using Shapely 2.0 transform and GeoPandas 1.0 APIs.",
+      "responsibility": "Load PB2002 plate polygon and boundary GeoJSON files, filter by plate code, normalize coordinates across the antimeridian to 0-360 range, and return properly prepared GeoDataFrames and unified boundary geometries.",
+      "key_functions": [
+        "shift_antimeridian_coords",
+        "load_plate_polygon",
+        "load_plate_boundaries"
+      ],
+      "dr_sections": [
+        "1.1 The PB2002 Tectonic Plate Model",
+        "2.1 Theoretical Implications of the Antimeridian",
+        "2.2 Coordinate Normalization to 0°–360°",
+        "2.3 Pacific-Centric Projections (EPSG:3832)",
+        "2.4 GeoDataFrame `set_crs` vs `to_crs`",
+        "3.2 Vectorized GEOS ufuncs and the Array Interface"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-geospatial-earthquake-distance",
+      "description": "Parse USGS earthquake GeoJSON, spatially filter earthquakes within a tectonic plate, compute projected distances to plate boundaries using EPSG:3832, and output the furthest earthquake as formatted JSON.",
+      "responsibility": "Parse earthquake data, shift earthquake coordinates to 0-360 space, perform spatial join to filter earthquakes within the Pacific plate, reproject to EPSG:3832 for metric distance calculation, identify the earthquake with maximum distance from the plate boundary, format timestamps to ISO 8601, and serialize result to JSON.",
+      "key_functions": [
+        "parse_usgs_earthquakes",
+        "filter_earthquakes_within_plate",
+        "compute_boundary_distances",
+        "find_furthest_earthquake",
+        "format_and_export_result"
+      ],
+      "dr_sections": [
+        "1.2 USGS Earthquake GeoJSON Specification",
+        "3.1 Deprecation of the `op` Parameter",
+        "3.3 Broadcast Distance Computation",
+        "4.2 Python Source Code",
+        "5.1 ISO 8601 DateTime Conversion",
+        "5.2 Python Float Normalization and Serialization"
+      ],
+      "depends_on": [
+        "evo-geospatial-antimeridian-plates"
+      ]
+    }
+  ]
+}

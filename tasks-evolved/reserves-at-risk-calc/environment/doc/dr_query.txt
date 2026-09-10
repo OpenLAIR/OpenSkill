@@ -1,0 +1,27 @@
+How to use Python openpyxl library to read and write Excel .xlsx files with multiple sheets, preserving existing formulas and formatting, and how to write Excel formulas (not Python computations) into cells for financial calculations. Specifically I need to know:
+
+1. **Reading IMF commodity price Excel files with openpyxl**: How to read an Excel workbook with openpyxl, iterate through sheets and rows to find specific commodity data (e.g., gold price rows/columns), handle merged cells, and extract time series data from structured Excel spreadsheets. What are the correct API calls for `load_workbook()`, `ws.iter_rows()`, `ws.cell(row, column).value`, and how to handle date-formatted cells? Show working code examples.
+
+2. **Writing Excel formulas with openpyxl** (not computed values): How to write string formulas into cells using openpyxl such that Excel/LibreOffice evaluates them. For example, writing `=LN(B3/B2)*100` for log returns, `=STDEV(C3:C5)` for volatility, `=XLOOKUP(...)` and `=INDEX(...,MATCH(...))` formulas. What is the correct syntax — do you just assign a string starting with "=" to `cell.value`? Are there any pitfalls with formula locale or function name differences between Excel and LibreOffice Calc?
+
+3. **Financial calculations as Excel formulas**:
+   - Monthly log returns formula: `=LN(current/previous)*100` — correct Excel function name is `LN()` not `LOG()`?
+   - Rolling standard deviation for 3-month and 12-month volatility: `=STDEV()` vs `=STDEV.S()` vs `=STDEV.P()` — which is appropriate for financial volatility calculation? What is the standard convention?
+   - Annualized volatility from monthly volatility: Is the standard formula `monthly_vol * SQRT(12)`? How to express annualized volatility from a 3-month rolling standard deviation of monthly log returns?
+   - Gold price exposure calculation: What does "gold price exposure" mean in the context of Reserves at Risk (RaR) for central bank gold reserves? The formula is typically `gold_reserves_value * volatility`?
+   - Reserves at Risk (RaR): Standard formula — is it `gold_price_exposure / total_reserves` or `gold_reserves_value * annualized_volatility / total_reserves`?
+
+4. **openpyxl API for copying data between sheets**: How to read values from one sheet and write them (or formulas referencing them) into another sheet. How to handle the case where you need to populate an "Answer" sheet by referencing data computed in other sheets. Working code examples for `wb['SheetName']`, accessing cells, writing values and formulas.
+
+5. **Using LibreOffice command line to recalculate formulas**: Since the environment has LibreOffice installed, how to use `libreoffice --calc --headless --convert-to xlsx` or `libreoffice --headless --macro` to force formula recalculation in an .xlsx file, so that formula cells have computed values. What is the exact command-line syntax? Are there pitfalls with formula compatibility between openpyxl-written formulas and LibreOffice Calc?
+
+6. **openpyxl pitfalls and edge cases**:
+   - When loading a workbook with `data_only=True` vs `data_only=False` — what exactly is returned for formula cells in each mode?
+   - Does openpyxl preserve existing sheets, formatting, and formulas when saving a modified workbook?
+   - How to avoid corrupting an Excel file when adding data to existing sheets that already have formulas?
+   - Version-specific issues with openpyxl 3.1.5?
+   - How to handle Excel files where the first few rows are headers/metadata and data starts at a variable row?
+
+7. **pandas read_excel for initial data exploration**: How to use `pandas.read_excel()` with `sheet_name`, `header`, `skiprows`, `usecols` parameters to quickly inspect the structure of an unfamiliar Excel file. How to find which row contains "Gold" or specific commodity identifiers. Working code with `xlrd` engine vs `openpyxl` engine for .xlsx files.
+
+8. **XLOOKUP and INDEX+MATCH formula syntax in Excel/LibreOffice**: Exact formula syntax for `=XLOOKUP(lookup_value, lookup_array, return_array)` and `=INDEX(array, MATCH(lookup_value, lookup_array, 0))`. Does LibreOffice Calc support XLOOKUP? If not, what is the alternative? Are there compatibility issues when writing these formulas with openpyxl and opening in LibreOffice?

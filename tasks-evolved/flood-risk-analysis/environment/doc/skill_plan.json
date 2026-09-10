@@ -1,0 +1,26 @@
+{
+  "task_summary": "Detect USGS Michigan stations that experienced flooding (exceeded 90th percentile historical streamflow) during April 1-7, 2025, and output a CSV of station IDs with flood day counts.",
+  "decomposition_rationale": "This task is a focused, single-domain pipeline (USGS NWIS data retrieval + percentile-based flood detection + CSV output). All components are tightly coupled around the dataretrieval API workflow, so a single comprehensive skill avoids artificial fragmentation.",
+  "skills": [
+    {
+      "name": "evo-usgs-flood-detection",
+      "description": "Detects flooding events at USGS streamgages by comparing daily streamflow against historical 90th percentile thresholds using the dataretrieval package. Use when analyzing flood occurrences over a date range for a list of USGS station IDs.",
+      "responsibility": "End-to-end pipeline: parse station list file (preserving leading zeros), fetch daily values and historical statistics via dataretrieval.nwis, compute flood-day counts via percentile threshold comparison, and write filtered results to CSV.",
+      "key_functions": [
+        "load_stations",
+        "get_station_flood_thresholds",
+        "detect_floods_for_site",
+        "run_flood_detection_pipeline"
+      ],
+      "dr_sections": [
+        "USGS dataretrieval Python Package (v1.0.10) API",
+        "Defining \"Flooding\" from Streamflow Data",
+        "Reading a Stations List File",
+        "Pipeline Development and Automation Patterns",
+        "Comprehensive Code Implementation",
+        "Common Pitfalls and Troubleshooting"
+      ],
+      "depends_on": []
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+Research query:
+
+Comprehensive guide for building a Python utility module for multilingual video dubbing pipeline with the following specific components. I need exact API usage, working code examples, correct parameter values, and common pitfalls for each:
+
+1. **SRT file parsing with pysrt (v1.1.2)**: How to parse SRT files using `pysrt.open()`, access `start`, `end` timestamps and convert them to seconds (using `.ordinal` property or manual conversion from hours/minutes/seconds/milliseconds). Show the exact attribute names on `SubRipItem` objects. What are the gotchas with encoding, BOM characters, or single-segment SRT files?
+
+2. **Kokoro TTS library (v0.9.4) for Japanese and English speech synthesis**: 
+   - Exact API for `KPipeline(lang_code='j')` for Japanese and `KPipeline(lang_code='a')` for American English
+   - How to call the pipeline to generate audio: what method to call, what parameters control speed/rate, what is the return format (generator yielding what objects? sample rate?)
+   - How to adjust speech rate/speed to fit a specific time window duration — is there a `speed` parameter in the pipeline call?
+   - What is the default sample rate of Kokoro output audio?
+   - How to select different voices? What voices are available for Japanese?
+   - Working code example: generate a WAV file from Japanese text with controlled duration
+
+3. **edge-tts (v6.1.12) as alternative TTS**: Exact async API usage with `edge_tts.Communicate()`, how to set voice, rate adjustment (e.g., `"+50%"` or `"-20%"`), and save to file. What Japanese voices are available? How to use `communicate.save()` or stream. Working code example for generating Japanese speech with rate control.
+
+4. **FFmpeg command-line usage from Python for video dubbing**:
+   - How to extract original video without audio: `ffmpeg -i input.mp4 -an -c:v copy`
+   - How to mux new audio track with original video maintaining sync
+   - How to create a silent audio track of specific duration, then overlay/mix TTS segments at precise timestamps using the `adelay` filter or `amix` filter
+   - Exact ffmpeg filter_complex syntax for placing an audio segment at a precise start time (millisecond precision) using `adelay` filter — the correct format for adelay values (milliseconds vs samples, mono vs stereo)
+   - How to ensure final output is 48000 Hz mono audio: `-ar 48000 -ac 1`
+   - How to pad silence before/after audio segments
+   - Common pitfalls: adelay filter requiring delays for all channels, sample rate mismatches, container format issues
+
+5. **ITU-R BS.1770-4 loudness measurement and normalization in Python**:
+   - How to measure LUFS using `pyloudnorm` library or ffmpeg's `loudnorm` filter
+   - If pyloudnorm is not installed, how to use `ffmpeg -i file -af loudnorm=print_format=json -f null -` to measure integrated loudness
+   - How to normalize audio to a target LUFS (typically -23 LUFS for broadcast or -16 LUFS) — exact Python code or ffmpeg command
+   - How to measure LUFS of a WAV file using `scipy` and manual implementation if no dedicated library is available
+   - What is the correct LUFS target for "human level high quality" speech? (typically -16 to -23 LUFS)
+
+6. **Audio manipulation with scipy and soundfile**:
+   - `soundfile.read()` and `soundfile.write()` — exact signatures, how to specify sample rate, subtype
+   - How to resample audio from one sample rate to another using `scipy.signal.resample` or `torchaudio.transforms.Resample`
+   - How to time-stretch audio (change duration without changing pitch) using `torchaudio.functional.speed` or scipy-based methods
+   - How to concatenate silence padding with audio arrays using numpy
+
+7. **Speed/rate adjustment to fit TTS into time windows**:
+   - Using `torchaudio.functional.speed()` or `torchaudio.transforms.Speed` — exact API, parameters, does it change pitch?
+   - Using ffmpeg `atempo` filter for rate adjustment — range limitations (0.5 to 2.0, chaining for larger ratios)
+   - Using sox/pysox for tempo adjustment
+   - Best approach to adjust generated TTS audio to exactly fit a target duration window
+
+8. **Duration measurement**: How to get exact duration of an audio file in Python using soundfile (`len(data) / samplerate`), and how to get video duration using ffprobe (`ffprobe -v error -show_entries format=duration -of csv=p=0 input.mp4`).
+
+9. **JSON report generation**: Best practices for floating point precision in JSON output (rounding to 2 decimal places), calculating drift_sec as the difference between TTS segment end and window end.
+
+10. **Common integration pitfalls**: Sample rate mismatches between TTS output and final video, mono vs stereo channel issues, ffmpeg adelay filter precision, subprocess.run error handling, ensuring the final mp4 container has correct audio codec (AAC), timing precision for 10ms placement accuracy.

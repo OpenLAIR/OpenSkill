@@ -1,0 +1,44 @@
+{
+  "task_summary": "Detect an exoplanet transit period in a TESS light curve by filtering data, removing stellar variability, and running a transit periodogram.",
+  "decomposition_rationale": "The task naturally splits into light curve preprocessing/detrending and transit period detection; these are distinct concerns with reusable utilities.",
+  "skills": [
+    {
+      "name": "evo-tess-lightcurve-preprocessing",
+      "description": "Load TESS text-format light curves and prepare them for transit detection by applying quality flag filtering, NaN removal, outlier rejection, normalization, and Savitzky-Golay flattening to remove stellar variability.",
+      "responsibility": "Data ingestion, cleaning, and stellar-activity detrending to produce a flattened, normalized light curve ready for periodogram analysis.",
+      "key_functions": [
+        "load_tess_lightcurve",
+        "filter_quality_and_nans",
+        "remove_outliers",
+        "estimate_rotation_period",
+        "flatten_lightcurve"
+      ],
+      "dr_sections": [
+        "1. Introduction to TESS Light Curve Processing",
+        "2. Data Loading and Preprocessing with `lightkurve`",
+        "3. Stellar Variability Removal Techniques",
+        "6. Common Pitfalls and Mitigation Strategies"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-transit-period-detection",
+      "description": "Run BLS and/or Transit Least Squares (TLS) periodograms on a cleaned, flattened light curve to identify the exoplanet orbital period, and write the result to a properly formatted output file.",
+      "responsibility": "Periodogram-based transit period detection and formatted output of the best-fit period.",
+      "key_functions": [
+        "detect_transit_tls",
+        "detect_transit_bls",
+        "save_period"
+      ],
+      "dr_sections": [
+        "4. Transit Detection with Box Least Squares (BLS)",
+        "5. Advanced Period Detection with Transit Least Squares (TLS)",
+        "6. Common Pitfalls and Mitigation Strategies",
+        "8. Output Formats"
+      ],
+      "depends_on": [
+        "evo-tess-lightcurve-preprocessing"
+      ]
+    }
+  ]
+}

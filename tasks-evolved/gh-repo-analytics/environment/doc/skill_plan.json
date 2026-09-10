@@ -1,0 +1,47 @@
+{
+  "task_summary": "Fetch PR and issue data from cli/cli for December 2024 using gh CLI, compute metrics, and output a structured report.json",
+  "decomposition_rationale": "The task has two distinct data domains (PRs and issues) but they share the same data fetching mechanism and output format. I decompose into: (1) a foundational skill for fetching GitHub data via gh CLI subprocess calls, and (2) a skill for computing metrics and assembling the final report. This keeps data I/O separate from business logic.",
+  "skills": [
+    {
+      "name": "evo-gh-data-fetcher",
+      "description": "Fetches pull request and issue data from a GitHub repository using the gh CLI tool via Python subprocess. Handles JSON output parsing, pagination limits, date range filtering, and error handling.",
+      "responsibility": "Execute gh CLI commands to retrieve PR and issue data with proper flags (--search, --state, --json, --limit), parse JSON output, and return structured Python lists of dictionaries.",
+      "key_functions": [
+        "fetch_prs",
+        "fetch_issues",
+        "run_gh_command",
+        "parse_gh_timestamp"
+      ],
+      "dr_sections": [
+        "1. The `gh` CLI Commands for Listing and Filtering",
+        "2. Filtering Merged vs. Closed PRs",
+        "3. Date and Time Parsing in Python",
+        "4. Label Filtering for Bug Issues",
+        "5. `gh` CLI Search Qualifiers",
+        "6. Python Subprocess Patterns for Calling `gh`",
+        "7. Common Pitfalls and Operational Considerations"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-gh-report-generator",
+      "description": "Computes community pulse metrics from raw PR and issue data and writes a structured report.json file. Calculates PR counts by state, average time-to-merge, top contributor, bug issue counts, and resolved bugs.",
+      "responsibility": "Process fetched PR/issue data to compute all required metrics (total/merged/closed PRs, avg merge days, top contributor, total issues, bug count, resolved bugs) and serialize results to /app/report.json.",
+      "key_functions": [
+        "compute_pr_metrics",
+        "compute_issue_metrics",
+        "identify_top_contributor",
+        "generate_report"
+      ],
+      "dr_sections": [
+        "2. Filtering Merged vs. Closed PRs",
+        "3. Date and Time Parsing in Python",
+        "4. Label Filtering for Bug Issues",
+        "8. Working End-to-End Python Code Example"
+      ],
+      "depends_on": [
+        "evo-gh-data-fetcher"
+      ]
+    }
+  ]
+}

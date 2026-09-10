@@ -1,0 +1,26 @@
+Research query:
+
+How to build a Python utility module for parsing structured dialogue scripts into JSON graph format and Graphviz DOT visualization. I need comprehensive, working code examples and exact API details for the following:
+
+1. **Text parsing patterns for dialogue scripts**: Best practices for writing a Python parser that processes a custom dialogue script format with sections delimited by `[NodeName]`, speaker lines like `Speaker: dialogue text -> TargetNode`, and numbered choice lines like `1. Choice text. -> TargetNode` or `1. [Tag] Choice text -> TargetNode`. How to use regex to extract node IDs, speaker names, dialogue text, choice text (with optional bracketed tags), and arrow targets. Provide exact `re` module patterns with named groups for each line type. What are common pitfalls when parsing multi-line text with regex in Python (e.g., greedy vs lazy matching, handling edge cases with special characters in dialogue text, lines with `->` arrows that may or may not have trailing whitespace)?
+
+2. **Graph data structure for dialogue trees**: How to represent a dialogue graph as `{"nodes": [{"id": str, "text": str, "speaker": str, "type": str}], "edges": [{"from": str, "to": str, "text": str}]}` in Python dictionaries. What is the correct way to differentiate between node types "line" (a single speaker line with an arrow) vs "choice" (a node containing numbered options)? How should terminal/leaf nodes be handled (e.g., "End" nodes with no outgoing edges)? How to validate graph constraints: (a) all nodes reachable from the first node (BFS/DFS reachability), (b) all edge targets must reference existing nodes (except possibly the last node), (c) multiple paths can lead to an "End" node.
+
+3. **Python `graphviz` library version 0.20.3 — exact API for DOT file generation**: Complete working code examples using `import graphviz`. What are the exact function signatures for `graphviz.Digraph()`, `Digraph.node(name, label, **attrs)`, `Digraph.edge(tail_name, head_name, label, **attrs)`, and `Digraph.save(filename, directory)`? How to output a `.dot` source file (not rendered PNG) to a specific path like `/app/dialogue.dot`? What is the difference between `Digraph.render()` vs `Digraph.save()` vs writing `Digraph.source` to a file? Show the exact method to save only the DOT source text without rendering. What are common pitfalls with `graphviz` 0.20.3 — any deprecated methods, changes from earlier versions, or issues with special characters in node labels or edge labels that need escaping?
+
+4. **JSON output in Python**: Best practices for writing a dictionary to a JSON file with `json.dump()` — correct parameters for indentation (`indent=2` or `indent=4`), `ensure_ascii=False` for preserving special characters, and proper file encoding (`utf-8`). Any pitfalls with JSON serialization of the graph structure?
+
+5. **Graph validation algorithms in Python**: How to implement BFS/DFS reachability check from a start node using only standard library (`collections.deque`). How to detect unreachable nodes and missing edge targets. Working code pattern for validating that all nodes in a node list are reachable from `nodes[0]` given an edge list.
+
+6. **Edge cases and pitfalls for dialogue parsing**:
+   - Nodes that are referenced as targets but have no corresponding `[NodeName]` section (implicit terminal nodes)
+   - Nodes with only choices vs nodes with only a speaker line
+   - Choice lines with bracketed tags like `[Lie]`, `[Attack]`, `[Sleight of Hand]` — how to handle these (should the tag be included in the choice text or stripped?)
+   - Lines where the arrow `->` target contains spaces or special formatting
+   - Circular references in the graph (e.g., a choice that leads back to a previous node)
+   - How to handle the "text" field for choice nodes vs line nodes (should choice nodes have text from the choices, or from the section header?)
+   - How to determine what goes in the edge "text" field for choice edges vs line edges
+
+7. **Python module structure for reusable skills**: How to structure a `utils.py` module with functions like `parse_script(text: str) -> dict`, `validate_graph(graph: dict) -> bool`, `generate_dot(graph: dict, output_path: str)`, and `save_json(graph: dict, output_path: str)` so they can be imported by another script. Correct use of `__all__`, type hints, and docstrings.
+
+Please provide complete, tested code snippets for each of these areas with correct import statements.

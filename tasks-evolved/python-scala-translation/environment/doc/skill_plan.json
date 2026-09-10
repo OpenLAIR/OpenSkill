@@ -1,0 +1,63 @@
+{
+  "task_summary": "Translate a Python tokenizer module (Tokenizer.py) to idiomatic Scala 2.13, preserving all classes, functions, and behavior while following Scala conventions.",
+  "decomposition_rationale": "The translation task involves three distinct concerns: (1) understanding the Python source structure and mapping its constructs to Scala idioms, (2) handling Scala-specific type system patterns (ADTs, generics, variance, error handling), and (3) producing compilable, well-structured Scala code with proper naming conventions and standard library usage. These are tightly coupled enough to warrant 2 skills: one for Python-to-Scala pattern mapping and one for the actual code generation.",
+  "skills": [
+    {
+      "name": "evo-scala-idiom-mapping",
+      "description": "Maps Python language constructs to idiomatic Scala 2.13 equivalents. Covers enum-to-sealed-trait ADTs, dataclass-to-case-class, ABC-to-trait, Protocol-to-trait, generic type variables with variance, Union types, Optional/Option, error handling (Try/Either/Option), naming convention conversion (snake_case to camelCase), collections mapping, datetime/BigDecimal handling, and companion object patterns.",
+      "responsibility": "Provide reference mappings and utility functions for converting Python constructs (enums, dataclasses, ABCs, protocols, generics, type variables, overloads, generators, comprehensions, exceptions, naming conventions) to their idiomatic Scala 2.13 equivalents.",
+      "key_functions": [
+        "snake_to_camel",
+        "map_python_type_to_scala",
+        "map_enum_to_sealed_trait",
+        "map_dataclass_to_case_class",
+        "map_abc_to_trait",
+        "map_protocol_to_trait",
+        "map_collection_type",
+        "map_error_handling_pattern",
+        "map_generic_variance"
+      ],
+      "dr_sections": [
+        "1. Scala 2.13 Enum/ADT Representation",
+        "2. Scala Case Classes vs Python Dataclasses",
+        "3. Scala Traits and Abstract Classes for Python ABC",
+        "4. Pattern Matching and Type Matching in Scala 2.13",
+        "5. Error Handling in Scala 2.13",
+        "6. Scala Naming Conventions",
+        "7. Scala 2.13 Collections and Standard Library Equivalents",
+        "8. Scala Generics and Type System for Python Generic[T]",
+        "9. Scala Datetime Handling",
+        "10. Scala BigDecimal for Python's decimal.Decimal",
+        "14. Common Pitfalls When Translating Python to Scala 2.13"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-scala-tokenizer-generator",
+      "description": "Generates the complete Scala 2.13 Tokenizer.scala file by translating all Python classes (TokenType, Token, BaseTokenizer, StringTokenizer, NumericTokenizer, TemporalTokenizer, UniversalTokenizer, WhitespaceTokenizer, TokenizerBuilder) and functions (tokenize, tokenizeBatch, toToken, withMetadata) using idiomatic Scala patterns including sealed traits, case classes, companion objects, Option/Try/Either error handling, and functional builder patterns.",
+      "responsibility": "Produce the final compilable Scala 2.13 source file at /root/Tokenizer.scala with correct package structure, all required classes/traits/objects, proper imports, JSON handling via standard library, and method implementations that match Python behavior.",
+      "key_functions": [
+        "generate_token_type_adt",
+        "generate_token_case_class",
+        "generate_base_tokenizer_trait",
+        "generate_specialized_tokenizers",
+        "generate_tokenizer_builder",
+        "generate_top_level_functions",
+        "generate_json_serialization",
+        "assemble_scala_file"
+      ],
+      "dr_sections": [
+        "1. Scala 2.13 Enum/ADT Representation",
+        "2. Scala Case Classes vs Python Dataclasses",
+        "3. Scala Traits and Abstract Classes for Python ABC",
+        "5. Error Handling in Scala 2.13",
+        "11. Scala Companion Objects and Factory Patterns",
+        "12. Scala JSON Handling with Standard Library Only",
+        "13. Scala 2.13 Compilation"
+      ],
+      "depends_on": [
+        "evo-scala-idiom-mapping"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+Research query for building a Python utility module for pedestrian counting in surveillance videos using available APIs (OpenAI vision, Gemini vision) and installed packages (moviepy 2.1.2, openpyxl 3.1.5, pandas 2.3.3, google-genai 1.59.0, openai 2.15.0):
+
+---
+
+I need comprehensive documentation and working code examples for building a Python skill module that: (1) extracts frames from surveillance videos, (2) counts unique pedestrians across frames using vision LLM APIs, and (3) writes results to Excel. Specifically:
+
+**1. MoviePy 2.1.2 — Video Frame Extraction API**
+- Exact API for opening a video file and iterating/extracting frames in MoviePy 2.1.2 (NOT 1.x). What changed between MoviePy 1.x and 2.x? Specifically: `VideoFileClip` constructor, `.iter_frames()`, `.get_frame(t)`, `.duration`, `.fps` attributes — are these still valid in 2.1.2 or renamed/deprecated?
+- Working code example to extract frames at a specific interval (e.g., every N seconds) from an MP4 file using MoviePy 2.1.2, returning numpy arrays or saving as images.
+- How to properly close/release video resources in MoviePy 2.1.2 to avoid memory leaks.
+- How to convert a MoviePy frame (numpy array) to a base64-encoded JPEG or PNG string suitable for sending to a vision API.
+
+**2. Using OpenAI Vision API (openai 2.15.0) for Pedestrian Counting**
+- Exact API for sending images (base64 encoded) to GPT-4o or GPT-4-vision via the `openai` Python SDK version 2.15.0. Show the correct `client.chat.completions.create()` call with image content parts.
+- Correct message format for multi-image input — can I send multiple frames in a single API call? What's the maximum number of images per request?
+- How to structure a prompt that asks the model to count unique pedestrians across multiple frames, accounting for the same person appearing in different frames.
+- Token limits and image resolution considerations — should frames be resized before sending?
+
+**3. Using Google Gemini API (google-genai 1.59.0) for Pedestrian Counting**
+- Exact API for sending images to Gemini models via `google-genai` SDK version 1.59.0. Show correct imports (`from google import genai`?), client initialization with API key, and the `generate_content` call with image inputs.
+- How to pass multiple images (frames) in a single Gemini API call. What's the correct format — PIL Images, bytes, base64 strings?
+- Model names available (gemini-2.0-flash, gemini-1.5-pro, etc.) and which support multi-image input.
+- Rate limits and best practices for batching frames.
+
+**4. Unique Pedestrian Counting Strategy**
+- Best practices for using vision LLMs to count unique pedestrians across video frames: Should I sample key frames at intervals? How many frames should I sample from a short surveillance clip? Should I send all sampled frames in one API call or use multiple calls with aggregation?
+- Prompt engineering techniques for getting accurate pedestrian counts from surveillance footage — asking for total unique individuals, providing context about camera angle, handling occlusion and re-identification.
+- Common failure modes: overcounting due to same person in multiple frames, undercounting due to occlusion, miscounting non-pedestrian objects.
+
+**5. Writing Results to Excel with openpyxl 3.1.5**
+- Working code to create an Excel file with a single sheet named "results", with columns "filename" and "number", using openpyxl directly. Include proper header row and data rows.
+- Alternative: using pandas DataFrame.to_excel() with openpyxl engine — exact parameters to avoid creating extra index columns, set sheet name, etc. Specifically: `index=False`, `sheet_name="results"`.
+- How to ensure no extra sheets are created (e.g., avoiding default "Sheet" sheet when using openpyxl Workbook directly).
+
+**6. File Discovery Pattern**
+- Python pattern using `os.listdir` or `glob` to find all video files (mp4, avi, mov, etc.) in a directory, sorted consistently for deterministic output order.
+
+**7. Critical Pitfalls**
+- MoviePy 2.x breaking changes from 1.x that would cause import errors or attribute errors.
+- google-genai 1.59.0 vs older google-generativeai package — are these the same? What are the correct import paths?
+- openai 2.15.0 — any deprecated patterns for vision/image API calls?
+- Memory management when processing multiple videos with large frame counts.
+- Ensuring integer output for pedestrian counts in the Excel file (not float, not string).

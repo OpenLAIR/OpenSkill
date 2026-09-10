@@ -1,0 +1,59 @@
+{
+  "task_summary": "Read problem.json, execute 5 JAX computation tasks (row mean, element-wise square, logistic loss gradient, RNN scan, JIT MLP), and save outputs as .npy files.",
+  "decomposition_rationale": "The task involves a straightforward pipeline: load data, compute with JAX, save results. All 5 problems share the same I/O pattern but differ in JAX computation. A two-skill decomposition separates data I/O concerns from the JAX computation logic, keeping the solution clean without over-decomposing.",
+  "skills": [
+    {
+      "name": "evo-jax-io",
+      "description": "Handles loading problem.json, reading .npy/.npz input files into JAX arrays, and saving JAX array results back to .npy files with proper numpy conversion.",
+      "responsibility": "All file I/O: parsing problem.json, loading numpy/npz data files and converting to JAX arrays, and safely serializing JAX arrays to .npy output files using np.asarray().",
+      "key_functions": [
+        "load_problem_json",
+        "load_input_data",
+        "save_jax_array"
+      ],
+      "dr_sections": [
+        "1. Data Loading Patterns for JAX Workflows",
+        "1.1 Loading `.npy` and `.npz` Files",
+        "1.2 Dtype Conversion Pitfalls and Default Precision",
+        "7. Data Serialization: Saving JAX Arrays to NumPy Files",
+        "7.1 Direct Application of `np.save`",
+        "7.2 The Correct Serialization Pattern"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-jax-compute",
+      "description": "Implements all five JAX computation tasks: row-wise mean reduction, element-wise squaring, logistic loss gradient via jax.grad, RNN forward pass via jax.lax.scan, and JIT-compiled 2-layer MLP forward pass.",
+      "responsibility": "All JAX computation logic for the five problem tasks, dispatching by problem ID and returning JAX arrays as results.",
+      "key_functions": [
+        "compute_basic_reduce",
+        "compute_map_square",
+        "compute_grad_logistic",
+        "compute_scan_rnn",
+        "compute_jit_mlp",
+        "dispatch_task"
+      ],
+      "dr_sections": [
+        "2. Axis-wise Reductions: `jnp.mean`",
+        "2.2 Exact Behavior for 2D Arrays",
+        "3. Vectorized Element-wise Squaring: `jnp.square`",
+        "3.1 `jnp.square` vs `x**2` vs `jax.vmap`",
+        "4. Automatic Differentiation with `jax.grad`: Scalar Loss",
+        "4.1 Signature and Defaults of `jax.grad`",
+        "4.2 Differentiating Logistic Loss",
+        "5. Sequence Processing with `jax.lax.scan` for RNNs",
+        "5.1 Exact Signature of `jax.lax.scan`",
+        "5.2 Return Values and Array Stacking",
+        "6. Just-In-Time Compilation with `jax.jit`: 2-Layer MLP",
+        "6.1 Implementing ReLU and MLP Math",
+        "6.2 Does `jax.jit` Affect Numerical Results?",
+        "8. Common Pitfalls and Migration Notes in JAX 0.8.x",
+        "8.3 `jnp.logaddexp` with Scalar Zero",
+        "8.4 `jax.lax.scan` Signature Integrity"
+      ],
+      "depends_on": [
+        "evo-jax-io"
+      ]
+    }
+  ]
+}

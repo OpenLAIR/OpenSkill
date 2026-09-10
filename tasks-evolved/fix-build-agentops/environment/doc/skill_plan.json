@@ -1,0 +1,64 @@
+{
+  "task_summary": "Diagnose and fix Python build failures in a BugSwarm-reproduced AgentOps-AI/agentops repository by analyzing errors, generating diff patches, and applying them.",
+  "decomposition_rationale": "The task has three distinct phases: (1) diagnosing the build failure by analyzing code, logs, and configuration, (2) generating correct unified diff patches, and (3) applying those patches. Diagnosis and patch generation are the two core competencies, while patch application is straightforward enough to fold into the patch generation skill.",
+  "skills": [
+    {
+      "name": "evo-build-diagnosis",
+      "description": "Analyzes a Python repository to identify the root causes of build failures, including syntax errors, import errors, test failures, and build configuration issues. Writes a structured analysis to a findings file.",
+      "responsibility": "Scan repository files for syntax errors (via ast.parse/compile), parse pytest output and CI logs, check build configuration files (pyproject.toml, setup.py, setup.cfg), identify missing dependencies, and produce a structured diagnosis report in failed_reasons.txt.",
+      "key_functions": [
+        "find_repo_path",
+        "parse_syntax_errors",
+        "run_build_and_capture_errors",
+        "run_tests_and_capture_failures",
+        "analyze_build_config",
+        "check_import_availability",
+        "write_diagnosis_report"
+      ],
+      "dr_sections": [
+        "1. Analyzing Python Build Failures",
+        "1.1 Python Syntax Errors and Import Errors",
+        "1.2 Parsing Pytest Test Failures",
+        "1.3 Build Configuration Errors: setup.py, pyproject.toml, and setup.cfg",
+        "1.4 CI/CD Configuration Issues",
+        "1.5 Type Checking and Linting Errors",
+        "3. Python AST and Code Analysis for Error Detection",
+        "3.1 Syntax Validation via `ast.parse()`",
+        "3.2 Navigating AST Coordinate Systems: Byte Offsets vs. Characters",
+        "3.3 Dynamic Extraction of Missing Imports",
+        "4. Build System Specifics: The AgentOps Case Study",
+        "4.2 Build Toolchains and Dependency Resolution",
+        "4.3 Parsing `pyproject.toml` Programmatically",
+        "5. The BugSwarm Reproduction Framework",
+        "5.2 Directory Structures and Reproduction Scripts",
+        "6.1 Encoding Issues and Unicode Escapes",
+        "6.2 Python Version Compatibility Constraints"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-patch-generate-apply",
+      "description": "Generates git-compatible unified diff patches from original and modified file contents, writes them to numbered patch files, and applies them to the repository using git apply or GNU patch.",
+      "responsibility": "Generate properly formatted unified diffs (with a/b prefixes, correct context lines, POSIX newline handling), write patch_{i}.diff files, and apply patches using git apply with appropriate flags and fallback strategies.",
+      "key_functions": [
+        "generate_unified_diff",
+        "handle_no_newline_at_eof",
+        "write_patch_file",
+        "apply_patch",
+        "validate_patch_applied",
+        "apply_all_patches"
+      ],
+      "dr_sections": [
+        "2. Generating and Applying Diffs Programmatically in Python",
+        "2.1 Generating Unified Diffs with `difflib`",
+        "2.2 The Pitfall of Missing Newlines at EOF",
+        "2.3 Applying Diffs: `git apply` vs. GNU `patch`",
+        "6.3 Patch Paths and the `a/ b/` Prefix Convention",
+        "5.3 Automating the Validation Loop"
+      ],
+      "depends_on": [
+        "evo-build-diagnosis"
+      ]
+    }
+  ]
+}

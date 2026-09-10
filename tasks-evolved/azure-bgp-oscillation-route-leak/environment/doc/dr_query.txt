@@ -1,0 +1,25 @@
+BGP route oscillation detection and valley-free routing violation (route leak) detection algorithms in Python: I need to build a reusable Python utility module that performs the following tasks on a BGP AS topology represented as JSON data. Please provide detailed explanations, algorithms, working Python code examples, and pitfalls for each of the following:
+
+1. **BGP Route Oscillation Detection via Routing Preference Cycles**: Given a set of ASes with routing preferences (e.g., AS 65002 prefers routes via AS 65003, AS 65003 prefers routes via AS 65002), how do you detect oscillation? Specifically:
+   - What is the formal definition of a BGP route oscillation caused by conflicting routing preferences forming a cycle?
+   - How to detect cycles in a directed "preference graph" where each AS has a "prefer_via" neighbor? Provide a Python implementation using cycle detection (e.g., DFS-based or Floyd's algorithm) on the preference graph.
+   - What constitutes the "oscillation_cycle" and "affected_ases" in the output? Is oscillation_cycle just the list of ASes forming the preference cycle, and affected_ases the same set?
+   - When preferences.json contains {65002: {"prefer_via": 65003}, 65003: {"prefer_via": 65002}}, the cycle is [65002, 65003]. Confirm this understanding.
+
+2. **BGP Valley-Free Routing and Route Leak Detection**: Given AS relationships (provider, customer, peer) and route advertisement events:
+   - What is the valley-free routing principle? Specifically: a route learned from a provider or peer should only be advertised to customers (not to other providers or peers). A route learned from a customer can be advertised to anyone.
+   - How to detect a route leak: if an AS advertises a route learned from a provider to a peer, or from a peer to another peer/provider, that is a valley-free violation (route leak).
+   - Given route_events.json entries with fields {advertiser_asn, source_asn, destination_asn, source_type, destination_type}, how to check each event: if source_type is "provider" and destination_type is "peer" → route leak. If source_type is "peer" and destination_type is "peer" or "provider" → route leak. Provide a Python function that classifies each route event.
+   - What is the standard format for reporting route leaks (leaker_as, source_as, destination_as, source_type, destination_type)?
+
+3. **Solution Evaluation Logic**: Given a list of possible solutions (text descriptions), how to programmatically evaluate whether each solution resolves oscillation and/or route leaks:
+   - **Oscillation resolution**: A solution resolves oscillation if it breaks the routing preference cycle. Which types of solutions break preference cycles? Examples: "Update routing preference on hub1 to stop preferring routes via hub2" (breaks the cycle), "Configure export policy to filter routes" (may or may not break the cycle), "disable hub peering" (removes the peering link, breaking the cycle path).
+   - **Route leak resolution**: A solution resolves route leaks if it prevents the offending AS from advertising provider-learned routes to peers. Examples: "Configure export policy on vhubvnet1 to block announcing provider routes to peer" (resolves leak), "Enable ingress filtering on vhubvnet2 to reject routes with provider ASN in AS_PATH from peer" (resolves leak), "Configure route policy to enforce no-export of provider routes to peer by bgp community" (resolves leak), "Enable Virtual WAN hub routing intent to enforce all hub-to-hub routes go through Virtual WAN only" (resolves leak by changing routing architecture), "disable hub peering between vhubvnet1 and vhubvnet2" (resolves leak by removing the peer link).
+   - Solutions that are purely operational (restart BGP, change timers, enable dampening, set max-prefix limits, wait for convergence, enable RPKI, enable ECMP, apply prefix filters, configure UDR overrides, set route preference hierarchy, configure AS-PATH/MED selection, deploy Route Map) do NOT resolve oscillation or route leaks.
+   - Provide a Python pattern for keyword/pattern-matching on solution descriptions to classify each solution's effectiveness. What are the key phrases to match for each category?
+
+4. **Data Loading Patterns**: Best practices for loading JSON files in Python from a fixed directory path (/app/data/), handling encoding, and structuring the data pipeline from raw JSON → detection → evaluation → output JSON file.
+
+5. **Output Format**: The exact JSON structure expected, including field types (booleans, lists of integers, lists of objects, nested dicts). Confirm that oscillation_cycle should contain only the ASNs in the cycle, affected_ases is the same set, route_leaks is a list of leak event objects, and solution_results maps solution description strings to {oscillation_resolved: bool, route_leak_resolved: bool}.
+
+6. **Common Pitfalls**: Integer vs string ASN keys in JSON, ensuring deterministic ordering of cycle detection output, handling the case where no oscillation or no leaks are detected (empty lists, false booleans).

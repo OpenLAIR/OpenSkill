@@ -1,0 +1,56 @@
+Speaker diarization pipeline in Python using speechbrain and openai-whisper with pyannote.core for RTTM output: complete working code examples and API reference
+
+I need detailed information on building a complete speaker diarization and transcription pipeline using the specific library versions installed: speechbrain 1.0.3, openai-whisper 20231117, pyannote.core 5.0.0, silero-vad 6.2.0, torch 2.2.0 (CPU), on Python 3.11. Please cover ALL of the following:
+
+1. **Audio extraction from MP4 using ffmpeg**: The exact ffmpeg command to extract audio from an MP4 file to WAV format (16kHz mono) suitable for diarization. What sample rate and format do speechbrain models expect?
+
+2. **Silero VAD (version 6.2.0) API**: 
+   - Exact import path and function signatures for loading and running Silero VAD v6.2.0
+   - How to get speech timestamps (start/end in seconds) from an audio file
+   - The correct API for silero-vad 6.2.0 specifically — I know the API changed between versions. Is it `silero_vad.load_silero_vad()` or `torch.hub.load()`? What are the correct function names for `get_speech_timestamps`, `read_audio`, `collect_chunks`?
+   - Parameters: threshold, min_speech_duration_ms, min_silence_duration_ms — what are good defaults for diarization?
+
+3. **SpeechBrain 1.0.3 Speaker Embedding Extraction**:
+   - Exact import: `from speechbrain.inference.speaker import EncoderClassifier` — is this correct for v1.0.3 or has it moved?
+   - `EncoderClassifier.from_hparams(source='speechbrain/spkrec-ecapa-voxceleb', savedir='/tmp/speechbrain_encoder')` — complete working example of loading and extracting embeddings from audio segments
+   - What is the exact method signature for `encode_batch()`? What tensor shape does it expect (batch, time)? What sample rate? Does it need normalization?
+   - How to extract embeddings for individual speech segments (cropped audio chunks)?
+
+4. **SpeechBrain VAD (speechbrain/vad-crdnn-libriparty)**:
+   - `from speechbrain.inference.VAD import VAD` — exact API for v1.0.3
+   - How to get speech boundaries from this model. What methods: `get_speech_segments()`, `get_speech_prob_file()`?
+   - Output format and how to convert to time boundaries
+
+5. **Clustering speaker embeddings**:
+   - Using scipy or numpy for agglomerative clustering (scipy.cluster.hierarchy) to cluster ECAPA-TDNN embeddings into speaker clusters
+   - Cosine distance vs euclidean for speaker embeddings
+   - How to determine optimal number of speakers automatically (threshold-based cutting of dendrogram)
+   - Working code example with scipy.cluster.hierarchy.linkage and fcluster
+
+6. **OpenAI Whisper (version 20231117) transcription API**:
+   - `import whisper; model = whisper.load_model('large-v3')` — exact transcribe API
+   - `whisper.transcribe()` or `model.transcribe()` — what parameters? `language`, `word_timestamps`, `verbose`
+   - How to get word-level or segment-level timestamps from whisper output
+   - The exact structure of the result dict: `result['segments']` — what keys does each segment have? (`start`, `end`, `text`, `words`?)
+   - Can you transcribe a numpy array directly or does it need a file path?
+
+7. **RTTM file format specification**:
+   - Exact column format: `SPEAKER <file_id> 1 <start_time> <duration> <NA> <NA> <speaker_label> <NA> <NA>`
+   - How to write this using pyannote.core Annotation objects — `pyannote.core.Annotation`, `pyannote.core.Segment`
+   - Does pyannote.core 5.0.0 have a built-in RTTM writer? What is the method — `annotation.write_rttm()`? Or do I need `pyannote.database.util.load_rttm`?
+   - Speaker label format: `spk00`, `spk01` etc.
+
+8. **ASS (Advanced SubStation Alpha) subtitle format**:
+   - Complete header/preamble needed for a valid .ass file
+   - The exact format for Dialogue lines: `Dialogue: 0,H:MM:SS.cc,H:MM:SS.cc,Default,,0,0,0,,Text`
+   - Time format in ASS: `H:MM:SS.CC` (centiseconds) — how to convert float seconds to this format
+   - How to include speaker labels in the text field like `SPEAKER_00: Hello there.`
+
+9. **Common pitfalls**:
+   - speechbrain 1.0.3 deprecation warnings or API changes from older tutorials
+   - silero-vad 6.2.0 API breaking changes from earlier versions
+   - whisper model loading on CPU — any issues with large-v3 on CPU?
+   - Memory management when processing long audio files segment by segment
+   - pyannote.core Annotation/Segment immutability or gotchas
+
+10. **Aligning whisper transcription segments with diarization speaker labels**: strategies for mapping whisper transcript segments to diarized speaker segments (overlap-based assignment).

@@ -1,0 +1,86 @@
+{
+  "task_summary": "Solve a DC-OPF with spinning reserve co-optimization from MATPOWER JSON data and produce a structured dispatch report",
+  "decomposition_rationale": "The task naturally separates into three concerns: (1) parsing MATPOWER JSON and building network matrices, (2) formulating and solving the DC-OPF with reserves, and (3) post-processing results into the required report format. Separating parsing from optimization allows reuse and clear debugging boundaries.",
+  "skills": [
+    {
+      "name": "evo-grid-matpower-parser",
+      "description": "Parses MATPOWER JSON network data into structured Python objects, builds bus/gen/branch/gencost arrays with proper indexing, filters inactive components, constructs the bus susceptance matrix (Bbus), PTDF matrix, and generator-to-bus mapping matrix.",
+      "responsibility": "All data ingestion from MATPOWER JSON: external-to-internal bus ID mapping, status filtering for generators and branches, susceptance matrix construction, PTDF computation, incidence matrices, and cost coefficient extraction with correct polynomial ordering.",
+      "key_functions": [
+        "load_matpower_json",
+        "build_bus_index_map",
+        "filter_active_components",
+        "build_susceptance_matrix",
+        "compute_ptdf",
+        "build_gen_bus_matrix",
+        "extract_gencost_coefficients"
+      ],
+      "dr_sections": [
+        "2. MATPOWER Case Format and JSON Structure",
+        "2.1. Bus Data Matrix",
+        "2.2. Generator Data Matrix",
+        "2.3. Branch Data Matrix",
+        "2.4. Generator Cost Matrix (`gencost`)",
+        "2.5. Indexing and Topological Mapping",
+        "3. DC Power Flow Formulation",
+        "3.1. Building the Susceptance Matrix (B-bus)",
+        "3.2. Reference (Slack) Bus Handling",
+        "3.3. Branch Flow Calculations",
+        "5. Building the PTDF Matrix in Python",
+        "5.1. Mathematical Definition of PTDF",
+        "5.2. Python and NumPy Implementation",
+        "8. Common Pitfalls in Implementation"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-grid-dcopf-solver",
+      "description": "Formulates and solves the DC-OPF with spinning reserve co-optimization as a linear or quadratic program. Supports both scipy.optimize.linprog for linear costs and piecewise-linear approximation of quadratic costs. Handles generator limits, capacity coupling (Pg + Rg <= Pmax), nodal power balance, transmission constraints via PTDF, and system reserve requirements.",
+      "responsibility": "Mathematical formulation of the optimization problem (objective, constraints), solver invocation, and extraction of optimal decision variables (Pg, Rg, flows). Determines reserve requirement using standard capacity coupling (largest online generator).",
+      "key_functions": [
+        "formulate_dcopf_with_reserves",
+        "solve_dcopf_linprog",
+        "solve_dcopf_cvxpy",
+        "compute_reserve_requirement",
+        "linearize_quadratic_cost"
+      ],
+      "dr_sections": [
+        "4. DC-OPF with Spinning Reserves as a Linear Program",
+        "4.1. Decision Variables",
+        "4.2. Constraints Formulation",
+        "4.3. Objective Function",
+        "6. Python Implementation Solvers",
+        "6.1. Linear Programming with `scipy.optimize.linprog`",
+        "6.2. Handling Quadratic Costs in SciPy",
+        "6.3. The Optimal Approach: CVXPY Implementation",
+        "8. Common Pitfalls in Implementation",
+        "9. Environment Setup in Ubuntu 24.04"
+      ],
+      "depends_on": [
+        "evo-grid-matpower-parser"
+      ]
+    },
+    {
+      "name": "evo-grid-report-generator",
+      "description": "Post-processes DC-OPF solution results to compute line loading percentages, identify top-3 most loaded lines, calculate operating margin, aggregate totals, and produce the final report.json in the required schema.",
+      "responsibility": "All post-optimization computations: line flow calculation from PTDF and optimal injections, loading percentage computation (handling rateA=0), operating margin calculation, total cost/load/generation/reserve aggregation, and JSON report serialization.",
+      "key_functions": [
+        "compute_line_flows",
+        "compute_line_loading_pct",
+        "find_top_loaded_lines",
+        "compute_operating_margin",
+        "compute_total_cost",
+        "generate_report_json"
+      ],
+      "dr_sections": [
+        "7. Post-Processing and Reporting Computations",
+        "7.1. Computing Line Loading Percentages",
+        "7.2. Operating Margin Calculation"
+      ],
+      "depends_on": [
+        "evo-grid-matpower-parser",
+        "evo-grid-dcopf-solver"
+      ]
+    }
+  ]
+}

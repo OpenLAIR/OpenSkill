@@ -1,0 +1,77 @@
+{
+  "task_summary": "Implement an Adaptive Cruise Control simulation with PID controllers, mode selection logic, and 150s vehicle simulation producing results CSV and report.",
+  "decomposition_rationale": "The task has three clear functional domains: (1) the reusable PID controller component, (2) the ACC system with mode selection logic, and (3) the simulation runner with data I/O, tuning, and reporting. Separating these matches the task's explicit file structure (pid_controller.py, acc_system.py, simulation.py) and ensures each skill has a non-overlapping responsibility.",
+  "skills": [
+    {
+      "name": "evo-control-pid-controller",
+      "description": "Implements a discrete PID controller class with anti-windup (conditional integration/clamping) and proper first-timestep handling. This is the foundational control building block used by the ACC system.",
+      "responsibility": "Provide a standalone PIDController class with reset() and compute(error, dt) methods, including output limits and integral windup prevention via clamping.",
+      "key_functions": [
+        "PIDController.__init__",
+        "PIDController.reset",
+        "PIDController.compute"
+      ],
+      "dr_sections": [
+        "1. Discrete PID Controller Implementation in Python",
+        "1.1 Mathematical Formulation and the Derivative Term",
+        "1.2 Handling Integral Windup via Clamping",
+        "1.3 Complete Python Implementation"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-acc-system-logic",
+      "description": "Implements the AdaptiveCruiseControl class with mode selection (cruise/follow/emergency), TTC calculation, desired distance computation, and minimum acceleration blending strategy. Reads config from vehicle_params.yaml structure.",
+      "responsibility": "Provide ACC mode selection logic, TTC safety checks, desired distance calculation (time headway policy), and acceleration command selection using minimum acceleration strategy across dual PID controllers.",
+      "key_functions": [
+        "AdaptiveCruiseControl.__init__",
+        "AdaptiveCruiseControl.compute",
+        "calculate_ttc",
+        "calculate_desired_distance"
+      ],
+      "dr_sections": [
+        "2. ACC Mode Selection Logic",
+        "2.1 Mode Definitions and Calculations",
+        "2.2 Mode Blending Strategy",
+        "3. PID Tuning for ACC: Practical Parameter Ranges and Methodology",
+        "3.1 Tuning the Speed Controller",
+        "3.2 Tuning the Distance Controller",
+        "7. Common Pitfalls and Mitigation Strategies"
+      ],
+      "depends_on": [
+        "evo-control-pid-controller"
+      ]
+    },
+    {
+      "name": "evo-acc-simulation-runner",
+      "description": "Implements the simulation loop, data I/O pipeline, PID tuning results generation, and report writing. Reads sensor_data.csv and vehicle_params.yaml, loads PID gains from tuning_results.yaml, runs 150s closed-loop simulation with Euler integration, and outputs simulation_results.csv and acc_report.md.",
+      "responsibility": "Handle all file I/O (YAML config loading/writing, CSV reading/writing), the 1501-step simulation loop with proper physics integration, tuning_results.yaml creation with recommended PID gains, simulation_results.csv output with correct NaN handling, and acc_report.md generation.",
+      "key_functions": [
+        "load_config",
+        "load_sensor_data",
+        "write_tuning_results",
+        "run_simulation",
+        "write_simulation_results",
+        "generate_report"
+      ],
+      "dr_sections": [
+        "4. Vehicle Dynamics Simulation Loop",
+        "4.1 Resolving the \"Critical Question\"",
+        "4.2 Complete Simulation Structure",
+        "5. Reading YAML and CSV with PyYAML and Pandas",
+        "5.1 PyYAML safe_load",
+        "5.2 Pandas Missing Value Interpretation",
+        "5.3 Writing Results to CSV (Handling NaNs properly)",
+        "6. Writing tuning_results.yaml",
+        "3.1 Tuning the Speed Controller",
+        "3.2 Tuning the Distance Controller",
+        "3.3 Methodology Application",
+        "7. Common Pitfalls and Mitigation Strategies"
+      ],
+      "depends_on": [
+        "evo-control-pid-controller",
+        "evo-acc-system-logic"
+      ]
+    }
+  ]
+}

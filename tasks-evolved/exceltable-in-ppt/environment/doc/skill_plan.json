@@ -1,0 +1,33 @@
+{
+  "task_summary": "Extract embedded Excel table from a PPTX file, read an updated exchange rate from an adjacent text box, update the Excel table while preserving formulas, and save the modified PPTX.",
+  "decomposition_rationale": "This task involves a single cohesive workflow: manipulating embedded OLE Excel objects within PPTX files. While it touches multiple libraries (python-pptx and openpyxl), the operations are tightly coupled and sequential, making a single comprehensive skill the most practical decomposition to avoid artificial boundaries.",
+  "skills": [
+    {
+      "name": "evo-pptx-embedded-excel-updater",
+      "description": "Provides utilities for finding and manipulating embedded Excel OLE objects within PPTX files, reading text boxes for context, modifying Excel cell values while preserving formulas, and saving the updated PPTX. Covers the full workflow of OLE object identification, blob extraction, openpyxl modification with formula preservation, blob replacement, and presentation saving.",
+      "responsibility": "End-to-end handling of embedded Excel OLE objects in PPTX files: identifying OLE shapes and text boxes on slides, extracting embedded xlsx blobs via python-pptx relationship IDs, reading/modifying Excel data with openpyxl while preserving formula cells, writing modified blobs back into the PPTX package, and parsing text box content for updated values.",
+      "key_functions": [
+        "find_embedded_ole_excel_shapes",
+        "extract_excel_blob_from_ole_shape",
+        "read_text_boxes_from_slide",
+        "parse_exchange_rate_from_text",
+        "load_excel_from_blob",
+        "update_excel_cell_preserve_formulas",
+        "save_excel_to_blob",
+        "replace_ole_blob_in_pptx",
+        "find_cell_by_currency_pair"
+      ],
+      "dr_sections": [
+        "1. Accessing Embedded Excel Objects in python-pptx",
+        "2. Extracting the Embedded xlsx Binary from the pptx Package",
+        "3. Reading the Extracted xlsx with openpyxl",
+        "4. Reading Text Boxes in python-pptx",
+        "5. Modifying Specific Cells in the Embedded Excel while Preserving Formulas",
+        "6. Writing the Modified xlsx Back into the pptx File",
+        "8. Common Pitfalls and Edge Cases",
+        "9. Complete Working Code Pattern"
+      ],
+      "depends_on": []
+    }
+  ]
+}

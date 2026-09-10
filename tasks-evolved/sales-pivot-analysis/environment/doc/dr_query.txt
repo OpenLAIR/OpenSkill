@@ -1,0 +1,28 @@
+Python skill for reading PDF tables with pdfplumber and Excel files with pandas/openpyxl, then creating multi-sheet Excel workbooks with pivot tables. I need detailed guidance on the following:
+
+1. **pdfplumber PDF table extraction API**: Exact usage of `pdfplumber.open()`, `page.extract_table()` and `page.extract_tables()` — what are the return types (list of lists?), how to handle multi-page tables that span across pages, how to get headers correctly, and how to convert extracted table data into a pandas DataFrame. Show complete working code examples with correct imports. What are the `table_settings` parameters (e.g., `vertical_strategy`, `horizontal_strategy`, `snap_tolerance`, `join_tolerance`) and when should they be tuned? What are common pitfalls like merged cells, empty cells returned as None vs empty string, numeric values extracted as strings?
+
+2. **pandas read_excel for .xlsx files**: Exact API for `pd.read_excel()` with openpyxl engine — parameter names, how to specify sheet names, handle header rows, data types. What are common issues with numeric columns being read as strings or floats?
+
+3. **Merging/joining DataFrames from different sources**: Best practices for merging population data (from PDF) with income data (from Excel) on common keys like SA2 region names or codes and STATE. How to handle mismatched keys, whitespace issues, case sensitivity in merge columns.
+
+4. **pandas pivot_table API**: Exact function signature for `pd.pivot_table()` — parameters `values`, `index`, `columns`, `aggfunc`, `margins`, `fill_value`. Show working examples for:
+   - Sum aggregation (`aggfunc='sum'`)
+   - Count aggregation (`aggfunc='count'` vs `aggfunc=len` vs `aggfunc='size'`)
+   - Pivot with both row and column dimensions (for the quartile cross-tabulation)
+   What is the difference between `pivot_table` and `groupby().agg()` for creating these summaries? How to ensure column ordering in the output (e.g., Q1, Q2, Q3, Q4 in specific order)?
+
+5. **pandas qcut for quartile assignment**: Exact API for `pd.qcut()` — how to assign quartile labels like "Q1", "Q2", "Q3", "Q4" based on a numeric column (MEDIAN_INCOME). What does `pd.qcut(series, q=4, labels=["Q1","Q2","Q3","Q4"])` return? How does it handle ties/duplicates (the `duplicates` parameter)? Is Q1 the lowest or highest quartile by default? Confirm that `pd.qcut` with `q=4` divides into four equal-frequency bins and that Q1 corresponds to the lowest 25% of values.
+
+6. **Writing multi-sheet Excel with pandas and openpyxl**: How to use `pd.ExcelWriter` with openpyxl engine to write multiple DataFrames to different sheets in a single .xlsx file. Exact code pattern:
+   ```python
+   with pd.ExcelWriter('file.xlsx', engine='openpyxl') as writer:
+       df.to_excel(writer, sheet_name='SheetName', index=True/False)
+   ```
+   When should `index=True` vs `index=False` be used for pivot table output vs regular data? How to control column widths, formatting? How to ensure the sheet order matches the desired order?
+
+7. **Common pitfalls with openpyxl 3.1.5 and pandas 2.2.3**: Any known compatibility issues? Deprecated parameters in `to_excel()` or `ExcelWriter`? Is `engine='openpyxl'` still the default for .xlsx? Any issues with `FutureWarning` or behavioral changes in pandas 2.x regarding pivot tables, categorical types from qcut, or Excel writing?
+
+8. **Data pipeline pattern**: How to structure reusable utility functions for: (a) extracting and cleaning PDF table data into a DataFrame, (b) loading and cleaning Excel data into a DataFrame, (c) merging the two datasets, (d) computing derived columns (quartile labels, calculated fields like EARNERS × MEDIAN_INCOME), (e) generating pivot summary DataFrames, (f) writing all results to a multi-sheet Excel workbook. What's the best practice for function signatures and error handling?
+
+9. **pdfplumber version 0.11.4 specifics**: Any API changes or deprecations in this version compared to earlier versions? Is `extract_table()` vs `extract_tables()` behavior consistent? How to handle pages with no tables gracefully?

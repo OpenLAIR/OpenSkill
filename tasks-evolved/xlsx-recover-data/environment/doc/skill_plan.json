@@ -1,0 +1,43 @@
+{
+  "task_summary": "Recover missing '???' values in a multi-sheet NASA budget Excel file by analyzing inter-sheet and intra-sheet mathematical relationships, then save the recovered workbook.",
+  "decomposition_rationale": "This task involves two distinct concerns: (1) reading/writing Excel files with openpyxl while handling edge cases like merged cells and data types, and (2) analyzing the specific mathematical relationships in the NASA budget spreadsheet to compute missing values via constraint propagation. Splitting these into two skills keeps I/O concerns separate from domain-specific recovery logic.",
+  "skills": [
+    {
+      "name": "evo-excel-io",
+      "description": "Provides utility functions for loading, scanning, and saving Excel workbooks with openpyxl 3.1.5, including handling merged cells, detecting placeholder markers, and preserving formatting when writing numeric values back.",
+      "responsibility": "All Excel file I/O operations: loading workbooks with correct parameters, scanning all sheets for '???' markers and returning their locations, safely reading cell values (handling MergedCell objects), writing recovered numeric values with correct data types, and saving the output workbook with the AppVersion monkey-patch applied.",
+      "key_functions": [
+        "load_workbook_safe",
+        "find_missing_cells",
+        "get_cell_value_safe",
+        "write_recovered_value",
+        "save_workbook_safe"
+      ],
+      "dr_sections": [
+        "1. The openpyxl API for Multi-Sheet Excel Reading and Writing",
+        "2. Detecting and Locating \"???\" Placeholder Cells",
+        "5. openpyxl Pitfalls and Edge Cases"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-nasa-budget-recovery",
+      "description": "Analyzes the mathematical structure of a NASA budget workbook to recover missing values marked as '???' by detecting row sums, column sums, and cross-sheet aggregation relationships, then iteratively solving via constraint propagation.",
+      "responsibility": "All domain-specific logic for recovering missing values: detecting sum relationships (row totals, column totals, cross-sheet totals), implementing constraint propagation to iteratively resolve unknowns, handling floating-point precision, inferring correct data types (int vs float), and orchestrating the full recovery pipeline from load to save.",
+      "key_functions": [
+        "detect_sum_relationships",
+        "detect_cross_sheet_relationships",
+        "recover_missing_values",
+        "run_recovery_pipeline"
+      ],
+      "dr_sections": [
+        "3. Analyzing Relationships in NASA Budget Excel Files",
+        "4. Numerical Computation Patterns for Data Recovery",
+        "6. Working Code Examples: Complete Reusable Utility Module"
+      ],
+      "depends_on": [
+        "evo-excel-io"
+      ]
+    }
+  ]
+}

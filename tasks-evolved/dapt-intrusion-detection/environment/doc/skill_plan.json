@@ -1,0 +1,53 @@
+{
+  "task_summary": "Parse packets.pcap with Scapy, compute ~35 network statistics (protocol counts, timing, sizes, entropy, graph metrics, flows, analysis flags), and fill in the value column of /root/network_stats.csv while preserving comment lines.",
+  "decomposition_rationale": "The task involves three distinct concerns: (1) efficient single-pass PCAP parsing and feature extraction into structured data, (2) computing diverse statistical metrics from the extracted data, and (3) writing results back to the CSV while preserving its comment-line format. Since the PCAP parsing is the performance bottleneck and all metrics derive from the same extracted features, a two-skill decomposition separates data extraction from metric computation+output, keeping skills focused and reusable.",
+  "skills": [
+    {
+      "name": "evo-pcap-feature-extraction",
+      "description": "Efficiently reads a PCAP file using Scapy's PcapReader in a single streaming pass, extracting per-packet features (timestamp, length, protocol flags, IPs, ports) into lists/dicts suitable for downstream statistical computation.",
+      "responsibility": "Single-pass PCAP ingestion: iterate packets via PcapReader, detect layers (TCP/UDP/ICMP/ARP/IP) using haslayer(), extract timestamps (cast EDecimal to float), packet lengths (len(packet)), source/destination IPs and ports. Return a structured dict of lists containing all raw feature arrays needed for every metric category.",
+      "key_functions": [
+        "extract_packet_features",
+        "get_packet_length",
+        "get_protocol_type",
+        "get_ip_port_fields"
+      ],
+      "dr_sections": [
+        "1. Reading PCAP Files with Scapy",
+        "2. Packet Layer Access in Scapy 2.5.0",
+        "3. Protocol Detection Pitfalls in Scapy"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-network-stats-computation",
+      "description": "Computes all required network statistics from extracted packet features and writes results into the CSV template, preserving comment lines. Covers protocol counts, time bucketing, size stats, Shannon entropy, directed graph metrics, IAT stats, PCR, flow analysis, and boolean analysis flags.",
+      "responsibility": "Take extracted feature arrays and compute every metric: protocol counts, duration, packets-per-minute buckets (avg/max/min), size stats, Shannon entropy (IPs and ports), unique ports, directed graph metrics (nodes/edges/density/degree), IAT mean/variance/CV, producer-consumer ratio, flow counts (unique/tcp/udp/bidirectional), and analysis flags. Read the CSV template preserving comment lines, fill in values, and write back.",
+      "key_functions": [
+        "compute_protocol_counts",
+        "compute_time_series_stats",
+        "compute_size_stats",
+        "compute_shannon_entropy",
+        "compute_graph_metrics",
+        "compute_iat_metrics",
+        "compute_pcr_metrics",
+        "compute_flow_metrics",
+        "compute_analysis_flags",
+        "read_csv_preserving_comments",
+        "write_csv_preserving_comments"
+      ],
+      "dr_sections": [
+        "4. Shannon Entropy Computation",
+        "5. Pandas 2.2.2 CSV Handling: Preserving Comments",
+        "6. Time Bucketing for `packets_per_minute`",
+        "7. Inter-Arrival Time (IAT) Calculations",
+        "8. Network Density Formula",
+        "9. Bidirectional Flow Counting",
+        "10. DAPT2020 Dataset Characteristics & Analysis Context"
+      ],
+      "depends_on": [
+        "evo-pcap-feature-extraction"
+      ]
+    }
+  ]
+}

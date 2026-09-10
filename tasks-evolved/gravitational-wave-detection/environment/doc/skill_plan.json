@@ -1,0 +1,45 @@
+{
+  "task_summary": "Detect gravitational wave signal from binary black hole merger using matched filtering with PyCBC, scanning mass parameters across three approximants and reporting best SNR results.",
+  "decomposition_rationale": "The task has a clear linear pipeline: (1) data I/O and conditioning, (2) matched filtering with grid search over mass parameters and approximants, and (3) result aggregation and CSV output. Since the pipeline is tightly coupled and the background document provides a complete working example, two skills suffice: one for the core GW data processing and matched filtering engine, and one for orchestrating the grid search and output formatting.",
+  "skills": [
+    {
+      "name": "evo-gw-matched-filter-engine",
+      "description": "Core utility for reading GWF frame files, conditioning gravitational wave detector data (highpass filtering, resampling, cropping, PSD estimation), generating waveform templates for various approximants, and performing matched filtering to extract peak SNR values.",
+      "responsibility": "Handles all PyCBC-specific operations: frame file reading, data conditioning pipeline (highpass, resample, crop, PSD estimation with Welch's method, interpolation, inverse spectrum truncation), waveform template generation (get_td_waveform for SEOBNRv4_opt, IMRPhenomD, TaylorT4), template resizing/cyclic shifting, matched filtering execution, SNR extraction with edge cropping.",
+      "key_functions": [
+        "read_and_condition_data",
+        "estimate_psd",
+        "generate_template",
+        "compute_matched_filter_snr",
+        "find_peak_snr"
+      ],
+      "dr_sections": [
+        "1. Reading GWF Frame Files with PyCBC",
+        "2. Data Conditioning for Matched Filtering in PyCBC",
+        "3. Generating Waveform Templates with PyCBC",
+        "4. Matched Filtering with PyCBC",
+        "5. Complete Working Code Example",
+        "6. Common Pitfalls and Version-Specific Issues in PyCBC 2.8.5",
+        "7. PSD Estimation Details: Empirical vs. Analytical"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-gw-grid-search-output",
+      "description": "Orchestrates the mass parameter grid search across approximants, tracks best SNR per approximant, handles error cases (e.g., TaylorT4 failures for high masses), manages memory during large loops, and formats/writes the final CSV output.",
+      "responsibility": "Manages the grid search loop over mass1, mass2 (10-40 solar masses, integer steps) and three approximants, calls the matched filter engine for each combination, tracks the maximum SNR and corresponding total mass per approximant, handles exceptions gracefully, performs memory cleanup between iterations, and writes the results CSV to /root/detection_results.csv in the required format.",
+      "key_functions": [
+        "run_grid_search",
+        "extract_best_per_approximant",
+        "write_detection_results_csv"
+      ],
+      "dr_sections": [
+        "8. Output Formatting: Aggregating a Grid Search",
+        "6. Common Pitfalls and Version-Specific Issues in PyCBC 2.8.5"
+      ],
+      "depends_on": [
+        "evo-gw-matched-filter-engine"
+      ]
+    }
+  ]
+}

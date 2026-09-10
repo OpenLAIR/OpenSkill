@@ -1,0 +1,62 @@
+{
+  "task_summary": "Parse a BibTeX file, verify each citation against academic APIs (CrossRef, Semantic Scholar, DBLP), identify fake/hallucinated citations, and output results as JSON.",
+  "decomposition_rationale": "The task naturally splits into three concerns: (1) parsing and cleaning BibTeX data, (2) verifying citations against external APIs with robust querying, and (3) scoring matches and producing the final output. This separation keeps I/O, network logic, and decision logic independent.",
+  "skills": [
+    {
+      "name": "evo-bibtex-parser",
+      "description": "Parses BibTeX files using bibtexparser 1.4.2 and cleans LaTeX/BibTeX artifacts from fields like title, author, year, DOI, and venue. Produces a normalized list of citation dictionaries ready for verification.",
+      "responsibility": "BibTeX file loading, field extraction, LaTeX artifact removal, and normalization of citation metadata",
+      "key_functions": [
+        "parse_bibtex_file",
+        "clean_bibtex_artifacts",
+        "extract_citation_metadata"
+      ],
+      "dr_sections": [
+        "2. Foundational Parsing: Utilizing `bibtexparser` 1.4.2",
+        "6. Navigating Edge Cases, Pitfalls, and Data Anomalies"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-citation-verifier",
+      "description": "Queries external academic APIs (CrossRef, Semantic Scholar, DBLP, doi.org) to verify whether a citation exists. Implements robust HTTP sessions with retry logic, exponential backoff, and rate limiting for unauthenticated access.",
+      "responsibility": "Network communication with academic APIs, DOI resolution, rate limiting, retry logic, and returning raw API results for each citation",
+      "key_functions": [
+        "verify_doi_exists",
+        "query_crossref",
+        "query_semantic_scholar",
+        "query_dblp",
+        "get_robust_session",
+        "rate_limited_query"
+      ],
+      "dr_sections": [
+        "3. Landscape of Free Academic Citation Verification APIs",
+        "5. Practical Implementation of Robust API Querying"
+      ],
+      "depends_on": [
+        "evo-bibtex-parser"
+      ]
+    },
+    {
+      "name": "evo-citation-scorer",
+      "description": "Compares parsed BibTeX citation metadata against API results using fuzzy string matching and multi-factor scoring to classify citations as real or fake, then outputs the final JSON report.",
+      "responsibility": "String normalization, fuzzy title/author matching, composite confidence scoring, fake/real classification, and JSON output generation",
+      "key_functions": [
+        "normalize_string",
+        "calculate_title_similarity",
+        "compute_composite_score",
+        "classify_citation",
+        "export_fake_citations_json"
+      ],
+      "dr_sections": [
+        "4. Matching and Scoring Heuristics",
+        "7. Structuring the Output Pipeline",
+        "1. Introduction to the Phenomenon of Hallucinated Citations"
+      ],
+      "depends_on": [
+        "evo-bibtex-parser",
+        "evo-citation-verifier"
+      ]
+    }
+  ]
+}

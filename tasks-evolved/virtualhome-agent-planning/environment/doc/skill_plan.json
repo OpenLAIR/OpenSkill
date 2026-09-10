@@ -1,0 +1,60 @@
+{
+  "task_summary": "Solve IPC Airport domain PDDL planning problems by parsing domain/problem files, generating valid plans, and writing them in correct output format",
+  "decomposition_rationale": "The task has two main concerns: (1) orchestrating the solve pipeline (reading problem.json, invoking planners with appropriate configurations, handling failures/timeouts) and (2) ensuring the output plan format matches what the validator expects. These are tightly coupled enough to fit in 2 skills: a core PDDL solver utility and a plan formatting/output utility.",
+  "skills": [
+    {
+      "name": "evo-pddl-solver",
+      "description": "Core PDDL planning solver that parses domain/problem files using unified_planning, invokes pyperplan with optimal search configuration (GBFS + hFF), handles timeouts and fallbacks, and returns a plan object. Also supports direct pyperplan invocation as fallback.",
+      "responsibility": "Parse PDDL files, configure and invoke planning engines (pyperplan via unified_planning or directly), handle timeout/memout errors, return solution plans",
+      "key_functions": [
+        "solve_pddl_task",
+        "solve_with_unified_planning",
+        "solve_with_pyperplan_direct",
+        "solve_with_fallback_strategies"
+      ],
+      "dr_sections": [
+        "2. `unified_planning` API for PDDL Parsing and Solving",
+        "2.1 Exact Import Paths and Instantiation",
+        "2.2 Understanding `PDDLReader`",
+        "2.3 `OneshotPlanner` and Engine Selection",
+        "3. Direct Usage of `pyperplan` as a Fallback",
+        "3.1 Architecture and Grounding",
+        "3.2 Programmatic Search Invocation",
+        "3.3 Available Search Algorithms and Heuristics",
+        "3.4 Selecting the Optimal Strategy",
+        "4. The IPC Airport Domain Specifics",
+        "4.3 Expressivity Requirements: STRIPS vs. ADL",
+        "6. Performance, Scaling, and Timeout Considerations",
+        "6.1 Timeout Handling in `unified_planning`",
+        "6.2 Best Search Configurations for Agile Limits",
+        "6.3 Memory Exhaustion (MEMOUT)",
+        "7. Common Pitfalls and Edge Cases",
+        "7.1 PDDL Expressivity Conflicts"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-pddl-plan-formatter",
+      "description": "Handles plan output formatting and the end-to-end task orchestration: reads problem.json, calls the solver for each task, formats plans in the correct syntax (parenthesized PDDL or function-call style as required by the validator), and writes output files.",
+      "responsibility": "Read problem.json, orchestrate solving of all tasks, format plan actions correctly (handling case-sensitivity and syntax requirements), write plan files to specified output paths",
+      "key_functions": [
+        "run_all_tasks",
+        "write_plan_pddl_format",
+        "write_plan_custom_format",
+        "format_action_instance"
+      ],
+      "dr_sections": [
+        "2.4 Plan Export with `PDDLWriter`",
+        "2.5 Parsing Plans with `PDDLReader.parse_plan()`",
+        "2.6 Full Pipeline Code Example",
+        "5. Plan Output Format Requirements",
+        "5.1 Syntax Conflicts: Standard vs UP Representation",
+        "5.2 Manual Custom Formatting",
+        "7.2 Case-Sensitivity Discrepancies"
+      ],
+      "depends_on": [
+        "evo-pddl-solver"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+Dots score formula for powerlifting: exact mathematical formula with all coefficients for male and female lifters. I need the precise polynomial coefficients used in the Dots formula (also known as "Dots coefficient" or "Dots points") as used by the International Powerlifting Federation (IPF). 
+
+Specifically I need:
+
+1. **The exact Dots formula**: Dots = Total × coefficient, where coefficient = 500 / (a×BW^4 + b×BW^3 + c×BW^2 + d×BW + e). What are the exact values of coefficients a, b, c, d, e for MALE and FEMALE lifters? Please provide all decimal places as used in the official implementation. I've seen references to these coefficients on sites like powerliftpro.app and in the OpenPowerlifting codebase — I need the authoritative values.
+
+2. **Input variables**: The formula uses bodyweight (BodyweightKg) and total lifted weight (TotalKg). How is TotalKg computed? Is it Best3SquatKg + Best3BenchKg + Best3DeadliftKg? What happens when any of these are missing or negative (failed lifts)? In OpenPowerlifting data, negative values indicate failed attempts — should negative best lift values be treated as zero or should the lifter be excluded?
+
+3. **Edge cases**: What happens when a lifter is disqualified (DQ) or has no valid total? What bodyweight range is the formula valid for? Are there any special cases for the Mx sex category?
+
+4. **Excel formula implementation**: How to express the Dots calculation as an Excel formula. Show a working Excel formula string that computes TotalKg from best squat, bench, and deadlift columns, and another formula that computes the Dots score using the polynomial coefficients. The formulas should use ROUND() for 3-digit precision. Show how to handle the IF(Sex="M", male_coefficients, female_coefficients) branching within a single Excel formula.
+
+5. **openpyxl Python library**: Working code examples for:
+   - Reading an Excel workbook with multiple sheets using openpyxl
+   - Copying specific columns from one sheet to another while preserving order and column names
+   - Writing Excel formulas (not computed values) into cells using openpyxl
+   - Saving the workbook with both sheets intact
+   - Correct import paths: `from openpyxl import load_workbook` etc.
+   - How to reference cells in formulas written via openpyxl (using cell references like A2, B2 etc.)
+   - How to ensure formulas are stored as formulas (strings starting with "=") rather than being evaluated by openpyxl
+
+6. **Common pitfalls with openpyxl**:
+   - Does openpyxl evaluate formulas or just store them as strings?
+   - When reading cells that contain formulas, do you need data_only=True?
+   - How to handle existing empty sheets (does openpyxl preserve them or do you need to create them?)
+   - Version-specific issues with openpyxl 3.1.5
+
+7. **OpenPowerlifting data schema**: The columns in the dataset include Name, Sex, Event, Equipment, BodyweightKg, Best3SquatKg, Best3BenchKg, Best3DeadliftKg among others. Which of these are needed for Dots computation? (Answer: Name, Sex, BodyweightKg, Best3SquatKg, Best3BenchKg, Best3DeadliftKg)
+
+Please provide the complete, exact Dots coefficients with full precision as they appear in official sources or the OpenPowerlifting codebase, and working Python code patterns using openpyxl for reading, copying columns between sheets, and writing Excel formulas.

@@ -1,0 +1,41 @@
+Research query: How to build a Python utility module using openpyxl 3.1.5 for reading, analyzing, and recovering missing values in multi-sheet Excel workbooks. I need comprehensive details on the following:
+
+1. **openpyxl API for multi-sheet Excel reading and writing:**
+   - Exact API for `openpyxl.load_workbook()` — all parameters including `data_only`, `keep_vba`, `keep_links`, and their defaults. What does `data_only=True` vs `data_only=False` return for cells with formulas?
+   - How to iterate over all sheet names using `wb.sheetnames`, access sheets via `wb[sheet_name]`, and iterate over rows/columns using `ws.iter_rows()`, `ws.iter_cols()`, `ws.max_row`, `ws.max_column`, `ws.min_row`, `ws.min_column`.
+   - How to read cell values: `cell.value`, `cell.data_type`, handling of None vs empty string vs "???" string markers.
+   - How to write values back: `ws.cell(row=r, column=c, value=numeric_value)` and ensuring the value is stored as a number (float/int) not a string.
+   - How to save the workbook with `wb.save('output.xlsx')` preserving formatting, merged cells, and other sheet properties.
+
+2. **Detecting and locating "???" placeholder cells across multiple sheets:**
+   - Best pattern for scanning all cells across all sheets to find cells containing the string "???".
+   - How to store their locations (sheet name, row, column) for later replacement.
+   - Working code example for a `find_missing_values(workbook)` function that returns a list of (sheet_name, row, col) tuples.
+
+3. **Analyzing relationships between sheets in NASA budget Excel files:**
+   - Common structures in NASA budget spreadsheets: summary sheets that aggregate data from detail sheets, year-over-year budget tables, percentage calculations, row/column totals.
+   - Patterns where one sheet contains totals that are sums of values from other sheets, or where a row/column in one sheet is the sum of other rows/columns in the same sheet.
+   - How to programmatically detect if a missing value can be computed as: (a) a row sum minus known values, (b) a column sum minus known values, (c) a cross-sheet aggregation, (d) a difference or ratio derived from other cells.
+   - Strategies for resolving interdependent missing values (e.g., constraint propagation where solving one "???" enables solving another).
+
+4. **Numerical computation patterns for recovering missing values:**
+   - How to identify header rows and label columns to understand table structure.
+   - How to detect sum relationships: checking if a cell equals the sum of a range of cells in the same row or column.
+   - How to handle floating point precision when comparing sums (tolerance-based comparison).
+   - How to determine if a value should be stored as int or float based on surrounding data.
+
+5. **openpyxl pitfalls and edge cases:**
+   - Merged cells behavior: does `cell.value` return None for non-anchor merged cells? How to handle merged cell ranges with `ws.merged_cells.ranges`.
+   - String "???" vs number: ensuring when you read a cell with "???" it's detected as string, and when writing back the recovered number it's written as a numeric type not string.
+   - Row/column indexing: openpyxl uses 1-based indexing — common off-by-one errors.
+   - Preserving cell formatting (number format, font, fill) when replacing cell values.
+   - Any issues with `openpyxl 3.1.5` specifically — deprecated methods, known bugs.
+
+6. **Working code examples for a complete reusable utility module** that includes:
+   - `load_workbook_data(filepath)` — loads and returns structured data from all sheets
+   - `find_missing_cells(wb)` — locates all "???" cells
+   - `detect_sum_relationships(ws)` — identifies which cells are sums of other cells
+   - `recover_missing_values(wb)` — iteratively solves for missing values using detected relationships
+   - `save_recovered_workbook(wb, output_path)` — saves with numeric values replacing "???"
+
+Please provide complete, tested code patterns with correct imports (`from openpyxl import load_workbook`, etc.) and emphasize correctness of numeric types when writing recovered values back to cells.

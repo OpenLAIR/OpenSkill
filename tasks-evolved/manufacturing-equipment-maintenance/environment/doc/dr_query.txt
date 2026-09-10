@@ -1,0 +1,42 @@
+Research query:
+
+Python utility module for parsing reflow soldering machine handbook PDF and analyzing thermocouple profile data, MES logs, and test defect CSVs in a manufacturing automation context. I need comprehensive information on the following:
+
+1. **PDF text extraction in Python 3.11**: What are the best libraries available (PyPDF2, pdfplumber, pdfminer.six, pymupdf/fitz) for extracting structured text from a technical handbook PDF? Since only pandas and pytest are installed, I need approaches that work with the Python standard library OR that can parse PDF files without additional packages. Can Python's built-in libraries read PDF text? What fallback approaches exist if no PDF library is installed (e.g., using subprocess with pdftotext if available, or reading raw binary)?
+
+2. **Reflow soldering thermal profile domain knowledge**: What are the standard IPC/JEDEC reflow profile zones and definitions?
+   - What is the standard definition of the **preheat zone** in reflow soldering (temperature range, typically 150°C to 200°C or similar)?
+   - What is the standard **ramp rate calculation** for preheat (ΔT/Δt in °C/s)? What is a typical allowable maximum ramp rate limit (e.g., 3°C/s)?
+   - What is **solder liquidus temperature** for common lead-free solders (SAC305 = 217°C, SnPb = 183°C)?
+   - What is **Time Above Liquidus (TAL)** — how is it measured, and what are typical acceptable TAL windows (e.g., 40-90 seconds for lead-free)?
+   - What are typical **peak temperature requirements** for reflow (e.g., 235-260°C for lead-free)?
+   - What is the relationship between **conveyor speed**, **heating zone length**, and **dwell time** in reflow ovens? How is minimum conveyor speed calculated from board geometry and thermal dwell requirements?
+
+3. **Pandas data processing patterns** for thermocouple time-series analysis:
+   - How to read CSV thermocouple data with columns like timestamp/time, temperature, run_id, tc_id using `pandas.read_csv()`
+   - How to compute **ramp rate** (derivative of temperature over time) from time-series data using `df.diff()` or `np.gradient()`
+   - How to filter data to a specific temperature range (preheat zone) and find maximum ramp rate per group (run_id)
+   - How to calculate **time above a threshold** (TAL) by identifying contiguous regions where temperature exceeds liquidus
+   - How to find **peak temperature** per run using `groupby().max()` or `groupby().apply()`
+   - How to handle multiple thermocouples per run and select the most representative one (e.g., the one closest to the coldest point on the board, or per handbook instructions)
+
+4. **JSON output formatting in Python**:
+   - Using `json.dump()` with proper formatting, handling numpy/pandas types (int64, float64, NaN → null conversion)
+   - Sorting dictionaries and arrays by run_id ascending
+   - Rounding floats to 2 decimal places before serialization
+   - Common pitfalls: `json.dump()` failing on pandas/numpy types, NaN not converting to null automatically, need for custom JSON encoder
+
+5. **MES log and test defect data analysis patterns**:
+   - How to cross-reference run IDs across multiple CSV files (thermocouple data, MES logs, test defects)
+   - How to determine "best run per board family" based on quality metrics (defect count/rate) and efficiency metrics (cycle time, throughput)
+   - Pandas merge/join patterns for combining data from multiple sources by run_id and board_family
+
+6. **Edge cases and pitfalls**:
+   - Runs with no thermocouple data (should be marked as failing)
+   - Multiple thermocouples per run — selection criteria
+   - Time unit conversions (seconds vs minutes) in ramp rate and TAL calculations
+   - Conveyor speed unit handling (cm/min)
+   - Proper null/None handling in JSON output
+   - How to handle non-monotonic temperature data or noisy sensor readings when computing ramp rates
+
+Provide working code examples with correct imports for pandas 2.2.3 on Python 3.11, focusing on reusable utility functions that encapsulate each computation (ramp rate calculation, TAL calculation, peak temperature extraction, conveyor speed validation, best run selection).

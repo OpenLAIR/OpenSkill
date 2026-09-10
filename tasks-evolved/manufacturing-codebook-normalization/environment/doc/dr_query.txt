@@ -1,0 +1,43 @@
+Research query:
+
+Python techniques and best practices for fuzzy text matching and normalization of noisy, multilingual (Chinese-English mixed) industrial defect reason texts against a standard codebook. I need to build a reusable Python utility module (skills) for an AI coding agent. Specifically, I need:
+
+1. **Fuzzy string matching libraries available in Python 3.11 with only pandas installed (no pip install allowed at runtime)**: Since the environment only has `pandas==2.2.3` and Python 3.11 standard library, what built-in modules can be used for string similarity? Specifically:
+   - `difflib.SequenceMatcher` — exact API, `ratio()` method, `get_close_matches()` function signatures, parameters, and return values. Working code examples for matching noisy strings against a list of canonical strings.
+   - How to implement Levenshtein distance, Jaccard similarity, cosine similarity of character n-grams using only Python standard library and pandas.
+   - `re` module patterns for splitting Chinese-English mixed text, handling Unicode CJK character ranges, detecting Chinese characters vs ASCII.
+
+2. **Chinese text processing without external libraries**: 
+   - How to segment Chinese text without jieba or other NLP libraries (character-level tokenization, regex-based approaches).
+   - Unicode ranges for CJK Unified Ideographs (e.g., `\u4e00-\u9fff`) and how to use them in regex.
+   - Common Chinese abbreviation patterns in manufacturing/QA contexts and how to expand them.
+   - Handling mixed Chinese-English strings: splitting, normalizing whitespace, punctuation normalization (full-width to half-width conversion).
+
+3. **Text normalization pipeline for noisy manufacturing defect descriptions**:
+   - Common typo patterns, abbreviation handling, noise removal strategies.
+   - How to preprocess text: lowercasing, stripping punctuation, normalizing whitespace, removing noise characters.
+   - How to split a compound defect reason text into multiple segments (e.g., when an engineer writes multiple defect reasons in one field separated by commas, semicolons, slashes, or Chinese punctuation like `、`，`；`).
+   - Strategies for mapping each segment to the best matching codebook entry, including confidence scoring.
+
+4. **Codebook matching and confidence calibration**:
+   - How to compute a meaningful confidence score (0.0 to 1.0) from `difflib.SequenceMatcher.ratio()` or similar similarity metrics.
+   - What thresholds to use for "UNKNOWN" classification — how to determine when a match score is too low and should be flagged as UNKNOWN.
+   - Engineering calibration of confidence scores: ensuring the distribution of confidence values has reasonable mean, quantiles, and diversity. What statistical properties should calibrated confidence scores exhibit?
+   - How to set the confidence for UNKNOWN predictions lower than non-UNKNOWN predictions.
+
+5. **Data pipeline with pandas**:
+   - Reading CSV files with mixed encodings (UTF-8, GBK) using `pandas.read_csv()` — the `encoding` parameter, `encoding_errors` parameter.
+   - Reading codebook files (CSV/Excel/JSON) and building lookup dictionaries mapping codes to labels.
+   - Pattern for iterating over CSV rows, processing each record, and building a JSON output structure matching a specific schema.
+   - `json.dumps()` with `ensure_ascii=False` for preserving Chinese characters in output JSON.
+
+6. **Working code patterns**:
+   - A complete working function that takes a raw noisy text string and a dictionary of {code: label} pairs, segments the text, fuzzy-matches each segment to the best codebook entry, and returns structured results with confidence scores.
+   - A function to detect and split multi-reason text fields into individual segments with span tracking (preserving the original span_text from raw_reason_text).
+   - Edge cases: empty strings, pure whitespace, single-character entries, identical entries in codebook, entries that could match multiple codes.
+
+7. **Common pitfalls**:
+   - `difflib.get_close_matches()` default `cutoff=0.6` and `n=3` — when these defaults are wrong.
+   - pandas `read_csv` silently dropping rows or misinterpreting delimiters with Chinese text.
+   - JSON serialization issues with numpy types (numpy.int64 not JSON serializable) — how to handle with pandas.
+   - File path handling with `glob` for discovering codebook files in a directory.

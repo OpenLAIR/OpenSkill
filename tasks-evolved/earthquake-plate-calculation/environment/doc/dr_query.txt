@@ -1,0 +1,22 @@
+I need comprehensive technical documentation and working code examples for building a Python utility module that performs geospatial analysis involving tectonic plate boundaries and earthquake point data using GeoPandas 1.0.1, Shapely 2.0.6, and PyProj 3.7.0 on Python 3.10. Specifically:
+
+1. **Loading and parsing GeoJSON plate boundary data (PB2002 format)**: How to load Peter Bird's PB2002 plate boundary and plate polygon GeoJSON files using GeoPandas `gpd.read_file()`. What is the structure of these files — do PB2002_plates.json contain polygon geometries with a plate name field, and PB2002_boundaries.json contain LineString geometries? What are the exact property/column names used for plate identification (e.g., "PlateName", "PLATENAME", "Name", "PlateA", "PlateB")? Show working code to load these files and filter for the Pacific plate (what is the exact string identifier — "PA", "Pacific", "PC"?).
+
+2. **Loading earthquake GeoJSON data**: How to parse USGS-style earthquake GeoJSON (FeatureCollection with properties like `id`, `place`, `time`, `mag`, and geometry as Point) into a GeoDataFrame. Show the correct approach to extract earthquake ID, magnitude, place, time, latitude, longitude from such data. What are the exact field names in USGS earthquake GeoJSON exports?
+
+3. **Filtering earthquakes that fall within the Pacific plate polygon**: How to use GeoPandas spatial operations to determine which earthquake points fall within a specific plate polygon. Show working code using `gpd.sjoin()` or `GeoDataFrame.within()` or `GeoDataFrame.clip()`. What are the correct `predicate` parameter values in GeoPandas 1.0.1 for `sjoin` (is it `predicate='within'` or the old `op='within'`?)? What are common pitfalls with the antimeridian (180°/-180° longitude) when working with the Pacific plate polygon, since the Pacific plate spans the antimeridian? How to properly handle geometries that cross the antimeridian — do I need to split the polygon, use a different CRS, or normalize longitudes?
+
+4. **Computing distances from points to plate boundary LineStrings**: How to calculate the distance in kilometers from each earthquake point to the nearest point on the Pacific plate boundary using GeoPandas and Shapely. Show the correct approach using projected coordinate systems. What CRS/projection is appropriate for distance calculations across the entire Pacific plate (which spans a huge area)? Should I use an equal-area or equidistant projection? What about using `shapely.ops.nearest_points()` or `GeoDataFrame.distance()` method? Show working code with `GeoDataFrame.to_crs()` for reprojection. What EPSG codes or proj4 strings work well for Pacific-centered projections (e.g., EPSG:3832 for WGS 84 / PDC Mercator, or a custom azimuthal equidistant projection)?
+
+5. **Critical pitfalls for Pacific plate analysis**:
+   - The Pacific plate crosses the antimeridian (International Date Line). What specific techniques handle this? Should longitudes be shifted to 0-360 range instead of -180 to 180 before projection?
+   - When using `to_crs()` with geometries crossing the antimeridian, do geometries get corrupted? How to prevent this?
+   - In GeoPandas 1.0.1, is `GeoDataFrame.set_crs()` vs `to_crs()` behavior different? Which sets CRS metadata vs actually reprojects?
+   - Does Shapely 2.0.6 use the new array-based interface? Are there deprecated functions to avoid?
+   - How does `geopandas.GeoDataFrame.distance()` work — does it compute element-wise distances or distances to a single geometry? How to compute distance from each point to the nearest point on a MultiLineString boundary?
+
+6. **Extracting Pacific plate boundary specifically**: From PB2002_boundaries.json, how to extract only the boundary segments that belong to the Pacific plate. The boundaries file likely has two plate identifiers per segment (PlateA and PlateB or similar). Show how to filter boundaries where either plate identifier equals the Pacific plate code, then merge/union them into a single MultiLineString geometry using `shapely.ops.unary_union` or GeoDataFrame `dissolve()`.
+
+7. **Output formatting**: How to convert pandas Timestamp or datetime to ISO 8601 format string "YYYY-MM-DDTHH:MM:SSZ". How to round float values to 2 decimal places in Python and write a JSON file with `json.dump()`.
+
+Provide complete, working Python code examples with correct import statements for all of the above using the exact package versions specified (geopandas 1.0.1, shapely 2.0.6, pyproj 3.7.0, pandas 2.2.3, numpy 1.26.4).

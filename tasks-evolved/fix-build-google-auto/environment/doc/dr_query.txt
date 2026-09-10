@@ -1,0 +1,55 @@
+Research query:
+
+How to build a Python utility module that automates diagnosing and fixing Java Maven build failures programmatically. I need detailed information on the following topics:
+
+1. **Maven build error parsing**: How to programmatically run Maven builds (`mvn compile`, `mvn test-compile`, `mvn package`) and parse the output to extract compilation errors, dependency resolution failures, plugin errors, and configuration issues. What are the exact error message formats Maven produces for:
+   - Java compilation errors (file path, line number, error message patterns)
+   - Dependency resolution failures (`Could not resolve dependencies`, `Could not find artifact`)
+   - Plugin execution failures
+   - POM configuration errors (invalid XML, missing required elements)
+   - Version incompatibilities between Java version and source/target level
+
+2. **Common Java/Maven build failure patterns and fixes**:
+   - Missing or incorrect import statements
+   - Type mismatches, incompatible types, method signature changes
+   - Missing method implementations (abstract methods, interface methods)
+   - Deprecated API usage that causes compilation errors with `-Werror`
+   - Incorrect Java source/target version settings in pom.xml (`maven-compiler-plugin` configuration)
+   - Missing dependencies in pom.xml
+   - Test compilation failures vs main source compilation failures
+   - Annotation processor errors
+
+3. **Generating and applying unified diff patches programmatically in Python**:
+   - How to use Python's `difflib` module to generate unified diffs compatible with `git apply` and GNU `diff`/`patch` format
+   - Exact format requirements: header lines (`---`, `+++`), hunk headers (`@@`), line prefixes (` `, `+`, `-`)
+   - Common pitfalls: trailing whitespace, missing newline at end of file, incorrect line numbers in hunk headers
+   - How to use `subprocess` to apply diffs with `git apply` or `patch` command
+   - Working code examples for reading a file, modifying content, generating a proper unified diff, writing it to a `.diff` file, and applying it
+
+4. **Python subprocess patterns for running Maven builds**:
+   - How to invoke Maven with specific JDK versions (using `JAVA_HOME` environment variable)
+   - Capturing both stdout and stderr
+   - Setting correct working directory
+   - Handling Maven's `-B` (batch mode) flag for cleaner output parsing
+   - Timeout handling for hung builds
+
+5. **Java/JDK version management on Ubuntu/Travis CI**:
+   - How `jdk_switcher` works, how to source it and switch JDK versions
+   - Common JDK paths under `/usr/lib/jvm/` on Ubuntu
+   - How to detect which JDK version a Maven project requires from pom.xml properties (`maven.compiler.source`, `maven.compiler.target`, `java.version`)
+
+6. **pom.xml parsing in Python**:
+   - Using `xml.etree.ElementTree` to parse Maven POM files
+   - Handling Maven XML namespaces (`http://maven.apache.org/POM/4.0.0`)
+   - Extracting dependencies, plugins, properties, parent POM references
+   - Common pitfall: forgetting the namespace prefix when querying elements
+
+7. **Edge cases and pitfalls**:
+   - Multi-module Maven projects: how to identify which module fails and navigate to its source
+   - Inherited configurations from parent POMs
+   - Maven wrapper (`mvnw`) vs system Maven
+   - Build profiles that may affect compilation
+   - Encoding issues in Java source files
+   - When errors cascade (one fix resolves multiple errors)
+
+Provide working Python code examples with correct imports for all utility functions described above.

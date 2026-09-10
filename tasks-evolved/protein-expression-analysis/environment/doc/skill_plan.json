@@ -1,0 +1,44 @@
+{
+  "task_summary": "Populate an Excel workbook with two-way lookups, group statistics, and fold-change calculations on log2-transformed proteomics data while preserving formatting.",
+  "decomposition_rationale": "The task is a focused openpyxl workflow on a single file with tightly coupled concerns (formula injection, formatting preservation, and proteomics-specific math). A single cohesive skill avoids artificial boundaries between these interdependent steps.",
+  "skills": [
+    {
+      "name": "evo-proteomics-excel-formulas",
+      "description": "Use when populating Excel workbooks for quantitative proteomics tasks: writing INDEX/MATCH lookups, AVERAGE/STDEV.S group statistics, and log2 fold-change formulas while preserving cell formatting via openpyxl 3.1.5.",
+      "responsibility": "Provide utilities to load/save .xlsx files preserving formulas and formatting, detect group/category cells by fill color, build sample/protein coordinate indices, and emit correctly-formatted Excel formulas (INDEX-MATCH, AVERAGE, _xlfn.STDEV.S, log2FC, 2^FC) for proteomics analysis.",
+      "key_functions": [
+        "load_workbook_preserving",
+        "save_workbook_safely",
+        "get_cell_fill_hex",
+        "build_sample_column_index",
+        "classify_group_columns",
+        "build_index_match_formula",
+        "build_average_formula",
+        "build_stdev_s_formula",
+        "build_log2_fold_change_formula",
+        "build_linear_fold_change_formula"
+      ],
+      "dr_sections": [
+        "1. Workbook and Worksheet Loading with openpyxl 3.1.5",
+        "1.1 Correct `load_workbook()` Signature and Parameters",
+        "1.2 Accessing Sheets, Iterating Rows, and Reading Cells",
+        "1.3 Detecting Cell Fill Colors",
+        "2. Writing Excel Formulas to Cells",
+        "2.1 Formula Syntax and Evaluation",
+        "2.2 Writing Specific Statistical and Lookup Formulas",
+        "3. Preserving Formatting on Save",
+        "3.1 Confirmed Behavior of `wb.save()`",
+        "4. Data Pipeline Patterns for Quantitative Proteomics",
+        "4.1 Indexing Headers and Categories",
+        "4.2 Cross-Sheet Formula Generation",
+        "5. Quantitative Proteomics Domain Conventions",
+        "5.1 Arithmetic vs. Geometric Means on Log2 Data",
+        "5.2 Calculating Log2 Fold Change",
+        "5.3 TenPx and Sample Nomenclature Parsing",
+        "6. Common Pitfalls and Troubleshooting Reference",
+        "Complete Working Code Pattern"
+      ],
+      "depends_on": []
+    }
+  ]
+}

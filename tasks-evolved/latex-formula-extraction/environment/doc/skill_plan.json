@@ -1,0 +1,68 @@
+{
+  "task_summary": "Extract all standalone (display) LaTeX formulas from a research paper PDF, clean them, fix syntax errors, and write them to a markdown file.",
+  "decomposition_rationale": "The task naturally splits into three concerns: (1) PDF-to-Markdown conversion using marker-pdf to get raw LaTeX, (2) extraction and cleaning of display math formulas from the markdown output, and (3) syntax validation and fixing of extracted formulas. This separation keeps each skill focused and testable independently.",
+  "skills": [
+    {
+      "name": "evo-pdf-to-markdown",
+      "description": "Converts an academic PDF to Markdown using marker-pdf v1.3.3, preserving LaTeX math delimiters. Handles model initialization, converter setup, and text extraction.",
+      "responsibility": "PDF ingestion and conversion to Markdown text with LaTeX formulas preserved in $$ delimiters",
+      "key_functions": [
+        "convert_pdf_to_markdown",
+        "setup_marker_models"
+      ],
+      "dr_sections": [
+        "1. The Marker-PDF (Version 1.3.3) Framework",
+        "1.1 Python API Usage for Version 1.3.3",
+        "1.2 Configuration Options for Maximizing Extraction Quality",
+        "1.3 Handling Multi-line Equations and Known Limitations",
+        "2. Surya OCR Models and the Texify Pipeline",
+        "7. Common Pitfalls and Migration Notes"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-latex-formula-extraction",
+      "description": "Extracts display math formulas from marker-pdf Markdown output, strips equation numbers/tags/trailing punctuation, normalizes environments, and organizes them for output.",
+      "responsibility": "Regex-based extraction of $$...$$ blocks, stripping of equation numbering/tags/trailing punctuation, normalization of LaTeX environments to clean display math format",
+      "key_functions": [
+        "extract_display_formulas",
+        "strip_equation_numbering",
+        "strip_trailing_punctuation",
+        "normalize_formula"
+      ],
+      "dr_sections": [
+        "3. Distinguishing Display Math from Inline Math",
+        "3.1 Patterns and Heuristics for Extraction",
+        "3.2 Standard Environments and Delimiters in Source LaTeX",
+        "3.3 Normalization to $$...$$ Format",
+        "4.1 Common OCR Artifacts in Mathematical LaTeX"
+      ],
+      "depends_on": [
+        "evo-pdf-to-markdown"
+      ]
+    },
+    {
+      "name": "evo-latex-syntax-validation",
+      "description": "Validates extracted LaTeX formulas for syntax correctness (balanced braces, matched \\left/\\right delimiters, valid command names) and produces fixed versions of problematic formulas. Focuses only on typos/syntax errors, not physics meaning.",
+      "responsibility": "Syntax validation of LaTeX strings, detection of unmatched braces/delimiters/broken commands, and automated heuristic fixing of syntax errors",
+      "key_functions": [
+        "validate_latex_formula",
+        "check_balanced_braces",
+        "fix_left_right_delimiters",
+        "fix_broken_commands",
+        "detect_and_fix_all"
+      ],
+      "dr_sections": [
+        "4. LaTeX Formula Cleaning and Validation",
+        "4.2 Programmatic Validation using pylatexenc",
+        "4.3 Detecting and Fixing Common Syntax Errors",
+        "5. Rendering Verification with Playwright",
+        "5.1 Playwright Implementation for MathJax Verification",
+        "5.2 Handling Encoding Issues and Raw Strings"
+      ],
+      "depends_on": [
+        "evo-latex-formula-extraction"
+      ]
+    }
+  ]
+}

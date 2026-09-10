@@ -1,0 +1,42 @@
+Manufacturing production planning job-shop scheduling optimization with machine downtime constraints and policy budgets: Python implementation patterns for building reusable utility functions
+
+I need comprehensive information on the following topics to build a Python skill module for solving a flexible job-shop scheduling problem (FJSP) with machine downtime windows and budget constraints:
+
+1. **Problem formulation**: What is the exact mathematical formulation of the Flexible Job-Shop Scheduling Problem (FJSP) where each job has a sequence of operations, each operation can be processed on multiple alternative machines with different processing times, and machines have downtime windows (maintenance/unavailability periods)? How do "policy budgets" typically constrain scheduling in manufacturing planning contexts — are these related to tardiness penalties, overtime costs, or resource usage limits?
+
+2. **Input data parsing patterns**: 
+   - What are common formats for job-shop scheduling instance files (instance.txt)? Show Python code to parse standard FJSP benchmark formats (e.g., Brandimarte, Dauzère-Pérès, Hurink formats) where each line specifies a job's operations with alternative machines and processing times. What variations exist (e.g., number of jobs/machines on first line, then per-job operation details)?
+   - How to parse machine downtime windows from CSV (columns likely: machine, start, end) using pandas?
+   - How to parse policy budget constraints from JSON files?
+   - How to parse a baseline schedule (likely CSV or JSON with job, operation, machine, start, end, duration)?
+
+3. **Scheduling algorithms suitable for Python implementation within ~15 minutes of compute time**:
+   - Provide working Python code for a greedy dispatching heuristic (e.g., SPT, LPT, or priority-rule-based) for FJSP that respects operation precedence constraints and machine downtime windows.
+   - Provide working Python code for a local search / neighborhood search improvement heuristic (swap, insert, or critical-path-based moves) to reduce makespan from a baseline solution.
+   - How to implement a constraint-based approach: for each operation, find the earliest feasible start time on each eligible machine considering (a) predecessor operation completion, (b) machine availability (no overlap with other scheduled operations), and (c) machine downtime windows?
+   - Show code for a simple genetic algorithm or simulated annealing approach for FJSP if time permits.
+
+4. **Handling machine downtime windows correctly**:
+   - Given a list of downtime intervals [start, end] for each machine, how to compute the earliest available time on a machine after a given time point, skipping over any downtime windows? Provide a Python function `find_earliest_start(machine, earliest_time, duration, downtimes, scheduled_ops)` that returns the earliest start time where the operation can run without overlapping any downtime or already-scheduled operation.
+   - Edge cases: operation duration spans multiple downtime windows, downtime at time 0, adjacent downtime windows, zero-duration gaps between downtimes.
+
+5. **Policy budget constraints**:
+   - In manufacturing scheduling, what does "policy budget" typically mean? Could it refer to constraints like maximum number of operations per machine, maximum total processing time per machine, shift-based limits, or cost budgets?
+   - How to validate that a schedule meets policy budget constraints and how to ensure the output schedule has "no worse policy budgets" than a baseline?
+
+6. **Feasibility validation**:
+   - Python code to validate a FJSP schedule: check operation precedence within each job, no machine time overlaps, no overlap with downtime windows, correct duration values, and all operations scheduled.
+   - How to compute makespan from a schedule (maximum end time across all operations).
+
+7. **Output formatting**:
+   - Python code to generate solution.json with the exact schema: `{"status": "...", "makespan": N, "schedule": [{"job": J, "op": O, "machine": M, "start": S, "end": E, "dur": D}, ...]}`.
+   - Python code to generate schedule.csv with columns job, op, machine, start, end, dur using pandas.
+
+8. **Common pitfalls**:
+   - Off-by-one errors in machine/job/operation indexing (0-based vs 1-based).
+   - Forgetting to sort downtime windows before binary searching for availability.
+   - Not handling the case where an operation's processing time varies by machine (flexible job-shop vs classical job-shop).
+   - Producing infeasible schedules by ignoring downtime windows during local search moves.
+   - JSON serialization issues with numpy int64 types when writing solution.json.
+
+9. **Libraries available**: Only pandas 2.2.3 and pytest 8.4.1 are installed (Python 3.11). No OR-Tools, no scipy, no specialized optimization libraries. All scheduling logic must be implemented from scratch. What are the best pure-Python approaches for FJSP given these constraints?

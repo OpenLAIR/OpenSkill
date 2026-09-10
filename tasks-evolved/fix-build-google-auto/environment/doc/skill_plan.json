@@ -1,0 +1,52 @@
+{
+  "task_summary": "Diagnose and fix Java Maven build failures by analyzing error logs, generating diff patches, and applying them to the repository",
+  "decomposition_rationale": "The task has three distinct functional domains: (1) running Maven builds and parsing error output to diagnose failures, (2) generating correct unified diff patches for the identified fixes, and (3) applying those patches. These map cleanly to two skills: one for build diagnosis/error parsing and one for patch generation/application, since patch generation and application are tightly coupled.",
+  "skills": [
+    {
+      "name": "evo-maven-build-diagnosis",
+      "description": "Executes Maven builds, captures output, and parses error logs to identify the root cause of build failures. Handles compilation errors, dependency resolution failures, POM configuration issues, and JDK version incompatibilities.",
+      "responsibility": "Run Maven builds via subprocess, parse stdout/stderr for error patterns using regex, classify errors (compilation, dependency, POM, version), extract file paths/line numbers/error messages, and write diagnostic analysis to failed_reasons.txt",
+      "key_functions": [
+        "execute_maven_build",
+        "parse_compilation_errors",
+        "parse_dependency_errors",
+        "parse_plugin_errors",
+        "parse_version_incompatibilities",
+        "detect_java_version_from_pom",
+        "classify_build_failure",
+        "write_diagnosis_report"
+      ],
+      "dr_sections": [
+        "2. Python Subprocess Execution Patterns for Maven Builds",
+        "3. Java and JDK Version Management in CI Environments",
+        "4. Parsing `pom.xml` via Python's `xml.etree.ElementTree`",
+        "5. Maven Build Error Parsing and Information Extraction",
+        "6. Common Java and Maven Build Failure Patterns and Fixes",
+        "8. Edge Cases, Pitfalls, and Complex Project Topologies"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-maven-patch-generation",
+      "description": "Generates GNU-compatible unified diff patches for proposed code or POM fixes, writes them to numbered patch files, and applies them to the repository using git apply or patch command.",
+      "responsibility": "Generate unified diff content using difflib with proper handling of trailing newlines and 'No newline at end of file' markers, write patch files in standard diff format, and apply patches via subprocess (git apply or patch)",
+      "key_functions": [
+        "generate_unified_diff",
+        "make_strict_patch",
+        "write_patch_file",
+        "apply_patch_via_git",
+        "apply_patch_via_patch_command",
+        "modify_java_source",
+        "modify_pom_xml"
+      ],
+      "dr_sections": [
+        "7. Programmatic Generation and Application of Unified Diff Patches",
+        "6. Common Java and Maven Build Failure Patterns and Fixes",
+        "4. Parsing `pom.xml` via Python's `xml.etree.ElementTree`"
+      ],
+      "depends_on": [
+        "evo-maven-build-diagnosis"
+      ]
+    }
+  ]
+}

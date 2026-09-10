@@ -1,0 +1,38 @@
+Provide a comprehensive technical guide for building a Python utility module that implements the following macroeconomic time series analysis pipeline, with exact API usage, working code examples, and common pitfalls:
+
+1. **Reading ERP (Economic Report of the President) Excel files (.xls format) with pandas and xlrd:**
+   - How to use `pd.read_excel()` with `.xls` files using the `xlrd` engine (xlrd version 2.0.1 which only supports .xls).
+   - How to handle ERP table formats: these tables typically have multi-row headers, footnotes, mixed text/numeric rows, and annual data followed by quarterly breakdowns at the bottom. What are the best practices for `header`, `skiprows`, `skipfooter`, `usecols` parameters? How to programmatically detect where annual data ends and quarterly data begins?
+   - How to extract "Total" column (first data column) from ERP Table 10 (Personal Consumption Expenditures) and Table 12 (Private Fixed Investment).
+   - How to handle 2024 partial year data: when only some quarters (e.g., Q1-Q3) are available, how to compute the annual average from available quarters.
+
+2. **Reading CPI data from an Excel file (.xlsx) downloaded from FRED:**
+   - Typical structure of FRED CPI downloads (CPIAUCSL series) — column names, date formats, monthly vs annual frequency.
+   - How to convert monthly CPI data to annual CPI (annual average of monthly values).
+   - How to use CPI to deflate nominal values: the exact formula (nominal_value / CPI * 100 or similar), and what base year convention FRED CPI uses.
+
+3. **Hodrick-Prescott (HP) filter implementation in statsmodels 0.14.4:**
+   - Exact import path: `from statsmodels.tsa.filters.hp_filter import hpfilter` — is this correct, or is it `statsmodels.api.tsa.filters.hpfilter`? Confirm the correct import for statsmodels 0.14.4.
+   - Full function signature of `hpfilter()`: what does it accept (numpy array, pandas Series, list)? What does it return (tuple of cycle and trend, or trend and cycle)? What is the ORDER of the return values?
+   - The `lamb` parameter (lambda smoothing parameter): what is the parameter name exactly — is it `lamb`, `lambda`, or `lam`? For annual data, λ=100 is standard; confirm this is passed correctly.
+   - Should the input be the natural log of the real series (i.e., `np.log(real_series)`) before applying the HP filter? Confirm that the cyclical component returned is the log deviation (percentage deviation from trend).
+   - Working code example: `cycle, trend = hpfilter(np.log(real_series), lamb=100)` — verify this is correct.
+
+4. **Pearson correlation computation:**
+   - Using `numpy.corrcoef()` vs `scipy.stats.pearsonr()` vs `pandas.Series.corr()` — which returns just the correlation coefficient? What are the return value structures?
+   - `np.corrcoef(x, y)` returns a matrix; confirm that `np.corrcoef(x, y)[0, 1]` gives the Pearson r.
+   - `scipy.stats.pearsonr(x, y)` returns `(r, p-value)` — confirm for scipy 1.14.1.
+
+5. **Data alignment and filtering by year range (1973-2024 inclusive):**
+   - Best practices for filtering pandas DataFrames/Series by year range.
+   - Ensuring both series (PCE and PFI) are aligned on the same years before computing correlation.
+
+6. **Common pitfalls:**
+   - xlrd 2.0.1 does NOT support .xlsx files — only .xls. Confirm this limitation.
+   - ERP tables often have years as index but with extra rows (headers, footnotes, "Seasonally adjusted" labels). How to clean these robustly.
+   - Off-by-one errors in year filtering (inclusive vs exclusive ranges).
+   - NaN handling: does `hpfilter` handle NaN values, or must they be removed first?
+   - Differences between `np.log` (natural log) and `np.log10` — confirm `np.log` is ln.
+   - Rounding: `round(value, 5)` vs `f"{value:.5f}"` — which correctly rounds to 5 decimal places for output?
+
+7. **Package versions confirmed available:** pandas 2.2.3, numpy 1.26.4, openpyxl 3.1.5, xlrd 2.0.1, scipy 1.14.1, statsmodels 0.14.4. Confirm all API details are consistent with these versions.

@@ -1,0 +1,51 @@
+Research query:
+
+OpenCV 4.12 Python template matching for object counting in video frames: complete API guide and working code examples
+
+I need comprehensive documentation and working code examples for building a Python utility module that:
+
+1. **Video frame extraction with OpenCV (cv2.VideoCapture)**:
+   - Exact API for `cv2.VideoCapture` to open MP4 files, read frames, and extract key frames
+   - What constitutes "key frames" extraction from a video — methods to extract representative frames (e.g., scene change detection using frame differencing, or uniform sampling)
+   - `cap.read()` return values, `cap.get(cv2.CAP_PROP_FRAME_COUNT)`, `cap.get(cv2.CAP_PROP_FPS)` usage
+   - How to detect scene changes or significant frame differences using `cv2.absdiff`, thresholding, or histogram comparison to identify key frames
+   - `cv2.imwrite()` for saving frames as PNG with correct parameters
+   - String formatting for sequential filenames like `keyframes_%03d.png`
+
+2. **RGB to Grayscale conversion with OpenCV**:
+   - `cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)` — exact function signature and behavior
+   - Note: OpenCV reads images in BGR not RGB — clarify this critical distinction
+   - How to read an image, convert to grayscale, and overwrite the same file in-place
+   - `cv2.imread()` flags: `cv2.IMREAD_COLOR` vs `cv2.IMREAD_GRAYSCALE`
+   - Saving grayscale images back with `cv2.imwrite()` — does it handle single-channel arrays correctly?
+
+3. **Template matching for object counting (cv2.matchTemplate)**:
+   - Complete API: `cv2.matchTemplate(image, template, method)` — all method options (`cv2.TM_CCOEFF_NORMED`, `cv2.TM_SQDIFF_NORMED`, `cv2.TM_CCORR_NORMED`, etc.)
+   - Which method is best for counting game sprites/objects in Super Mario screenshots?
+   - **Critical threshold values**: What threshold to use with `cv2.TM_CCOEFF_NORMED` for reliable detection (e.g., 0.7, 0.8, 0.9)?
+   - How to count MULTIPLE occurrences of a template in a single image — using `np.where(result >= threshold)` to find all matches
+   - **Non-maximum suppression / overlap handling**: When multiple detections overlap the same object, how to deduplicate using spatial proximity filtering (e.g., grouping nearby detections within template width/height)
+   - Working code example: find all locations where template matches above threshold, then filter overlapping detections to get accurate count
+   - **Multi-scale template matching**: Do I need to resize the template at different scales for Super Mario sprites? How to implement this?
+   - Should both the frame and template be grayscale for template matching? Does matching grayscale-to-grayscale work correctly?
+
+4. **Critical pitfalls and edge cases**:
+   - Template matching on grayscale vs color images — must template and source be same number of channels?
+   - What happens if the template is larger than the image? (cv2.error)
+   - `cv2.matchTemplate` returns a 2D result array — explain its dimensions relative to input image and template sizes
+   - OpenCV `imread` returning None when file doesn't exist — error handling
+   - Coordinate system: `np.where` returns (y_coords, x_coords) not (x, y)
+   - When counting overlapping detections: proper algorithm to cluster nearby points (using distance threshold equal to template dimensions)
+   - Video codec issues with `cv2.VideoCapture` on Ubuntu — does ffmpeg backend work out of the box with opencv-python 4.12?
+
+5. **Pandas CSV output**:
+   - `pd.DataFrame` construction with columns ["frame_id", "coins", "enemies", "turtles"]
+   - `df.to_csv('/root/counting_results.csv', index=False)` — exact parameters to avoid row index in output
+   - Ensuring integer types for count columns
+
+6. **Key frame extraction strategies for game recordings**:
+   - For a Super Mario gameplay recording, what's the best approach — extract every Nth frame, or detect scene changes?
+   - How many key frames are typical? Should I use `cv2.VideoCapture` with scene detection or just sample at regular intervals (e.g., every 1 second)?
+   - Frame differencing approach: compute mean absolute difference between consecutive frames, use threshold to detect significant changes
+
+Provide complete, copy-pastable Python code examples using `import cv2`, `import numpy as np`, `import pandas as pd` that demonstrate each of these operations. Specify exact import paths, function signatures, and parameter values that work with opencv-python==4.12.0.88 and pandas==2.3.3.

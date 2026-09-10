@@ -1,0 +1,58 @@
+{
+  "task_summary": "Analyze lake water temperature for long-term warming trends and identify the most important driving factor category (Heat/Flow/Wind/Human) from climate, hydrology, and land cover data.",
+  "decomposition_rationale": "The task has two distinct analytical phases: (1) trend detection using Mann-Kendall statistics, and (2) driving factor attribution using ML-based feature importance with category aggregation. A data loading/merging skill is foundational to both. Three skills cleanly separate data pipeline, trend analysis, and factor attribution concerns.",
+  "skills": [
+    {
+      "name": "evo-lake-data-pipeline",
+      "description": "Loads, merges, and preprocesses the four CSV datasets (water_temperature, climate, land_cover, hydrology) into analysis-ready DataFrames. Handles date parsing, temporal alignment, annual aggregation, and NaN management.",
+      "responsibility": "All data I/O, merging, resampling, and cleaning. Produces unified DataFrames ready for trend analysis and factor attribution.",
+      "key_functions": [
+        "load_all_datasets",
+        "merge_datasets",
+        "compute_annual_means",
+        "get_feature_columns_by_category"
+      ],
+      "dr_sections": [
+        "7. Data Pipeline Patterns using `pandas` (v2.2.3)",
+        "6. Categorization of Driving Factors"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-lake-trend-analysis",
+      "description": "Performs non-parametric Mann-Kendall trend detection on lake water temperature time series using pymannkendall, outputting slope and p-value to trend_result.csv.",
+      "responsibility": "Trend detection on water temperature series, handling autocorrelation via modified MK tests, NaN removal, and CSV output of slope and p-value.",
+      "key_functions": [
+        "run_mann_kendall_trend",
+        "save_trend_result"
+      ],
+      "dr_sections": [
+        "2. Non-Parametric Trend Detection: `pymannkendall` (Version 1.4.3)",
+        "3. Parametric Linear Regression: `scipy.stats` (Version 1.14.1)"
+      ],
+      "depends_on": [
+        "evo-lake-data-pipeline"
+      ]
+    },
+    {
+      "name": "evo-lake-factor-attribution",
+      "description": "Trains a Random Forest model to determine feature importances of environmental predictors, maps features to categories (Heat/Flow/Wind/Human), sums contributions per category, and outputs the dominant factor to dominant_factor.csv.",
+      "responsibility": "ML-based feature importance extraction, manual category mapping of all predictor variables, aggregation of importance by category, identification of the single most important category, and CSV output.",
+      "key_functions": [
+        "train_random_forest",
+        "compute_feature_importances",
+        "map_features_to_categories",
+        "get_dominant_category",
+        "save_dominant_factor"
+      ],
+      "dr_sections": [
+        "4. Driving Factor Attribution via `scikit-learn` (Version 1.5.2)",
+        "5. Overcoming Pitfalls: Multicollinearity and Permutation Importance",
+        "6. Categorization of Driving Factors"
+      ],
+      "depends_on": [
+        "evo-lake-data-pipeline"
+      ]
+    }
+  ]
+}

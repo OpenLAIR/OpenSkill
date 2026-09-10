@@ -1,0 +1,76 @@
+{
+  "task_summary": "Run DC-OPF with reserve co-optimization for base and counterfactual (20% increased line 64→1501 capacity) scenarios, extract LMPs, reserve MCP, binding lines, and produce a comparison report.json",
+  "decomposition_rationale": "The task naturally splits into three concerns: (1) parsing MATPOWER JSON data and building network matrices, (2) formulating and solving the DC-OPF with reserve co-optimization and extracting economic signals, and (3) comparing scenarios and formatting the final JSON report. This separation keeps data I/O, optimization logic, and output formatting independent.",
+  "skills": [
+    {
+      "name": "evo-matpower-parser",
+      "description": "Parses MATPOWER JSON files into structured Python data: bus, gen, branch, gencost arrays with proper indexing. Builds bus mapping dictionaries (ext2int, int2ext), computes network matrices (incidence matrix A, branch susceptance Bbranch, nodal susceptance Bbus, PTDF), and provides utilities for modifying branch parameters (e.g., increasing thermal limits).",
+      "responsibility": "All data ingestion from MATPOWER JSON, bus index mapping, network matrix construction (A, Bbranch, Bbus, PTDF), branch modification utilities, and generator cost parsing (polynomial and piecewise linear).",
+      "key_functions": [
+        "load_matpower_json",
+        "create_bus_mappings",
+        "parse_generators",
+        "parse_branches",
+        "parse_gencost",
+        "compute_network_matrices",
+        "modify_branch_rate",
+        "find_slack_bus"
+      ],
+      "dr_sections": [
+        "MATPOWER Data Structure and JSON Parsing",
+        "Exact Structure of MATPOWER JSON",
+        "Column Indices for Data Matrices",
+        "Parsing Generator Cost Functions",
+        "MATPOWER Bus Numbering, Indexing, and MW Base Conventions",
+        "Internal vs. External Bus Indexing",
+        "Modifying Specific Branches",
+        "BaseMVA and Sign Conventions",
+        "Matrix Constructions for Network Flows"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-dcopf-solver",
+      "description": "Formulates and solves DC-OPF with spinning reserve co-optimization using Python optimization libraries (PuLP, CVXPY, or Pyomo). Extracts LMPs from nodal power balance dual variables, reserve MCP from system reserve constraint dual, generator dispatch, and identifies binding transmission lines (>=99% loading).",
+      "responsibility": "Optimization model construction (objective, constraints: power balance, thermal limits, capacity coupling, reserve requirement), solving, dual variable extraction for LMPs and reserve MCP, and identifying binding lines.",
+      "key_functions": [
+        "solve_dcopf_with_reserves",
+        "extract_lmps",
+        "extract_reserve_mcp",
+        "identify_binding_lines",
+        "compute_total_cost"
+      ],
+      "dr_sections": [
+        "Mathematical Formulation of DC-OPF with Spinning Reserves",
+        "Standard Capacity Coupling",
+        "Matrix Constructions for Network Flows",
+        "Extracting Economic Signals (LMP and MCP)",
+        "Optimization Frameworks in Python",
+        "Implementation Guides and Working Code",
+        "Introduction to DC-OPF and Market Co-Optimization"
+      ],
+      "depends_on": [
+        "evo-matpower-parser"
+      ]
+    },
+    {
+      "name": "evo-market-report",
+      "description": "Compares base case and counterfactual DC-OPF results, computes impact analysis metrics (cost reduction, top 3 buses with largest LMP drop, congestion relief flag), and formats everything into the required report.json structure with proper rounding and JSON serialization.",
+      "responsibility": "Scenario comparison logic, impact analysis computation, JSON report assembly and serialization with correct field names, types, and structure.",
+      "key_functions": [
+        "compute_impact_analysis",
+        "find_top_lmp_drops",
+        "check_congestion_relieved",
+        "build_report_json",
+        "export_report"
+      ],
+      "dr_sections": [
+        "Output Formatting",
+        "Extracting Economic Signals (LMP and MCP)"
+      ],
+      "depends_on": [
+        "evo-dcopf-solver"
+      ]
+    }
+  ]
+}

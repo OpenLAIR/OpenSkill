@@ -1,0 +1,46 @@
+Research query:
+
+How to build a Python utility module that (1) scrapes specific Paul Graham essays from paulgraham.com, (2) converts the extracted text to speech using either the OpenAI TTS API or the ElevenLabs TTS API, and (3) concatenates/saves the result as a single MP3 file. I need the following specific technical details:
+
+**1. Scraping Paul Graham essays:**
+- What are the exact URLs for "Do Things that Don't Scale" and "Founder Mode" on paulgraham.com? What is the URL pattern (e.g., paulgraham.com/ds.html, paulgraham.com/foundermode.html)?
+- What is the HTML structure of paulgraham.com essay pages? Which HTML tags/selectors contain the essay text (e.g., `<table>`, `<font>`, `<p>`)? Are there any gotchas with the page encoding or layout?
+- Working Python code using `requests` and `BeautifulSoup` (bs4) to fetch and extract clean essay text from these pages. What are the correct import paths (`from bs4 import BeautifulSoup`)?
+- How to handle character encoding issues, remove navigation/header/footer elements, and extract only the essay body text?
+
+**2. OpenAI TTS API usage (current as of 2024-2025):**
+- What is the exact Python API for OpenAI's text-to-speech? Provide working code with `from openai import OpenAI`, `client.audio.speech.create(...)` — exact method name, all parameters, their types and defaults.
+- What models are available (e.g., `tts-1`, `tts-1-hd`)? What voices are available (e.g., `alloy`, `echo`, `fable`, `onyx`, `nova`, `shimmer`)?
+- What is the maximum input text length per API call? How to handle long essays that exceed this limit — do you need to chunk the text? What is the recommended chunk size?
+- What is the response format? Does `response.content` give raw bytes? How to write it to an MP3 file? What `response_format` options exist (`mp3`, `opus`, `aac`, `flac`)?
+- What is the correct pip package name and version (`openai>=1.0`)?
+
+**3. ElevenLabs TTS API usage:**
+- What is the current Python SDK for ElevenLabs? Is it `elevenlabs` pip package? What is the correct import path and current API?
+- Working code example using the ElevenLabs Python SDK to convert text to speech and get audio bytes/stream. Show exact function signatures: `generate()`, `client.generate()`, or `client.text_to_speech.convert()` — which is the current non-deprecated API?
+- What are available voice IDs or voice names? How to specify a voice?
+- What is the text length limit per request? How to handle chunking for long texts?
+- How to get the output as MP3 bytes?
+- Common pitfalls: has the ElevenLabs Python SDK API changed recently? What breaking changes exist between v0.x and v1.x?
+
+**4. Audio concatenation and MP3 handling:**
+- How to concatenate multiple MP3 audio segments (from chunked TTS calls) into a single MP3 file using Python?
+- Can you simply concatenate raw MP3 bytes (`b"".join(chunks)`) and write to a file, or do you need pydub/ffmpeg?
+- Working code using `pydub` (`from pydub import AudioSegment`) to load MP3 bytes from memory and concatenate. What is `AudioSegment.from_mp3(io.BytesIO(data))`?
+- Since ffmpeg is available in the environment, how to use it as a subprocess to concatenate MP3 files?
+- Pip package name for pydub?
+
+**5. Text chunking strategy:**
+- Best practices for splitting long text into chunks for TTS APIs without cutting words or sentences mid-way. How to split by sentences or paragraphs while staying under the character limit?
+- What is the exact character limit for OpenAI TTS (4096 characters?) and ElevenLabs?
+
+**6. Fallback to local TTS:**
+- If both cloud APIs fail, what local Python TTS libraries work on Ubuntu 24.04 without GPU? Options like `gTTS` (Google Translate TTS), `pyttsx3`, or `edge-tts`?
+- Working code for `gTTS` and `edge-tts` to generate MP3 output.
+- Pip package names and correct imports.
+
+**7. Common pitfalls:**
+- OpenAI client initialization: `OpenAI()` auto-reads `OPENAI_API_KEY` from environment? Or do you need `OpenAI(api_key=os.environ["OPENAI_API_KEY"])`?
+- ElevenLabs client initialization with API key from environment variable `ELEVENLABS_API_KEY`.
+- Rate limiting, timeout handling, and retry logic for both APIs.
+- Any issues with writing binary audio data to files (need `"wb"` mode)?

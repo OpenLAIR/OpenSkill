@@ -1,0 +1,37 @@
+Scapy 2.5.0 Python library: comprehensive guide for building a reusable PCAP analysis utility module. I need exact API details, working code examples, and pitfalls for the following operations:
+
+1. **Reading PCAP files with Scapy**: Exact usage of `rdpcap()` and `PcapReader` for large files. What does `rdpcap("file.pcap")` return? How to iterate packets. Memory considerations for ~32MB pcap files.
+
+2. **Packet layer access in Scapy 2.5.0**:
+   - How to check if a packet has a specific layer: `packet.haslayer(TCP)`, `packet.haslayer(UDP)`, `packet.haslayer(ICMP)`, `packet.haslayer(ARP)`, `packet.haslayer(IP)`. Exact import paths: `from scapy.all import *` vs `from scapy.layers.inet import IP, TCP, UDP, ICMP` vs `from scapy.layers.l2 import ARP, Ether`.
+   - How to get packet length: is it `len(packet)`, `packet.len`, or `packet[IP].len`? Which gives the raw wire length (total bytes on wire)? What about `packet.wirelen` in Scapy 2.5.0?
+   - How to extract source/destination IP: `packet[IP].src`, `packet[IP].dst` — do these return strings?
+   - How to extract source/destination ports: `packet[TCP].sport`, `packet[TCP].dport`, `packet[UDP].sport`, `packet[UDP].dport`. What happens if you access sport/dport on a packet without TCP/UDP layer?
+   - How to get the timestamp of a packet: `packet.time` — what type does it return? Is it a float (epoch seconds)? How to convert to seconds for inter-arrival time calculations?
+   - How to determine protocol number: `packet[IP].proto` — what integer values correspond to TCP (6), UDP (17), ICMP (1)?
+
+3. **Protocol detection pitfalls in Scapy**:
+   - Can a packet have both ARP and IP layers? How does ARP interact with IP layer detection?
+   - For counting "protocol_tcp" etc., should we check `haslayer(TCP)` or check `IP.proto == 6`? Which is more reliable?
+   - ICMP packets: do they have an IP layer too? So protocol_ip_total should include ICMP packets that are encapsulated in IP?
+   - Are there packets that have IP but not TCP/UDP/ICMP?
+
+4. **Shannon entropy computation in Python using numpy 1.26.4**:
+   - Working code example to compute Shannon entropy (in bits, using log base 2) from a list of values (IP addresses, port numbers) by computing frequency distribution. Use `numpy` or `collections.Counter`. Exact formula: `H = -sum(p * log2(p))` for each unique value's probability p. Handle edge cases where only one unique value exists (entropy = 0).
+
+5. **Pandas 2.2.2 CSV handling**:
+   - How to read a CSV that has comment lines starting with `#` while preserving those comment lines in output. `pd.read_csv` with `comment='#'` parameter — does this skip comment lines entirely? 
+   - Best approach: read the file line-by-line, preserve comment lines, and only fill in the `value` column for non-comment metric rows. Working code pattern for this.
+   - How to write back preserving the exact format with comments.
+
+6. **Time bucketing for packets_per_minute**:
+   - How to bucket packets into 60-second intervals based on their timestamp, count packets per bucket, then compute avg/max/min across those buckets. What about the last partial bucket — should it be included? Standard approach in network traffic analysis.
+
+7. **Inter-arrival time (IAT) calculations**:
+   - Sort packets by timestamp, compute differences between consecutive packet timestamps. Compute mean, variance, and coefficient of variation (std/mean). Use numpy for these calculations. `np.var` uses population variance by default (ddof=0) vs sample variance (ddof=1) — which is standard for IAT variance in network analysis?
+
+8. **Network density formula**: For directed graphs, density = num_edges / (num_nodes * (num_nodes - 1)). Confirm this is the standard formula for directed graph density (not dividing by 2).
+
+9. **Bidirectional flow counting**: A flow is bidirectional if both (src,dst,sport,dport,proto) and (dst,src,dport,sport,proto) exist. Should each such pair be counted once or twice? If flows A→B and B→A both exist, is that 1 bidirectional flow or 2?
+
+10. **DAPT2020 dataset characteristics**: What kind of traffic does the DAPT2020 dataset contain? Is it known to contain port scanning, DoS attacks, beaconing behavior? What are typical indicators to detect these patterns in PCAP analysis? Thresholds for classifying traffic as having port scan (many destinations from one source on different ports), DoS (high packet rate spikes), or beaconing (regular periodic intervals with low IAT coefficient of variation).

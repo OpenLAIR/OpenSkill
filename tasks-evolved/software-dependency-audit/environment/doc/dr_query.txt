@@ -1,0 +1,34 @@
+How to use Trivy CLI tool to scan a package-lock.json file for npm dependency vulnerabilities using an offline/pre-downloaded database, and then parse the JSON output in Python to extract CVE information including package name, installed version, CVE ID, severity, CVSS score, fixed version, title, and reference URL. Specifically I need to know:
+
+1. **Trivy CLI exact command and flags for offline scanning of package-lock.json**: What is the exact command to run `trivy fs` or `trivy sbom` against a `package-lock.json` file using a local/offline vulnerability database? What are the flags for:
+   - Specifying the cache directory (e.g., `--cache-dir /root/.cache/trivy` or `--cache-dir /root/trivy-cache`)
+   - Skipping database download/update (`--skip-db-update`, `--skip-java-db-update`, `--skip-check-update`, `--offline-scan`)
+   - Filtering by severity (`--severity HIGH,CRITICAL`)
+   - Outputting JSON format (`--format json` or `--format table`)
+   - Any flags needed to ensure it scans `package-lock.json` specifically as an npm lockfile
+   - The `--list-all-pkgs` flag behavior
+
+2. **Trivy JSON output schema**: What is the exact JSON structure returned by `trivy fs --format json`? Specifically:
+   - Where are vulnerabilities located in the JSON hierarchy (Results[].Vulnerabilities[])?
+   - What are the exact field names for: package name (`PkgName`), installed version (`InstalledVersion`), CVE ID (`VulnerabilityID`), severity (`Severity`), CVSS score (where exactly — `CVSS.nvd.V3Score`, `CVSS.ghsa.V3Score`, `CVSS.redhat.V3Score`?), fixed version (`FixedVersion`), title (`Title`), description (`Description`), and reference URLs (`References`, `PrimaryURL`)?
+   - How does Trivy represent CVSS scores from different sources (NVD, GHSA, RedHat)? What is the nesting structure of the CVSS field? Are scores stored as floats?
+   - What happens when `FixedVersion` is not available — is it an empty string, null, or missing key?
+
+3. **Trivy database structure in the cache directory**: When a pre-downloaded Trivy DB is unzipped into `/root/.cache/trivy`, what files/folders should be present (e.g., `db/trivy.db`, `db/metadata.json`)? What is the expected directory layout for Trivy to recognize the offline DB? Are there separate vulnerability DB and Java DB files?
+
+4. **Python code pattern to**: 
+   - Run Trivy via `subprocess.run()` with proper arguments, capture JSON stdout
+   - Parse the JSON output and extract all HIGH/CRITICAL vulnerabilities
+   - Handle edge cases: missing CVSS scores (fall back through NVD → GHSA → RedHat sources), missing fixed versions, duplicate CVEs for the same package
+   - Write results to CSV using Python's `csv` module with proper quoting for fields that may contain commas or special characters
+   - The CSV columns should be: `Package,Version,CVE_ID,Severity,CVSS_Score,Fixed_Version,Title,Url`
+
+5. **Common pitfalls with Trivy offline scanning**:
+   - Does `--skip-db-update` alone suffice or do you also need `--skip-java-db-update` and `--offline-scan`?
+   - Version-specific behavior differences in Trivy (the Dockerfile installs from the apt repo — what version is typically installed?)
+   - Does Trivy sometimes report GHSA IDs instead of CVE IDs? How to handle that?
+   - Are there cases where the same vulnerability appears multiple times in the output for different dependency paths?
+   - How does Trivy handle the `node_modules` directory vs just a `package-lock.json` file scan?
+   - What `--scanners` flag value should be used (e.g., `--scanners vuln` to avoid misconfig/secret scanning)?
+
+6. **CVSS score extraction specifics**: In Trivy's JSON output, what are the exact key paths for CVSS v3 scores from different vendors? Provide a working Python code example that extracts the best available CVSS score from the Trivy vulnerability object, preferring NVD score, falling back to other sources. What is the typical numeric format (float with one decimal)?

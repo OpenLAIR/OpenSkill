@@ -1,0 +1,58 @@
+{
+  "task_summary": "Detect filler words in an interview video with timestamps, save annotations as JSON, and stitch filler word clips into a single output video.",
+  "decomposition_rationale": "The task has three distinct concerns: (1) speech-to-text transcription with word-level timestamps, (2) filler word detection via text matching with normalization, and (3) video clip extraction and concatenation. Skills 1 and 2 are tightly coupled (transcription feeds directly into detection), so they can be combined. Video processing is a separate concern. This yields 2 skills with clear boundaries.",
+  "skills": [
+    {
+      "name": "evo-speech-filler-detection",
+      "description": "Extracts audio from video, transcribes it using faster-whisper with word-level timestamps, and detects filler words/phrases using normalized text matching with sliding window logic. Outputs structured annotations as JSON.",
+      "responsibility": "Audio extraction from video via ffmpeg subprocess, speech-to-text transcription using faster-whisper with optimized CPU settings, text normalization (lowercasing, punctuation stripping, whitespace handling), single-word and multi-word filler phrase detection using n-gram sliding window, and JSON annotation output.",
+      "key_functions": [
+        "extract_audio_for_whisper",
+        "transcribe_with_word_timestamps",
+        "normalize_word",
+        "detect_filler_words",
+        "save_annotations_json"
+      ],
+      "dr_sections": [
+        "1. Whisper Model Frameworks and Word-Level Timestamps",
+        "1.1 Package Ecosystem: `whisper` vs `faster-whisper` vs `openai-whisper`",
+        "1.2 The `faster-whisper` API and Implementation",
+        "1.4 Model Sizes and the Accuracy vs. Speed Tradeoff",
+        "2. Audio Extraction from Video using FFmpeg",
+        "2.1 Subprocess vs. FFmpeg-Python",
+        "2.2 Extraction Command and Parameters",
+        "3. Filler Word Detection Logic",
+        "3.1 Normalizing Whisper Transcripts",
+        "3.2 Handling Whisper Artifacts and Disfluencies",
+        "3.3 Sliding Window Logic for Multi-Word Phrases",
+        "5. Installation and Environment Constraints",
+        "5.1 Pip Packages and Dependencies",
+        "5.2 CPU Execution without CUDA",
+        "6. Common Pitfalls and Mitigation Strategies",
+        "6.1 Hallucination on Silence",
+        "6.2 Timestamp Accuracy and Temporal Drift",
+        "6.3 Memory Saturation on CPU"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-video-clip-stitcher",
+      "description": "Extracts precise video clips at given timestamps from a source video using ffmpeg with re-encoding for sub-second accuracy, then concatenates all clips into a single output video using the concat demuxer.",
+      "responsibility": "Frame-accurate video clip extraction with re-encoding (libx264/aac), timestamp padding for acoustic continuity, temporary clip file management, concat demuxer list generation, and final video concatenation with stream copy.",
+      "key_functions": [
+        "extract_clip",
+        "concatenate_clips",
+        "build_filler_compilation"
+      ],
+      "dr_sections": [
+        "4. Video Clip Extraction and Concatenation with FFmpeg",
+        "4.1 Frame-Accurate Clip Extraction",
+        "4.2 Concatenation Logic",
+        "6.2 Timestamp Accuracy and Temporal Drift"
+      ],
+      "depends_on": [
+        "evo-speech-filler-detection"
+      ]
+    }
+  ]
+}

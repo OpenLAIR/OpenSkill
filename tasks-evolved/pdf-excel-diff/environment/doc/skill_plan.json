@@ -1,0 +1,59 @@
+{
+  "task_summary": "Extract employee table from PDF backup, compare with current Excel file, identify deleted and modified employees, and write a JSON diff report.",
+  "decomposition_rationale": "This task involves three distinct concerns: (1) extracting tabular data from a PDF, (2) comparing two DataFrames to find deletions and modifications, and (3) serializing results to JSON with proper type handling. However, since the task is relatively straightforward and the steps are tightly coupled, two skills provide clean separation without over-decomposition: one for data extraction/normalization and one for diffing/reporting.",
+  "skills": [
+    {
+      "name": "evo-pdf-excel-extraction",
+      "description": "Extracts tabular data from PDF files using pdfplumber and reads Excel files using pandas/openpyxl, returning normalized pandas DataFrames with proper data types.",
+      "responsibility": "Handle all data ingestion: PDF table extraction (with multi-page support, header detection, cell cleaning) and Excel file reading. Normalize column names, strip whitespace, preserve string IDs, and coerce numeric columns appropriately.",
+      "key_functions": [
+        "extract_table_from_pdf",
+        "read_excel_file",
+        "normalize_dataframe"
+      ],
+      "dr_sections": [
+        "1. Extracting Tables from PDFs with `pdfplumber` (Version 0.11.4)",
+        "1.1 Core API: Opening and Processing Files",
+        "1.2 `extract_table()` vs `extract_tables()`",
+        "1.3 Deep Dive into `table_settings` Parameters",
+        "1.4 Handling Multi-page Tables",
+        "1.5 Common Pitfalls in `pdfplumber` Extraction",
+        "1.6 Complete `pdfplumber` Working Example",
+        "2. Alternative Table Extraction with `tabula-py` (Version 2.9.3)",
+        "3. Reading Excel Files with `pandas` (v2.2.3) and `openpyxl` (v3.1.5)",
+        "3.1 Correct Parameters for Reading `.xlsx`",
+        "3.2 Data Type Handling and Inference Limitations",
+        "5. Data Type Normalization Between PDF and Excel",
+        "5.1 Normalizing Strings and Whitespace",
+        "5.2 Preserving Zero-Padded Keys",
+        "5.3 Coercing Numerics Intelligently"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-dataframe-diff-report",
+      "description": "Compares two pandas DataFrames (old vs new) by a key column to identify deleted rows and modified fields, then exports results as a properly formatted JSON report with NumPy-safe serialization.",
+      "responsibility": "Perform outer merge with indicator to detect deletions, iterate matched rows for field-by-field comparison with NaN and float tolerance handling, format output per the required JSON schema, and serialize with custom NumPy encoder.",
+      "key_functions": [
+        "find_deleted_employees",
+        "find_modified_employees",
+        "build_diff_report",
+        "export_diff_to_json"
+      ],
+      "dr_sections": [
+        "4. DataFrame Comparison Patterns for Record Diffing",
+        "4.1 The Outer Merge with `indicator=True`",
+        "4.2 Iterating Over Matched Rows for Field-by-Field Diffing",
+        "4.3 Handling NaN Comparisons and Type Mismatches",
+        "5.4 Float Precision Tolerance",
+        "6. JSON Output Formatting and Serialization",
+        "6.1 The NumPy Serialization Bug (TypeError)",
+        "6.2 Designing a Custom JSON Encoder",
+        "6.3 Formatting, Sorting, and Indentation"
+      ],
+      "depends_on": [
+        "evo-pdf-excel-extraction"
+      ]
+    }
+  ]
+}

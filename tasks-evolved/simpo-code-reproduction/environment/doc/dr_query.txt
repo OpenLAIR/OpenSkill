@@ -1,0 +1,47 @@
+Research query:
+
+SimPO (Simple Preference Optimization) loss function: exact mathematical formulation, PyTorch implementation details, and relationship to DPO loss. I need comprehensive information on the following:
+
+1. **SimPO paper details**: The SimPO paper by Yu Meng et al. (2024) "SimPO: Simple Preference Optimization with a Reference-Free Reward" — what is the exact mathematical formula for the SimPO loss? How does it differ from standard DPO (Direct Preference Optimization) loss? Specifically:
+   - What is the length-normalized reward formulation in SimPO? (average log probability rather than sum)
+   - What is the gamma (γ) margin term in the SimPO objective?
+   - The exact loss formula: L_SimPO = -log(sigmoid(β/|y_w| * Σlog π(y_w|x) - β/|y_l| * Σlog π(y_l|x) - γ))
+   - Confirm whether the reward is defined as r(x,y) = (β/|y|) * log π_θ(y|x) where |y| is the response length
+
+2. **PyTorch implementation patterns for SimPO loss**:
+   - Working code example of computing SimPO loss given policy_chosen_logps and policy_rejected_logps tensors
+   - How to compute length-normalized log probabilities (dividing by sequence length)
+   - The role of `beta` (scaling factor) and `gamma` (margin/target reward margin) hyperparameters
+   - Default values for beta and gamma in the reference implementation (beta=2.0 or 2.5, gamma=0.5 or 1.0?)
+   - Whether the loss uses `F.logsigmoid` or manual sigmoid computation
+   - Return type: does it return per-example losses, mean loss, or both?
+
+3. **HuggingFace TRL DPOTrainer / SimPOTrainer class structure**:
+   - How is `simpo_loss` method structured within a trainer class that extends DPOTrainer?
+   - What are the expected input arguments: `policy_chosen_logps`, `policy_rejected_logps` (both torch.Tensor)?
+   - What does the method return? (losses tensor, chosen_rewards tensor, rejected_rewards tensor)
+   - How are `chosen_rewards` and `rejected_rewards` computed in SimPO (they should be the length-normalized logps scaled by beta)?
+   - The `label_smoothing` parameter — is it used in SimPO loss and how?
+
+4. **Critical implementation details**:
+   - In SimPO, there is NO reference model — the loss only uses the policy model's log probabilities. Confirm this.
+   - The log probabilities passed to `simpo_loss` — are they already length-normalized (averaged over tokens) or are they sum log probs that need to be divided by length inside the loss function?
+   - If the logps are already averaged, then the formula simplifies to: loss = -logsigmoid(beta * (chosen_logps - rejected_logps) - gamma)
+   - If the logps are NOT averaged, the function needs the lengths to normalize them
+
+5. **Exact code from the SimPO GitHub repository** (https://github.com/princeton-nlp/SimPO):
+   - The `simpo_loss` method implementation
+   - How `concatenated_forward` computes per-token log probabilities and averages them
+   - The `get_batch_loss_metrics` method showing how logps are prepared before being passed to `simpo_loss`
+   - Whether `simpo_loss` receives already-normalized logps or raw sum logps
+
+6. **Common pitfalls**:
+   - Using sum of log probs instead of mean (length-normalized) — this is the KEY difference from DPO
+   - Forgetting the gamma margin term
+   - Sign errors in the logsigmoid argument
+   - Tensor dimension issues (should losses be per-example before reduction?)
+   - Whether detach() is needed for reward computation but not for loss
+
+7. **NumPy save format**: How to save PyTorch tensor results to .npz file using `np.savez` with specific key names, ensuring proper conversion from torch tensor to numpy array (`.detach().cpu().numpy()`)
+
+Please provide actual working PyTorch code snippets showing the complete `simpo_loss` function implementation with correct imports, parameter handling, and return values.

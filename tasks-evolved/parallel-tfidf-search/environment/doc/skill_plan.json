@@ -1,0 +1,79 @@
+{
+  "task_summary": "Parallelize a sequential TF-IDF search engine using Python multiprocessing, implementing parallel index building and parallel batch query search with correctness guarantees and performance targets.",
+  "decomposition_rationale": "The task has two distinct parallelization targets (index building and batch search) that share common multiprocessing patterns but have fundamentally different computational structures. Index building is a MapReduce problem (chunk, compute local TF/DF, merge), while batch search requires distributing a large read-only index to workers via the initializer pattern. A third concern is ensuring result determinism. These map cleanly to 3 skills.",
+  "skills": [
+    {
+      "name": "evo-parallel-index-building",
+      "description": "Provides utilities for parallelizing TF-IDF inverted index construction using a MapReduce approach: chunking documents, computing local TF and DF in worker processes, merging partial results, and finalizing TF-IDF scores with global DF.",
+      "responsibility": "Document chunking, parallel map phase for local TF/DF computation, merging partial inverted indices and document frequencies using Counter.update() and defaultdict.extend(), and finalizing TF-IDF scores from raw counts.",
+      "key_functions": [
+        "chunk_documents",
+        "map_index_chunk",
+        "merge_partial_results",
+        "finalize_tfidf_scores",
+        "build_tfidf_index_parallel"
+      ],
+      "dr_sections": [
+        "2. Parallelizing Inverted Index Construction",
+        "2.1 The Two-Pass vs. Single-Pass Strategy",
+        "2.2 Merging Partial Results Using collections.Counter",
+        "10. Efficient Patterns for Merging Partial Results",
+        "10.1 Merging Inverted Indices",
+        "10.2 Merging Document Frequencies",
+        "1. Concurrency APIs: ProcessPoolExecutor and multiprocessing.Pool",
+        "1.3 chunksize Parameter Behavior",
+        "1.4 Code Example: Chunking and Mapping Documents",
+        "7. TF-IDF Computation Details",
+        "6.2 Chunk Size Optimization"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-parallel-batch-search",
+      "description": "Provides utilities for parallelizing batch query search over a pre-built TF-IDF index, using the worker initializer pattern to efficiently share the read-only index across worker processes without repeated pickling.",
+      "responsibility": "Worker initializer setup for sharing large index data, parallel query dispatch using ProcessPoolExecutor or multiprocessing.Pool with initializer/initargs, per-query search logic in workers, and result collection.",
+      "key_functions": [
+        "init_search_worker",
+        "worker_search_query",
+        "batch_search_parallel"
+      ],
+      "dr_sections": [
+        "3. Parallelizing Batch Query Search",
+        "3.1 Passing the Index: Approaches and Trade-offs",
+        "4. The Worker Initializer Pattern",
+        "4.1 Exact Code Pattern for Initializer",
+        "1.1 concurrent.futures.ProcessPoolExecutor",
+        "1.2 multiprocessing.Pool",
+        "6. Performance Considerations and Scaling",
+        "6.1 Understanding Overhead",
+        "6.3 ProcessPoolExecutor vs. multiprocessing.Pool"
+      ],
+      "depends_on": [
+        "evo-parallel-index-building"
+      ]
+    },
+    {
+      "name": "evo-parallel-determinism",
+      "description": "Provides patterns and utilities to ensure parallel TF-IDF results are identical to the sequential baseline, addressing floating-point ordering, dictionary/set ordering, tie-breaking, and pickling compatibility.",
+      "responsibility": "Deterministic score accumulation order, tie-breaking in result sorting, ensuring NamedTuples/dataclasses are module-level picklable, handling spawn vs fork context selection, and __name__ guards.",
+      "key_functions": [
+        "deterministic_score_accumulation",
+        "stable_sort_results",
+        "get_safe_mp_context"
+      ],
+      "dr_sections": [
+        "5. Ensuring Identical Results to Sequential Version",
+        "5.1 Floating-Point Non-Determinism",
+        "5.2 Dictionary Ordering",
+        "5.3 Tie-Breaking Logic",
+        "8. NamedTuple and Dataclass Patterns for IPC",
+        "8.1 Pickling Requirements",
+        "9. Common Pitfalls in Python Multiprocessing",
+        "9.1 Deadlocks with fork",
+        "9.2 Objects that Aren't Picklable",
+        "9.4 if __name__ == '__main__' Guard"
+      ],
+      "depends_on": []
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.env
+.venv/
+/jobs/
+/workspace/
+/results/
+*.egg-info/
+.mypy_cache/
+.ruff_cache/

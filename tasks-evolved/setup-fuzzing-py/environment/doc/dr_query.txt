@@ -1,0 +1,30 @@
+How to set up continuous coverage-guided fuzzing for Python libraries using Atheris (Google's Python fuzzing engine) with LibFuzzer on the oss-fuzz base-builder-python Docker image. I need detailed information on the following:
+
+1. **Atheris library API and usage**: Exact import paths, function signatures for `atheris.Setup()`, `atheris.Fuzz()`, `atheris.instrument_imports()`, and `atheris.FuzzedDataProvider`. What are the correct parameter types and return values? Show complete working fuzz driver examples (fuzz.py files) that use `atheris.FuzzedDataProvider` to generate typed inputs (strings, ints, bytes, unicode, lists) for feeding into target library functions.
+
+2. **FuzzedDataProvider methods**: Complete list of `FuzzedDataProvider` methods like `ConsumeString()`, `ConsumeInt()`, `ConsumeFloat()`, `ConsumeBytes()`, `ConsumeUnicode()`, `ConsumeBool()`, `ConsumeIntInRange()`, `ConsumeFloatInRange()` — their exact signatures, parameter names, and what happens when the fuzzer data is exhausted.
+
+3. **LibFuzzer integration with Atheris**: How does the `-max_total_time=10` flag work to limit fuzzing duration? What other LibFuzzer flags are relevant (like `-rss_limit_mb`, `-timeout`)? How to pass LibFuzzer arguments through `atheris.Setup(sys.argv, TestOneInput)` correctly? How to redirect fuzzer output/logs to a file?
+
+4. **oss-fuzz base-builder-python environment**: What Python version and tools are pre-installed in `gcr.io/oss-fuzz-base/base-builder-python`? Is Atheris pre-installed or does it need to be pip-installed? What compile/build infrastructure is available? How does `compile_python_fuzzer` work if available?
+
+5. **Python virtual environment setup for fuzzing**: How to use `uv` (astral.sh/uv) to create a `.venv` in a specific directory, install dependencies from `pyproject.toml`, `setup.py`, `setup.cfg`, or `requirements.txt` files, and then run a fuzz driver within that virtual environment. Exact `uv` commands: `uv venv`, `uv pip install`, `uv run`. How to install a local package in editable/development mode with `uv`.
+
+6. **Fuzz driver patterns for specific library types**:
+   - **arrow** (date/time parsing library): Best functions to fuzz — `arrow.get()`, `arrow.Arrow.fromtimestamp()`, date string parsing with various formats. Working fuzz driver example.
+   - **black** (Python code formatter): Best functions to fuzz — `black.format_str()`, `black.Mode()` configuration. How to fuzz a code formatter safely (catching expected exceptions).
+   - **ipython** (interactive Python): Best functions/modules to fuzz — input transformation, magic command parsing, code completion.
+   - **ujson** (ultra fast JSON): Best functions to fuzz — `ujson.loads()`, `ujson.dumps()`, `ujson.decode()`, `ujson.encode()`. Differential fuzzing against stdlib `json`.
+   - **mini-sglang** (new ML project): How to identify fuzzable entry points in an unfamiliar Python project by examining `__init__.py`, public API, and parser/tokenizer functions.
+
+7. **Common pitfalls and edge cases**:
+   - How to handle expected exceptions in fuzz targets (wrapping in try/except for ValueError, TypeError, etc. that are normal behavior, NOT bugs)
+   - Atheris version compatibility issues
+   - How to ensure `atheris.instrument_imports()` context manager covers the target library imports
+   - Memory and timeout issues with certain libraries
+   - The difference between `sys.argv` handling when running standalone vs. under a fuzzer
+   - How to structure the `if __name__ == "__main__"` block correctly
+
+8. **Identifying libraries in a directory**: Python/shell patterns to detect whether a subdirectory is a Python library (checking for `pyproject.toml`, `setup.py`, `setup.cfg`, `__init__.py`, etc.)
+
+9. **Log redirection**: How to capture both stdout and stderr from a LibFuzzer/Atheris run into a log file, including the fuzzing statistics summary.

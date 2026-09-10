@@ -1,0 +1,37 @@
+I need to build a Python utility module for automating meeting scheduling via Gmail and Google Calendar APIs. Please provide comprehensive, working code examples and API documentation for the following:
+
+**1. Google Calendar API - Checking Free/Busy and Listing Events (Python)**
+- How to authenticate with Google Calendar API using OAuth2 `tokens.json` and `credentials.json` files in Python. Exact code for loading credentials from these files using `google-auth` and `google-auth-oauthlib` libraries. What are the correct import paths? Is it `google.oauth2.credentials.Credentials` or something else? Show how to build the service object with `googleapiclient.discovery.build`.
+- How to query calendar events for a specific date range using `service.events().list()` — exact parameters including `timeMin`, `timeMax`, `timeZone`, `singleEvents`, `orderBy`. What datetime format do these parameters expect (RFC3339)?
+- How to use the FreeBusy API (`service.freebusy().query()`) as an alternative — exact request body format and response parsing.
+- How to find available time slots given a list of busy periods and a desired meeting duration. Algorithm pattern for gap-finding between events.
+
+**2. Gmail API - Sending Reply Emails (Python)**
+- How to authenticate with Gmail API using OAuth2 `tokens.json` and `credentials.json` — exact code using `google.oauth2.credentials.Credentials.from_authorized_user_file()` or equivalent.
+- How to construct and send an email using `service.users().messages().send()`. Exact code for building MIME message with `email.mime.text.MIMEText`, setting To, From, Subject headers, encoding with base64url.
+- How to retrieve the `messageId` (or `id`) from the response of `messages().send()`. What exactly does the response dict contain? Is it `response['id']` or `response['messageId']`? Clarify the difference between the Gmail API message `id` and the RFC 2822 `Message-ID` header.
+- How to set the `threadId` if replying to an existing thread vs. sending a new email.
+
+**3. Token Refresh and Credential Handling**
+- When loading `tokens.json`, what JSON structure does the Google OAuth2 client expect? Fields like `token`, `refresh_token`, `token_uri`, `client_id`, `client_secret`, `scopes`.
+- How to handle token expiry and refresh automatically. Do I need to explicitly call `credentials.refresh()`?
+- What Python packages are needed? Are `google-api-python-client`, `google-auth-httplib2`, `google-auth-oauthlib` all required? What are the pip install commands?
+
+**4. Node.js Gmail and Calendar Skills as Alternative**
+- Since the environment has pre-installed Node.js skills at `/root/.claude/skills/gmail-skill/` and `/root/.claude/skills/google-calendar-skill/`, how might these be structured? Common patterns for Node.js Google API wrappers using `googleapis` npm package. How to invoke Node.js scripts from Python using `subprocess`.
+- What would a typical Node.js script look like that lists calendar events or sends emails via Gmail API, reading auth from a local `tokens.json` and `credentials.json`?
+
+**5. Date/Time Formatting in Python**
+- Python `datetime.strftime` patterns for: day names (`%A`), month names (`%B`), zero-padded day (`%d`), year (`%Y`), 12-hour time with AM/PM (`%I:%M %p`). Confirm that `%d` gives zero-padded day (e.g., `08` not `8`).
+- How to parse natural language dates like "January 8th, 2026" in Python — regex patterns or dateutil parsing.
+- Timezone handling with `pytz` or `zoneinfo` for PST/Pacific time.
+
+**6. Common Pitfalls**
+- Gmail API `messages.send` requires base64url encoding (not standard base64) — what's the exact Python code? Is it `base64.urlsafe_b64encode(message.as_bytes()).decode()` or `message.as_string()`?
+- Calendar API datetime format must include timezone offset or 'Z' suffix — what happens if you omit it?
+- When `strftime('%I:%M %p')` is used, does Python output `AM`/`PM` in uppercase? Any OS-locale dependencies?
+- The `installed` vs `web` application type in `credentials.json` — does this affect how credentials are loaded?
+- Are there differences between `google.oauth2.credentials.Credentials` constructor vs `from_authorized_user_file` vs `from_authorized_user_info`?
+
+**7. JSON I/O Pattern**
+- Reading `test_input.json` and writing `results.json` with proper structure `{"sent_results": [{"messageId": ...}]}` — confirm whether Gmail API returns `id` field as the message ID to save.

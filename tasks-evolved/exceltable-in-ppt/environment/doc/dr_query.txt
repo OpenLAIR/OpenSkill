@@ -1,0 +1,26 @@
+How to extract, read, and modify an embedded Excel spreadsheet (OLE object or embedded xlsx) inside a PowerPoint .pptx file using python-pptx and openpyxl in Python. I need comprehensive, working code examples and API details for building reusable utility functions covering the following:
+
+1. **Accessing embedded Excel objects in python-pptx**: How are embedded Excel tables represented in a .pptx file? Are they EMF/OLE embedded objects, or are they stored as an embedded xlsx part in the pptx ZIP archive? Show how to use `python-pptx` (version 1.0.2) to iterate over slides, shapes, and identify embedded Excel objects. What shape types correspond to embedded Excel workbooks — is it `MSO_SHAPE_TYPE.EMBEDDED_OLE_OBJECT`, `MSO_SHAPE_TYPE.TABLE`, or something else? Show the exact attributes and methods on `shape` objects to detect and access embedded Excel data. Include `shape.ole_format`, `shape.part`, `shape._element` XML inspection patterns if needed.
+
+2. **Extracting the embedded xlsx binary from the pptx package**: Since .pptx is a ZIP file, show how to navigate the relationships and parts to find the embedded .xlsx file (e.g., under `ppt/embeddings/`). Show both approaches: (a) using python-pptx's internal API (`slide.part.rels`, `related_parts`, etc.) and (b) using `zipfile` to directly extract from the .pptx archive. What are the typical paths like `ppt/embeddings/Microsoft_Excel_Worksheet1.xlsx`? How to identify which embedding corresponds to which shape?
+
+3. **Reading the extracted xlsx with openpyxl (version 3.1.5)**: Show how to open the extracted bytes as an openpyxl workbook using `openpyxl.load_workbook()` with `data_only=False` to preserve formulas. How to iterate over cells, distinguish between formula cells (cells whose value starts with `=`) and hardcoded value cells. How to read cell values, types, and formulas correctly.
+
+4. **Reading text boxes in python-pptx**: How to identify and extract text from text box shapes on a slide. Show `shape.has_text_frame`, `shape.text_frame.text`, `shape.text` usage. How to distinguish a text box from other shape types.
+
+5. **Modifying specific cells in the embedded Excel while preserving formulas**: After changing a cell value in openpyxl (setting `cell.value = new_number` for non-formula cells), how to save the workbook back to bytes. Critical: how to ensure formula cells remain as formulas and are NOT converted to computed values. What parameters or precautions are needed?
+
+6. **Writing the modified xlsx back into the pptx file**: This is the most critical part. Show exactly how to replace the embedded xlsx binary inside the .pptx package. Options: (a) using python-pptx's internal part/relationship API to replace the binary blob of the embedded part, (b) using zipfile to rebuild the .pptx with the modified xlsx replacing the original. Show working code for both approaches. For the zipfile approach, show how to copy all entries except the target embedding and write the new one. For the python-pptx approach, show how to access `slide.part.rels` to find the relationship pointing to the embedding, get the part, and replace its `blob` attribute.
+
+7. **Updating the cached/displayed table in the slide**: When an Excel object is embedded in PowerPoint, there's often a cached visual representation (EMF image or a table shape). After modifying the underlying xlsx, does the cached image need to be updated? If so, how? Can LibreOffice be used to refresh it (the environment has LibreOffice installed)? Show a command-line approach using `libreoffice --headless` to refresh embedded objects if needed.
+
+8. **Common pitfalls and edge cases**:
+   - Does python-pptx support direct manipulation of OLE/embedded objects, or is low-level XML/ZIP manipulation required?
+   - Version-specific issues with python-pptx 1.0.2 and openpyxl 3.1.5
+   - Content types (`[Content_Types].xml`) — does replacing an embedded part require updating content types?
+   - Relationship IDs — how to maintain consistency when replacing embedded parts
+   - Formula preservation gotchas in openpyxl (e.g., `data_only` parameter, writing formulas back)
+   - How openpyxl handles shared formulas and array formulas
+   - Encoding and binary handling when reading/writing embedded parts via zipfile
+
+9. **Complete working code pattern**: A full end-to-end example that: opens a .pptx, finds an embedded Excel worksheet, extracts it, modifies a cell value while preserving formulas, writes it back, and saves the result as a new .pptx file.

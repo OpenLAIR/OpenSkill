@@ -1,0 +1,66 @@
+{
+  "task_summary": "Parse enterprise documents (DOCX, XLSX, PPTX, PDF, etc.) from /root/DATA, answer retrieval questions from /root/question.txt about employee IDs, team members, and URLs related to specific products, and write structured JSON answers to /root/answer.json.",
+  "decomposition_rationale": "The task involves three distinct concerns: (1) parsing diverse enterprise file formats to extract text, (2) parsing malformed question input and searching extracted text to answer specific queries, and (3) assembling and writing the final JSON output with token tracking. Given the 600s timeout and moderate complexity, two skills provide clean separation: one for document parsing/extraction and one for the question-answering pipeline that ties everything together.",
+  "skills": [
+    {
+      "name": "evo-enterprise-doc-parser",
+      "description": "Provides utility functions to discover files recursively in a directory and extract text content from diverse enterprise document formats including DOCX, XLSX, PPTX, PDF, and plain text files. Handles dependency installation, merged cells in Excel, presenter notes in PowerPoint, headers/footers in Word documents, and encoding detection.",
+      "responsibility": "File discovery, binary/text classification, format-specific text extraction (PDF, DOCX, XLSX, PPTX, TXT/CSV/JSON), encoding handling, and runtime dependency installation for Ubuntu 24.04 environments.",
+      "key_functions": [
+        "ensure_dependencies",
+        "discover_files",
+        "extract_text_from_pdf",
+        "extract_text_from_docx",
+        "extract_text_from_xlsx",
+        "extract_text_from_pptx",
+        "safe_read_text",
+        "process_file",
+        "extract_all_documents"
+      ],
+      "dr_sections": [
+        "1. Runtime Environment and Dependency Management",
+        "1.1 The PEP 668 Challenge in Ubuntu 24.04",
+        "1.2 Programmatic Runtime Installation",
+        "2. File Discovery and Binary/Text Classification",
+        "2.1 File Discovery Implementation",
+        "2.2 Text vs. Binary Detection",
+        "2.3 Handling File Encodings",
+        "3. Parsing and Reading Diverse File Formats",
+        "3.1 PDF Files: PyPDF2 vs. pdfplumber vs. pymupdf",
+        "3.2 DOCX Files: Extracting Paragraphs, Tables, Headers, and Footers",
+        "3.3 XLSX Files: Handling Merged Cells with openpyxl",
+        "3.4 PPTX Files: Extracting Text from Slides, Shapes, and Notes",
+        "3.5 Consolidated Extractor",
+        "8. Final Considerations on Common Pitfalls"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-enterprise-qa-pipeline",
+      "description": "Orchestrates the end-to-end question-answering pipeline: parses the malformed question.txt file, searches extracted document text for answers (employee IDs, URLs, team member names), tracks token consumption, and writes the final answer.json output in the required format.",
+      "responsibility": "Parsing malformed/unquoted JSON questions, mapping questions to search strategies (regex for employee IDs and URLs, keyword/context-based search for names), aggregating answers across multiple documents, token counting, and writing structured JSON output.",
+      "key_functions": [
+        "parse_question_file",
+        "extract_employee_ids",
+        "extract_urls",
+        "search_context_for_answer",
+        "count_tokens_for_text",
+        "run_qa_pipeline",
+        "write_answer_json"
+      ],
+      "dr_sections": [
+        "4. Text Search and Information Extraction Patterns",
+        "4.1 Keyword and Regex Extraction",
+        "4.2 Fuzzy String Matching",
+        "5. Question-Answering Pipeline for Enterprise Documents",
+        "5.1 Parsing Unquoted JSON",
+        "5.2 Mapping Questions to Search Strategies",
+        "6. Token Counting Patterns",
+        "7. Output Formatting and Execution Assembly"
+      ],
+      "depends_on": [
+        "evo-enterprise-doc-parser"
+      ]
+    }
+  ]
+}

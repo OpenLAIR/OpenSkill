@@ -1,0 +1,28 @@
+Comprehensive guide for building a Python OCR utility module for extracting text from scanned receipt images using pytesseract 0.3.13, Pillow 12.0.0, and openpyxl 3.1.5 on Ubuntu 24.04 with tesseract-ocr system package:
+
+1. **pytesseract API details**: Exact function signatures for `pytesseract.image_to_string()` and `pytesseract.image_to_data()` — all parameters, especially `config` string options (e.g., `--psm` page segmentation modes, `--oem` OCR engine modes). Which `--psm` mode works best for receipt images (single column of text)? What are the exact valid values for PSM modes 4, 6, 7, 11, 12? How does `lang` parameter work? What is the default config? Show working code examples with correct imports (`from PIL import Image; import pytesseract`).
+
+2. **Pillow image preprocessing for OCR accuracy on receipts**: What preprocessing steps improve tesseract accuracy on scanned receipts — grayscale conversion, thresholding (binary/Otsu), contrast enhancement, resizing/upscaling, denoising? Show exact Pillow code for each: `Image.convert('L')`, `ImageEnhance.Contrast`, `ImageFilter` usage, `Image.point()` for thresholding. What threshold values work best for receipt text? Should images be upscaled before OCR and to what DPI? How to use `Image.resize()` with resampling filters?
+
+3. **Tesseract config strings for digit-heavy receipt text**: How to configure tesseract to better recognize digits, currency amounts, and dates on receipts? Does `tessedit_char_whitelist` help and how to pass it? What about `--psm 6` vs `--psm 4` for receipts? Show exact config string format like `'--psm 6 --oem 3'`.
+
+4. **openpyxl API for writing Excel files**: Exact code to create a workbook, name a sheet "results", write header row with column names, write data rows, and save to `.xlsx`. How to write `None`/null values in cells. How to ensure no extra sheets are created (delete default sheet if needed). Show `openpyxl.Workbook()` usage, `ws.title`, `ws.append()`, `wb.save()`. How to write string values that look like numbers without Excel auto-converting them?
+
+5. **Date extraction patterns from OCR text**: Common date formats on receipts (DD/MM/YYYY, MM/DD/YYYY, DD-MM-YYYY, DD.MM.YYYY, YYYY-MM-DD, "DD Mon YYYY", "DD MONTH YYYY") and Python regex patterns to match each. How to parse these with `datetime.strptime()` and convert to ISO format YYYY-MM-DD. What are the common OCR misreads for dates (e.g., `O` vs `0`, `l` vs `1`)?
+
+6. **Total amount extraction from OCR text**: Regex patterns for matching monetary values like `47.70`, `1,234.56`, `RM 47.70`, `RM47.70`, `$ 1,234.56`. How to handle comma-separated thousands. How to clean extracted amount strings and format to exactly two decimal places using Python string formatting (`f"{value:.2f}"`).
+
+7. **Line-by-line text processing patterns**: Best approach to split OCR output into lines, search for keywords case-insensitively, extract numeric values from the same line or the next line. Regex for finding the last number on a line. How to handle multi-line keyword+value splits in OCR output.
+
+8. **Common pitfalls**: 
+   - pytesseract returning extra whitespace, newlines, or garbage characters
+   - Pillow image mode issues (RGBA vs RGB vs L) before passing to tesseract
+   - tesseract failing silently and returning empty strings
+   - openpyxl default sheet name issues (Sheet vs Sheet1)
+   - File ordering: `os.listdir()` not returning sorted results — need `sorted()`
+   - OCR confidence issues on low-quality receipt scans
+   - Encoding issues with special characters in OCR output
+
+9. **File handling patterns**: How to use `os.listdir()` or `glob.glob()` to get all image files (jpg, png, jpeg) from a directory, filter by extension, sort by filename. Correct path joining with `os.path.join()`.
+
+10. **Version-specific concerns**: Any deprecated APIs in pytesseract 0.3.13, Pillow 12.0.0, or openpyxl 3.1.5? Any breaking changes in Pillow 12 (e.g., removed `Image.ANTIALIAS` replaced by `Image.LANCZOS`)? Current correct resampling filter names in Pillow 12.

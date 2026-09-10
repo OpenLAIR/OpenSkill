@@ -1,0 +1,52 @@
+Research query: Python libraries for extracting tables from PDF files and comparing with Excel data — comprehensive API guide for building reusable utility functions
+
+I need detailed, working code examples and API documentation for the following Python libraries and patterns:
+
+1. **pdfplumber (version 0.11.4)** — Extracting tables from PDF files:
+   - Exact import path and correct usage of `pdfplumber.open()` to open a PDF file
+   - How to use `page.extract_table()` vs `page.extract_tables()` — what each returns (list of lists? list of list of lists?), including header rows
+   - Table extraction settings/parameters: `table_settings` dict keys like `"vertical_strategy"`, `"horizontal_strategy"`, `"snap_tolerance"`, `"join_tolerance"`, `"edge_min_length"` — what are the defaults and when to change them
+   - How pdfplumber handles multi-page tables — does it auto-merge across pages or must you concatenate manually?
+   - Common pitfalls: cells returning `None` vs empty string, numeric values always returned as strings, whitespace issues, header row detection
+   - How to convert pdfplumber extracted table output into a pandas DataFrame with proper column headers
+   - Complete working example: open PDF → extract table → create DataFrame
+
+2. **tabula-py (version 2.9.3)** as an alternative:
+   - `tabula.read_pdf()` function signature, key parameters: `pages`, `multiple_tables`, `lattice` vs `stream` mode, `pandas_options`
+   - Return type (list of DataFrames)
+   - Java dependency requirements and common errors
+   - When tabula-py works better vs pdfplumber for structured tables
+
+3. **openpyxl (version 3.1.5) and pandas (version 2.2.3)** — Reading Excel files:
+   - `pandas.read_excel()` with `engine='openpyxl'` — correct parameters for reading .xlsx files
+   - Data type handling: how pandas infers types for mixed columns, ensuring integer columns don't become floats (e.g., Salary as 50020 not 50020.0)
+   - Reading specific sheets, handling header rows
+
+4. **DataFrame comparison patterns for record diffing**:
+   - How to compare two DataFrames row-by-row using a key column (employee ID) to find:
+     - Deleted rows (present in old but not in new)
+     - Modified fields (same ID but different values in specific columns)
+   - Using `pandas.merge()` with `indicator=True` and `how='outer'` to identify left_only/right_only/both
+   - Iterating over matched rows to compare field-by-field and collect differences
+   - Handling type mismatches during comparison: string "50020" from PDF vs integer 50020 from Excel — best practices for normalizing types before comparison
+   - Handling NaN comparisons correctly
+
+5. **Data type normalization between PDF-extracted and Excel data**:
+   - PDF tables typically return all values as strings — how to detect and convert numeric strings to int or float appropriately
+   - Using `pandas.to_numeric()` with `errors='coerce'` 
+   - Ensuring employee IDs like "EMP00002" remain as zero-padded strings and are not corrupted
+   - Stripping whitespace from string fields extracted from PDFs
+
+6. **JSON output formatting**:
+   - Writing results to JSON with `json.dump()` — ensuring numeric values are output as numbers (int/float) not strings
+   - Sorting lists by ID field
+   - Proper formatting with `indent` parameter
+
+7. **Common pitfalls and edge cases**:
+   - pdfplumber returning merged cells or split cells incorrectly
+   - PDF table extraction returning extra empty rows or columns
+   - Float precision issues when comparing salary/score values between sources
+   - pandas dtype issues: int64 vs float64 when NaN values are present
+   - `json.dump` serialization of numpy int64/float64 types — they are NOT JSON serializable by default, need conversion to native Python types
+
+Please provide complete, tested code patterns for each of these areas that could be composed into a reusable Python utility module.

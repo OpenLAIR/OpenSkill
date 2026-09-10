@@ -1,0 +1,66 @@
+{
+  "task_summary": "Read meeting request emails from JSON, check Google Calendar for availability, find earliest compatible time slots, send formatted reply emails via Gmail API, and save sent message IDs to results.json",
+  "decomposition_rationale": "The task has three distinct functional domains: (1) parsing natural language email requests to extract scheduling constraints, (2) interacting with Google Calendar API to find available slots, and (3) composing and sending reply emails via Gmail API. However, since the environment has pre-installed Node.js skills for Gmail and Calendar, and the overall orchestration is tightly coupled, a 3-skill decomposition by concern (email parsing, calendar availability, email sending+orchestration) provides clear boundaries while keeping complexity manageable.",
+  "skills": [
+    {
+      "name": "evo-meeting-request-parser",
+      "description": "Parses natural language meeting request emails to extract structured scheduling constraints including date ranges, time windows, meeting duration, and sender information.",
+      "responsibility": "Extract meeting dates/date ranges, time availability windows, meeting duration, and timezone from free-text email bodies. Returns structured data ready for calendar querying.",
+      "key_functions": [
+        "parse_meeting_request",
+        "extract_dates",
+        "extract_time_window",
+        "extract_duration_minutes",
+        "normalize_to_datetime_ranges"
+      ],
+      "dr_sections": [
+        "4. Date and Time Formatting in Python",
+        "5. JSON I/O Pattern"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-calendar-availability-finder",
+      "description": "Queries Google Calendar API to retrieve busy periods and finds the earliest available time slot matching the requested duration within specified date/time constraints.",
+      "responsibility": "Authenticate with Google Calendar API, query events or freebusy endpoint for given date ranges, compute available gaps using interval merging algorithm, and return the earliest slot that satisfies the meeting duration requirement.",
+      "key_functions": [
+        "authenticate_calendar",
+        "get_busy_periods",
+        "find_earliest_available_slot",
+        "merge_busy_intervals"
+      ],
+      "dr_sections": [
+        "1. Google Workspace Authentication and Credential Management",
+        "2. Google Calendar API: Checking Availability and Listing Events",
+        "6. Node.js Gmail and Calendar Skills as Alternatives",
+        "7. Synthesis of Common Pitfalls"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-gmail-reply-sender",
+      "description": "Composes and sends formatted meeting reply emails via Gmail API using the specified template, and saves sent message IDs to results.json.",
+      "responsibility": "Authenticate with Gmail API, construct MIME messages with proper base64url encoding and reply headers, format date/time strings per the exact required format, send emails, collect message IDs, and write results.json output file.",
+      "key_functions": [
+        "authenticate_gmail",
+        "format_meeting_reply",
+        "create_and_send_email",
+        "save_results_json",
+        "format_date_string",
+        "format_time_range"
+      ],
+      "dr_sections": [
+        "1. Google Workspace Authentication and Credential Management",
+        "3. Gmail API: Constructing and Sending Reply Emails",
+        "4. Date and Time Formatting in Python",
+        "5. JSON I/O Pattern",
+        "6. Node.js Gmail and Calendar Skills as Alternatives",
+        "7. Synthesis of Common Pitfalls"
+      ],
+      "depends_on": [
+        "evo-meeting-request-parser",
+        "evo-calendar-availability-finder"
+      ]
+    }
+  ]
+}

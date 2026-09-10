@@ -1,0 +1,54 @@
+{
+  "task_summary": "Fill the California SC-100 Small Claims Court PDF form with case-specific data (plaintiff/defendant info, claim details, venue, dates) and save the completed form.",
+  "decomposition_rationale": "This task involves two distinct concerns: (1) extracting and mapping the PDF form field names from the blank SC-100 template, and (2) filling those fields with the correct case data and writing the output. Since both are tightly coupled to the same PDF and the task is straightforward form-filling, two skills provide clean separation between field discovery/mapping and the actual form-filling logic.",
+  "skills": [
+    {
+      "name": "evo-pdf-field-inspector",
+      "description": "Inspects a PDF form to enumerate all AcroForm field names, types (text, checkbox, radio), and current values. Essential for discovering the exact internal field keys of the SC-100 form before filling.",
+      "responsibility": "Read and catalog all interactive form fields from a PDF, returning their names, types, flags, appearance states (for checkboxes), and default values.",
+      "key_functions": [
+        "enumerate_pdf_fields",
+        "get_checkbox_on_states",
+        "classify_field_type"
+      ],
+      "dr_sections": [
+        "1. The California SC-100 Form (Rev 2024) Architecture and Field Taxonomy",
+        "1.2 Exact PDF Form Field Names",
+        "1.3 Programmatic Enumeration of Field Names",
+        "2. Reading PDF Form Field Names Using `pypdf` (Version 5.1.0)",
+        "2.1 The `get_fields()` and `get_form_text_fields()` Methods",
+        "2.2 Distinguishing Between Text, Checkboxes, and Radio Buttons",
+        "2.3 Code Example: Comprehensive Field Inspector"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-pdf-form-filler",
+      "description": "Fills a PDF AcroForm with provided data (text fields, checkboxes, radio buttons) using pypdf/pdfrw, sets the NeedAppearances flag, and writes the output PDF. Handles checkbox state detection and proper value/appearance-state updates.",
+      "responsibility": "Accept a field-name-to-value mapping and a source PDF path, fill all specified fields correctly (including checkboxes with proper /V and /AS states), set /NeedAppearances flag, and write the filled PDF to an output path.",
+      "key_functions": [
+        "fill_pdf_form",
+        "set_need_appearances",
+        "fill_checkbox_field",
+        "fill_text_field"
+      ],
+      "dr_sections": [
+        "3. Filling PDF Form Fields Using `pypdf` (Version 5.1.0)",
+        "3.1 The `update_page_form_field_values()` Method Signature",
+        "3.2 Handling Checkboxes and Radio Buttons",
+        "3.3 The Critical `/NeedAppearances` Flag",
+        "3.4 Working Code Example: Filling the SC-100 Form",
+        "5. Alternative Approaches Using `pdfrw` (Version 0.4)",
+        "5.1 The `pdfrw` Architectural Pattern",
+        "5.2 Working Code Pattern for `pdfrw`",
+        "6. Critical Pitfalls and Edge Cases",
+        "6.1 The NeedAppearances Conundrum",
+        "6.2 Checkbox State Divergence",
+        "6.3 Unicode and Encoding Issues"
+      ],
+      "depends_on": [
+        "evo-pdf-field-inspector"
+      ]
+    }
+  ]
+}

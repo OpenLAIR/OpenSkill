@@ -1,0 +1,41 @@
+D3.js v6 force simulation bubble chart with sector clustering, interactive data table, and CSV data loading in a single-page web app — comprehensive implementation guide for building a Python utility module that generates all required files
+
+I need detailed information on the following topics to build a Python skill that generates a complete D3.js v6 visualization web app:
+
+1. **D3.js v6 Force Simulation API for Bubble Charts with Sector Clustering:**
+   - Exact API for `d3.forceSimulation()`, `d3.forceX()`, `d3.forceY()`, `d3.forceCollide()`, `d3.forceManyBody()` in D3 v6. What are the correct method signatures, default parameter values, and how do you chain them?
+   - How to use `forceX` and `forceY` with custom accessor functions to cluster bubbles by a categorical variable (sector). What is the correct pattern to assign x/y target positions per sector so clusters form visually distinct groups that remain centered in the SVG? Show working code examples.
+   - How to set `forceCollide` radius to match bubble radius plus padding so bubbles never overlap. What is the correct way to use `.radius(d => radiusScale(d.marketCap) + padding)` with a dynamic accessor?
+   - How to properly size bubbles using `d3.scaleSqrt()` for market cap mapping — what domain/range values work well for 50 bubbles in an ~800x600 SVG?
+   - How to handle the simulation `tick` event to update circle positions, and how to properly stop/restart simulation.
+
+2. **D3.js v6 CSV Loading and Data Parsing:**
+   - Exact usage of `d3.csv()` in v6 — does it return a Promise? How to use `d3.csv("path", rowConverter)` with type coercion for numeric fields?
+   - How to load multiple CSV files (one description file + multiple individual stock CSVs from a directory) and merge them. Pattern for `Promise.all([d3.csv(...), d3.csv(...)])`.
+
+3. **D3.js v6 Color Scales for Categorical Data (Sectors):**
+   - How to use `d3.scaleOrdinal()` with `d3.schemeCategory10` or `d3.schemeTableau10` for sector-based coloring. Correct import/usage in v6.
+   - How to build a color legend showing sector names with colored circles/rectangles. Working D3 v6 code example for a legend with `selectAll`, `enter`, `append` pattern.
+
+4. **D3.js v6 Tooltip Implementation:**
+   - Best practice for creating hover tooltips in D3 v6 using a div overlay. How to position tooltip relative to mouse using `d3.pointer(event)` (NOT the deprecated `d3.mouse` from v5). Show the correct event handler signature `function(event, d)` in v6 (not the old `function(d, i)` from v5).
+   - How to conditionally show/hide tooltip content based on data properties (e.g., skip tooltip for ETF entries missing marketCap).
+
+5. **D3.js v6 Interactive Data Table with Click-Based Highlighting:**
+   - Pattern for generating an HTML table from data using D3's `selectAll`, `data`, `join` (or enter/update/exit). How to format large numbers as "1.64T", "850B", "12.5M" etc.
+   - How to implement bidirectional click interaction: clicking a bubble highlights the corresponding table row, and clicking a table row highlights the corresponding bubble. What CSS class toggling and D3 selection patterns work best?
+   - How to scroll a table to bring a highlighted row into view (`element.scrollIntoView()`).
+
+6. **D3.js v6 Text Labels Inside Circles:**
+   - How to add text labels (ticker symbols) centered inside SVG circles. Should you use `<g>` groups containing both `<circle>` and `<text>`, or overlay text separately? What `text-anchor`, `dominant-baseline`, and font-size settings ensure proper centering?
+
+7. **Python Utility Functions for File Generation:**
+   - Best practices for a Python script that: reads CSV data with pandas, copies data files to output directory, downloads or embeds d3.v6.min.js, generates HTML/JS/CSS files from templates using string formatting or Jinja2.
+   - How to programmatically obtain d3.v6.min.js — can it be fetched from a CDN URL like `https://d3js.org/d3.v6.min.js`? What is the exact URL and file size?
+   - `shutil.copytree` and `shutil.copy2` usage for copying data directories preserving structure.
+
+8. **Common Pitfalls in D3 v6:**
+   - The v5→v6 event handler breaking change: `selection.on("click", function(event, d) {...})` vs old `function(d, i) {...}`. This is critical.
+   - `d3.event` is removed in v6 — event is now passed as first argument to handlers.
+   - Force simulation nodes must have `x`, `y` properties initialized or D3 assigns random positions. How to pre-initialize for better convergence?
+   - CSV parsing: all values come as strings by default — must explicitly convert numeric fields with `+d.marketCap` or a row accessor.

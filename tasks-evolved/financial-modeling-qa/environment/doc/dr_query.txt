@@ -1,0 +1,41 @@
+Python pandas openpyxl large Excel file financial data analysis: exact API patterns for building reusable utility functions
+
+I need detailed documentation and working code examples for the following:
+
+1. **Reading large Excel files with pandas and openpyxl (pandas 2.2.3, openpyxl 3.1.5)**:
+   - Exact function signature for `pd.read_excel()` with openpyxl engine — all relevant parameters including `sheet_name`, `header`, `dtype`, `engine='openpyxl'`
+   - How to list all sheet names in an Excel workbook using openpyxl directly and via pandas
+   - How to handle multi-sheet workbooks where data may be spread across sheets
+   - Memory-efficient patterns for large xlsx files (400KB+ with potentially many rows)
+
+2. **Reading PDF files with pypdf (version 5.1.0)**:
+   - Exact import path: `from pypdf import PdfReader` — confirm this is correct for pypdf 5.1.0
+   - Working code to extract all text from a PDF: `PdfReader`, iterating pages, `page.extract_text()`
+   - Any breaking changes or deprecated APIs in pypdf 5.x vs older PyPDF2
+
+3. **Game/match comparison data analysis pattern**:
+   - Given a dataset of game results (likely with scores or outcomes), how to:
+     - Separate odd-numbered and even-numbered rows (1-indexed vs 0-indexed considerations)
+     - Pair them up (game 1 vs game 2, game 3 vs game 4)
+     - Compare paired values to determine a "winner"
+   - Pandas patterns for: filtering by row index parity, creating paired comparisons using iloc, vectorized comparison operations
+   - `df.iloc[::2]` for even-indexed rows vs `df.iloc[1::2]` for odd-indexed rows — confirm behavior and whether reset_index is needed before comparison
+   - Critical pitfall: pandas uses 0-based indexing but the task says "odd numbered games" (1-indexed), so game 1 is index 0, game 2 is index 1, etc.
+
+4. **Determining match winners from game scores**:
+   - If each game has a score, how to compare Player 1's score (from odd game) vs Player 2's score (from even game)
+   - Handling ties — do they count for neither player?
+   - Vectorized pandas comparison: `(series1 > series2).sum()` to count wins
+
+5. **Common pitfalls**:
+   - Off-by-one errors when mapping 1-indexed game numbers to 0-indexed pandas rows
+   - What happens if there's an odd number of total games (last game has no pair)
+   - Data type issues: scores read as strings vs integers from Excel
+   - NaN handling in comparisons
+   - Excel files with header rows shifting the actual data index
+
+6. **Output formatting**:
+   - Writing a single number to a text file in Python: `with open('answer.txt', 'w') as f: f.write(str(result))`
+   - Ensuring no trailing newline or extra formatting
+
+Please provide complete working code snippets for each pattern, with correct imports and parameter usage for the specified library versions.

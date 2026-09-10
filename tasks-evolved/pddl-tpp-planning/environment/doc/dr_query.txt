@@ -1,0 +1,46 @@
+Research the following topics in depth for building a Python utility module that solves Travelling Purchase Problem (TPP) tasks using PDDL planning:
+
+1. **unified_planning library (version 1.3.0) API details**:
+   - Exact API for `PDDLReader`: how to use `reader.parse_problem(domain_file, problem_file)`, what it returns, the `Problem` object structure
+   - `OneshotPlanner` API: how to use `OneshotPlanner(name="pyperplan")`, the `result` object structure, `result.plan`, `result.plan.actions`
+   - How `str(action)` formats action instances — what exact string format does it produce? Does it use parentheses like `(action_name arg1 arg2)` or function-call syntax like `action_name(arg1, arg2)`?
+   - `SequentialPlanValidator` API for validating plans
+   - How to serialize/deserialize plans with pickle
+   - Any known issues with unified_planning 1.3.0 and up-pyperplan 1.1.0 compatibility
+
+2. **pyperplan (version 2.1) as a planning engine**:
+   - What search algorithms does pyperplan support? What are the defaults?
+   - Can you configure the heuristic or search strategy when using pyperplan through unified_planning's OneshotPlanner interface? What parameters are available?
+   - Performance characteristics: what problem sizes can pyperplan handle within a few minutes?
+   - Does pyperplan support all PDDL features needed for TPP (typing, equality, numeric fluents, etc.)?
+   - What PDDL subset does pyperplan support? Does it handle `:requirements` like `:typing`, `:action-costs`, or only STRIPS?
+
+3. **Travelling Purchase Problem (TPP) in PDDL**:
+   - What is the standard PDDL encoding of TPP from IPC (International Planning Competition)?
+   - What are the typical actions: `drive`, `buy`, `load`, `unload`? What are their parameters and preconditions/effects?
+   - How are "levels" used in TPP PDDL encoding (e.g., `level0`, `level1` for goods quantities and truck capacity)?
+   - What does a typical TPP domain.pddl look like? What requirements does it declare?
+   - What does a typical TPP problem.pddl look like — objects, init state, goal specification?
+
+4. **Plan output format**:
+   - The expected output format shows actions like `drive(truck1, depot1, market1)` — is this the default `str()` representation of unified_planning action instances?
+   - If not, how to convert unified_planning plan actions to this parenthesized comma-separated format?
+   - How to extract action name and parameters from a unified_planning `ActionInstance` object — what properties/methods are available (`action.name`, `action.actual_parameters`, etc.)?
+
+5. **Common pitfalls and edge cases**:
+   - Does pyperplan through unified_planning handle TPP problems correctly, or are there known limitations with level-based encodings?
+   - Are there timeout or memory issues with larger TPP instances when using pyperplan?
+   - Any issues with action/object name case sensitivity between PDDL files and plan output?
+   - Does the validation script compare plans by exact string match of actions? If so, what formatting details matter?
+   - The validate.py compares `plan_actions_str == pred_plan_actions_str` — this means the plan must match the reference solution exactly. Does pyperplan always produce deterministic, identical plans for the same problem?
+
+6. **Alternative approaches if pyperplan fails**:
+   - Can unified_planning use other built-in planners?
+   - How to call pyperplan directly (not through unified_planning) as a fallback — `pyperplan` command-line interface or Python API?
+   - Direct pyperplan Python usage: `from pyperplan import ...` — what functions are available for parsing PDDL and solving?
+   - How to read pyperplan's native plan output format and convert it to the required format
+
+7. **Working code examples**:
+   - Complete working Python code that reads a PDDL domain + problem, solves with pyperplan via unified_planning, and writes the plan in the format `action_name(arg1, arg2, ...)` one per line
+   - Code to handle the case where no plan is found
+   - Code to iterate over multiple problems from a JSON configuration file

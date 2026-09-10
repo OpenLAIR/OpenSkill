@@ -1,0 +1,27 @@
+{
+  "task_summary": "Write a Suricata rule (sid:1000001) in /root/local.rules that detects HTTP POST exfiltration matching specific path, header, and body patterns while avoiding false positives.",
+  "decomposition_rationale": "This is a focused task requiring one skill: writing a correct Suricata 7.0 rule with sticky buffers, exact URI matching, header inspection, and PCRE body matching. The background research provides all needed syntax details. A single skill covering Suricata rule construction is sufficient since there's no separate data processing or output formatting needed.",
+  "skills": [
+    {
+      "name": "evo-suricata-http-exfil-rule",
+      "description": "Constructs and validates Suricata 7.0 rules for detecting HTTP-based data exfiltration patterns using sticky buffers, content matching, and PCRE. Covers HTTP method, URI exact matching, request header inspection, and request body pattern matching with url_decode transform.",
+      "responsibility": "Generate the correct Suricata rule syntax for /root/local.rules that matches HTTP POST to exact path /telemetry/v2/report with X-TLM-Mode: exfil header, base64 blob≥80 chars, and sig= with exactly 64 hex chars. Includes knowledge of sticky buffer ordering, http.method, http.uri with startswith/endswith, http.request_header with colon-space delimiter, http.request_body with url_decode transform, and PCRE boundary anchoring.",
+      "key_functions": [
+        "generate_exfil_detection_rule",
+        "validate_rule_syntax",
+        "write_local_rules_file"
+      ],
+      "dr_sections": [
+        "Understanding Sticky Buffers and Rule Scoping",
+        "The Importance of Transforms in Modern Rule Writing",
+        "1. Suricata 7.0.x HTTP Rule Keywords: Exact Syntax and Semantics",
+        "2. PCRE in Suricata Rules: Syntax for Body Matching",
+        "3. Combining Multiple Match Conditions in a Single Rule",
+        "4. Rule Structure and Syntax",
+        "5. Critical Pitfalls and Edge Cases",
+        "6. Command-Line Execution and PCAP Analysis"
+      ],
+      "depends_on": []
+    }
+  ]
+}

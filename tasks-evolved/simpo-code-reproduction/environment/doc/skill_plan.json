@@ -1,0 +1,38 @@
+{
+  "task_summary": "Implement the SimPO loss function in a trainer class and run a unit test to produce deterministic loss values saved to an npz file",
+  "decomposition_rationale": "This is a focused task requiring implementing one function (simpo_loss) based on a well-documented formula, then running a test and saving results. The core knowledge is the SimPO loss math and its PyTorch implementation, plus environment setup. Two skills suffice: one for the loss implementation logic, one for environment/execution.",
+  "skills": [
+    {
+      "name": "evo-simpo-loss-implementation",
+      "description": "Implements the SimPO loss function following the paper's mathematical formulation. Covers the exact formula: L = -logsigmoid(beta * (chosen_avg_logps - rejected_avg_logps) - gamma) with label smoothing support, plus reward computation for logging.",
+      "responsibility": "Provide the correct SimPO loss function implementation including: pi_logratios computation, gamma/beta margin factoring, F.logsigmoid-based loss with label smoothing, hinge loss variant, and detached reward returns. Handles sigmoid and hinge loss types.",
+      "key_functions": [
+        "simpo_loss"
+      ],
+      "dr_sections": [
+        "2. Mathematical Formulation of SimPO",
+        "3.3 The Core `simpo_loss` PyTorch Implementation",
+        "3.4 Key Breakdown of the Implementation",
+        "5. Critical Implementation Details and Common Pitfalls"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-simpo-environment-execution",
+      "description": "Handles environment setup (Python 3.10, PyTorch, required packages), running the unit test, and saving loss results to npz format with correct keys.",
+      "responsibility": "Set up the Python environment with correct dependencies (torch, numpy, transformers, etc.), execute the unit test script, ensure loss tensor is properly detached/converted and saved to /root/loss.npz with key 'losses', and log Python version info.",
+      "key_functions": [
+        "setup_environment",
+        "save_loss_to_npz",
+        "log_python_info"
+      ],
+      "dr_sections": [
+        "6. Saving PyTorch Tensor Results to NumPy (.npz)",
+        "4. Hugging Face TRL Class Structure and Configuration"
+      ],
+      "depends_on": [
+        "evo-simpo-loss-implementation"
+      ]
+    }
+  ]
+}

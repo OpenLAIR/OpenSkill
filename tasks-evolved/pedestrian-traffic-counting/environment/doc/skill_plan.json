@@ -1,0 +1,44 @@
+{
+  "task_summary": "Count unique pedestrians in surveillance videos using VLM APIs and write results to an Excel file",
+  "decomposition_rationale": "The task has three distinct concerns: (1) video frame extraction and encoding, (2) VLM-based pedestrian counting with de-duplication logic, and (3) Excel output formatting. However, since the VLM inference is tightly coupled with the frame preparation and the Excel output is simple, a 2-skill decomposition cleanly separates video/image processing from the VLM analysis + reporting pipeline.",
+  "skills": [
+    {
+      "name": "evo-video-frame-extraction",
+      "description": "Extracts and encodes sampled frames from video files using MoviePy 2.1.2. Handles file discovery, temporal sampling, base64 JPEG encoding, and proper resource cleanup to prevent memory leaks.",
+      "responsibility": "Video file discovery, frame extraction at configurable intervals, NumPy-to-base64-JPEG conversion, and MoviePy resource management",
+      "key_functions": [
+        "discover_video_files",
+        "extract_sampled_frames",
+        "numpy_to_base64_jpeg",
+        "extract_and_encode_frames"
+      ],
+      "dr_sections": [
+        "2. File Discovery and Deterministic Processing",
+        "3. Video Frame Extraction with MoviePy 2.1.2"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-pedestrian-vlm-counting",
+      "description": "Sends extracted video frames to Vision LLM APIs (OpenAI GPT-4o or Google Gemini) with carefully engineered prompts for unique pedestrian counting, parses integer results robustly, and writes final counts to a properly formatted Excel file.",
+      "responsibility": "VLM API integration (OpenAI and Gemini), prompt engineering for unique pedestrian re-identification, response parsing with integer coercion, and Excel output generation with correct sheet/column structure",
+      "key_functions": [
+        "count_pedestrians_openai",
+        "count_pedestrians_gemini",
+        "parse_count_from_response",
+        "write_results_to_excel",
+        "run_pedestrian_counting_pipeline"
+      ],
+      "dr_sections": [
+        "4. Utilizing the OpenAI Vision API (openai 2.15.0)",
+        "5. Utilizing the Google Gemini API (google-genai 1.59.0)",
+        "6. Advanced Unique Pedestrian Counting Strategy",
+        "7. Persisting Results with OpenPyXL 3.1.5 and Pandas 2.3.3",
+        "8. Critical Pitfalls and System Robustness"
+      ],
+      "depends_on": [
+        "evo-video-frame-extraction"
+      ]
+    }
+  ]
+}

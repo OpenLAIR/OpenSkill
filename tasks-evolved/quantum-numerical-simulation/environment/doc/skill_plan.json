@@ -1,0 +1,45 @@
+{
+  "task_summary": "Simulate an open Dicke model steady state for 4 dissipation cases, compute cavity Wigner functions on 1000x1000 grids, and save as CSV files.",
+  "decomposition_rationale": "The task has two distinct functional domains: (1) quantum physics simulation (building Hamiltonian, collapse operators, solving steady state, partial trace) and (2) Wigner function computation and CSV export. Separating these allows clean reuse and testing of the physics engine independently from the output pipeline.",
+  "skills": [
+    {
+      "name": "evo-dicke-model-simulation",
+      "description": "Builds the open Dicke model Hamiltonian and Lindblad collapse operators in the full 2^N tensor product Hilbert space, solves for the steady-state density matrix, and extracts the reduced cavity state via partial trace. Supports all dissipation channels: cavity loss, local dephasing, local emission, local pumping, collective emission, and collective pumping.",
+      "responsibility": "Construct composite Hilbert space operators (cavity + N qubits), build the Dicke Hamiltonian, assemble collapse operator lists for arbitrary combinations of local and collective dissipation channels, solve for steady state using QuTiP's steadystate solver, and return the reduced cavity density matrix.",
+      "key_functions": [
+        "build_local_spin_op",
+        "build_collective_spin_ops",
+        "build_dicke_hamiltonian",
+        "build_collapse_operators",
+        "solve_steady_state",
+        "get_cavity_state"
+      ],
+      "dr_sections": [
+        "2. Composite Hilbert Space Construction",
+        "3. Dicke Hamiltonian Construction",
+        "4. Lindblad Master Equation Collapse Operators",
+        "4. Liouvillian Construction and Steady State Solver",
+        "5. Partial Trace to Get Cavity Reduced Density Matrix",
+        "8. Performance and Memory Considerations",
+        "9. Common Pitfalls with QuTiP 4.7.0 Specifically"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-wigner-csv-export",
+      "description": "Computes the Wigner function of a bosonic density matrix on a specified phase-space grid using QuTiP and exports the result as a CSV file. Handles grid construction, method selection, and efficient pandas-based CSV writing.",
+      "responsibility": "Generate phase-space grid arrays, compute the Wigner function using qutip.wigner with the clenshaw method, and save the resulting 2D array to CSV with proper formatting using numpy savetxt or pandas DataFrame.",
+      "key_functions": [
+        "compute_wigner_function",
+        "save_wigner_to_csv"
+      ],
+      "dr_sections": [
+        "6. Wigner Function Calculation in QuTiP 4.7.0",
+        "7. Saving Wigner Function Data as CSV"
+      ],
+      "depends_on": [
+        "evo-dicke-model-simulation"
+      ]
+    }
+  ]
+}

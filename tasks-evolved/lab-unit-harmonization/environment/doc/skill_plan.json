@@ -1,0 +1,60 @@
+{
+  "task_summary": "Harmonize clinical lab data from multiple healthcare systems by cleaning data formats, detecting mixed units via physiological range boundaries, converting to US conventional units, and outputting clean CSV",
+  "decomposition_rationale": "This task has three distinct concerns: (1) data cleaning/parsing of structural issues like commas, scientific notation, and missing values, (2) domain-specific unit detection and conversion requiring clinical knowledge of analyte ranges and conversion factors, and (3) the orchestration of applying these to the actual dataset. Skills 1 and 2 separate the generic data cleaning from the clinical domain logic.",
+  "skills": [
+    {
+      "name": "evo-clinical-data-cleaning",
+      "description": "Utility functions for cleaning raw clinical lab CSV data: handling decimal comma formats, scientific notation normalization, missing value detection, and numeric coercion of mixed-type columns.",
+      "responsibility": "Parse and clean structural data quality issues (decimal commas, scientific notation, mixed dtypes, missing values) without any domain-specific clinical knowledge. Provides reusable functions for loading, coercing, and preparing numeric data.",
+      "key_functions": [
+        "load_clinical_csv",
+        "replace_decimal_commas",
+        "coerce_to_numeric",
+        "drop_incomplete_rows",
+        "format_output_csv"
+      ],
+      "dr_sections": [
+        "3. Python Pandas Code Patterns for Data Cleaning",
+        "3.1 Reading Mixed Formats and Handling Decimal Commas",
+        "3.2 Cleaning Scientific Notation and Mixed Dtypes",
+        "3.4 Formatting, Dropping NaNs, and Writing Clean CSV",
+        "4.4 Pandas Dtype Issues with Mixed Strings"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-clinical-unit-harmonization",
+      "description": "Domain-specific clinical lab unit detection and conversion module. Contains conversion factor registry, physiological range boundaries for each analyte, and boundary-based auto-detection logic to identify and convert SI units to US conventional units.",
+      "responsibility": "Define analyte-specific conversion factors, physiological range thresholds for US and SI units, implement boundary-based auto-detection algorithm, and provide per-analyte harmonization functions that convert values outside expected US ranges using appropriate conversion factors.",
+      "key_functions": [
+        "get_analyte_config",
+        "detect_and_convert_value",
+        "harmonize_column",
+        "build_conversion_registry",
+        "harmonize_all_features"
+      ],
+      "dr_sections": [
+        "1. Complete Reference of US Conventional Units and Conversion Factors",
+        "1.1 CKD-Relevant Analytes: Physiological Ranges and Conversion Factors",
+        "1.1.1 Renal Function Biomarkers",
+        "1.1.2 Proteins and Metabolites",
+        "1.1.3 Electrolytes and Minerals",
+        "1.1.4 Glycemic Indices",
+        "1.1.5 Lipids",
+        "1.1.6 Hematology",
+        "1.1.7 Iron Studies",
+        "2. Algorithm and Strategy for Automatic Unit Detection",
+        "2.1 The Boundary-Based Auto-Detection Logic",
+        "2.2 Constructing the Discriminatory Thresholds",
+        "2.3 Handling Edge Cases",
+        "4.1 Valency and Electrolyte Equivalence",
+        "4.2 Handling of Percentage-Based Measurements",
+        "4.3 Zero, Negative Values, and Outliers",
+        "5. CKD Feature Description Conventions and Abbreviations"
+      ],
+      "depends_on": [
+        "evo-clinical-data-cleaning"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "task_summary": "Detect dangling paper titles in a PPTX file, reformat them (font, size, color, bold), resize boxes for single-line display, center at bottom of each slide, and create a reference slide with auto-numbered deduplicated titles.",
+  "decomposition_rationale": "The environment lacks python-pptx (only lxml, defusedxml, six are installed), so all manipulation must use raw ZIP+lxml. The task naturally splits into: (1) low-level PPTX ZIP/XML read-write utilities, (2) dangling title detection and reformatting logic, and (3) reference slide creation with numbered bullets. Keeping these separate ensures clean boundaries between I/O, detection/formatting, and slide creation concerns.",
+  "skills": [
+    {
+      "name": "evo-pptx-xml-io",
+      "description": "Low-level utilities for reading/writing PPTX files as ZIP archives with lxml XML parsing, without python-pptx. Provides functions to open a PPTX, parse slide XML, enumerate shapes, read/write XML attributes, and repackage modified content into a valid PPTX.",
+      "responsibility": "ZIP archive management, XML parsing with proper OOXML namespaces (DrawingML 'a:', PresentationML 'p:'), slide enumeration, and safe repackaging of modified PPTX files.",
+      "key_functions": [
+        "open_pptx_archive",
+        "parse_slide_xml",
+        "get_all_slide_paths",
+        "get_presentation_xml",
+        "write_pptx_archive",
+        "get_namespaces",
+        "find_shapes_in_slide"
+      ],
+      "dr_sections": [
+        "6. Important Pitfalls: The Docker/Dependency Constraint",
+        "5. Working with `lxml` to Manipulate OOXML Directly"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-pptx-title-detect-format",
+      "description": "Detects dangling (non-placeholder) paper title text boxes in slide XML using heuristics, applies font reformatting (Arial, size 16, color #989596, non-bold) at the run level via raw XML manipulation, calculates/adjusts box width for single-line display, and repositions titles to bottom-center of each slide.",
+      "responsibility": "Dangling title identification via XML heuristics (non-placeholder check, text content analysis), run-level typography manipulation in raw OOXML, text width estimation for box resizing, and spatial repositioning (bottom-center) using EMU coordinates.",
+      "key_functions": [
+        "detect_dangling_titles",
+        "apply_font_formatting_to_shape",
+        "estimate_text_width_emu",
+        "resize_textbox_for_single_line",
+        "position_bottom_center",
+        "extract_title_text"
+      ],
+      "dr_sections": [
+        "1. Reading and Iterating Slides and Shapes in `python-pptx`",
+        "2. Typography and Font Formatting in `python-pptx`",
+        "3. Text Box Sizing, Positioning, and Spatial Mathematics",
+        "Heuristics for Title Detection at the Raw XML Level"
+      ],
+      "depends_on": [
+        "evo-pptx-xml-io"
+      ]
+    },
+    {
+      "name": "evo-pptx-reference-slide",
+      "description": "Creates a new slide at the end of the presentation with 'Reference' as the title and all unique paper titles as auto-numbered bullet points in the body, using raw OOXML XML construction with lxml.",
+      "responsibility": "New slide XML creation, presentation.xml and relationship file updates, title placeholder population, body text with auto-numbered bullets via a:buAutoNum elements, and deduplication of paper titles.",
+      "key_functions": [
+        "create_reference_slide_xml",
+        "add_slide_to_presentation",
+        "create_autonumbered_paragraphs",
+        "update_content_types",
+        "update_presentation_rels",
+        "deduplicate_titles"
+      ],
+      "dr_sections": [
+        "4. Creating Slides and the Numbered List Dilemma",
+        "5. Working with `lxml` to Manipulate OOXML Directly",
+        "6. Important Pitfalls: The Docker/Dependency Constraint"
+      ],
+      "depends_on": [
+        "evo-pptx-xml-io",
+        "evo-pptx-title-detect-format"
+      ]
+    }
+  ]
+}

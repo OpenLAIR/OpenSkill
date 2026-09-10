@@ -1,0 +1,51 @@
+Next.js e-commerce performance optimization: comprehensive guide to fixing slow React/Next.js applications
+
+I need detailed technical information on the following topics for building a Python utility module that can analyze and fix performance issues in a Next.js e-commerce application:
+
+1. **Next.js API Route Optimization Patterns**
+   - What are the exact patterns for implementing API response caching in Next.js API routes (app router and pages router)? Show working code examples with `fetch` options like `{ next: { revalidate: N } }` and `cache: 'force-cache'` vs `'no-store'`.
+   - How to implement request deduplication in Next.js when multiple components fetch the same API endpoint simultaneously?
+   - What is the correct way to add in-memory caching (e.g., using `Map` or `lru-cache`) in Next.js API routes? Show exact code patterns with proper cache invalidation.
+   - How to detect and fix N+1 query patterns in API routes where multiple sequential fetches should be batched or parallelized using `Promise.all()`?
+   - What are the correct `headers()` settings for Cache-Control in Next.js API responses?
+
+2. **Bundle Size Reduction in Next.js**
+   - How to identify and fix heavy imports that bloat the client bundle? Specifically:
+     - Converting `import lodash from 'lodash'` to `import debounce from 'lodash/debounce'` (tree-shaking patterns)
+     - Using `next/dynamic` for code splitting with exact syntax: `const Component = dynamic(() => import('./Heavy'), { ssr: false, loading: () => <p>Loading...</p> })`
+     - What are the exact import paths and options for `next/dynamic`?
+   - How to use `@next/bundle-analyzer` to identify large dependencies? What configuration is needed in `next.config.js`?
+   - What are common offenders for large bundle sizes in React e-commerce apps (moment.js vs date-fns, full icon libraries, chart libraries loaded eagerly)?
+
+3. **Excessive Re-rendering Prevention in React/Next.js**
+   - What are the exact patterns for:
+     - `React.memo()` — correct wrapping syntax, custom comparison function signature
+     - `useMemo()` and `useCallback()` — when to use each, correct dependency array patterns
+     - Moving state down to prevent parent re-renders
+     - Context splitting to avoid re-rendering all consumers
+   - How does creating a new object/array/function on every render in a parent cause child re-renders even with `React.memo`? Show the fix pattern.
+   - What is the correct pattern for cart state management that avoids re-rendering the entire product list when cart updates? (extracting cart context, using selectors, or splitting contexts)
+
+4. **Next.js Specific Performance Patterns**
+   - `useEffect` vs server-side data fetching: how to move client-side fetches to `getServerSideProps`, `getStaticProps`, or server components?
+   - Image optimization: using `next/image` instead of `<img>` tags — exact props (`width`, `height`, `sizes`, `priority`, `loading="lazy"`)
+   - What is the difference between `'use client'` and server components in Next.js App Router? How to minimize client components?
+
+5. **Common Anti-Patterns in Slow Next.js E-commerce Apps**
+   - Fetching data on the client inside `useEffect` when it could be fetched server-side
+   - Artificial delays or unnecessary `setTimeout`/`await new Promise(resolve => setTimeout(...))` in API routes or data fetching
+   - Unoptimized comparison pages that re-compute derived data on every render instead of memoizing
+   - Passing entire product objects through context when only IDs are needed
+   - Not using `key` props correctly causing full list re-renders
+   - Synchronous heavy computation in render path (e.g., sorting/filtering large arrays without memoization)
+   - Unnecessary `JSON.parse(JSON.stringify())` deep cloning patterns
+
+6. **File Pattern Recognition for Performance Issues**
+   - What file patterns in a Next.js project (pages/, app/, components/, api/) indicate performance problems?
+   - How to grep/search for: unnecessary re-renders, missing memoization, heavy synchronous imports, client-side fetching that should be server-side, unoptimized API calls?
+   - What are the typical file structures for Next.js pages router vs app router?
+
+7. **Specific Code Transformation Patterns**
+   - Show before/after code examples for each optimization category
+   - What are safe refactoring patterns that maintain existing `data-testid` attributes and `performance.mark()` calls while improving performance?
+   - How to add caching to a fetch wrapper without changing the external API contract?

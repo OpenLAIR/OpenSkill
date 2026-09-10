@@ -1,0 +1,52 @@
+{
+  "task_summary": "Anonymize three academic PDF papers by redacting author names, affiliations, arXiv identifiers, venue information, and other identity-revealing content, then save redacted versions.",
+  "decomposition_rationale": "This task has two distinct concerns: (1) extracting and identifying what content needs redaction from each specific PDF (author names, affiliations, emails, arXiv IDs, venue info), and (2) performing the actual PDF redaction operations including text removal, link scrubbing, and metadata purging. Since the papers are unknown, the agent must first inspect them to discover author-specific strings, then apply comprehensive redaction. These concerns are tightly coupled enough to warrant two skills rather than more.",
+  "skills": [
+    {
+      "name": "evo-pdf-content-extraction",
+      "description": "Extracts and analyzes text content from PDF pages to identify author-revealing information including names, affiliations, emails, arXiv IDs, venue/conference mentions, and other identity-leaking content. Focuses on the first few pages where author blocks typically appear.",
+      "responsibility": "Text extraction, layout analysis of author blocks, pattern detection for identifying redaction targets (author names, institution names, emails, arXiv identifiers, conference/venue statements). Returns structured lists of exact strings and regions to redact.",
+      "key_functions": [
+        "extract_page_text",
+        "extract_words_with_positions",
+        "identify_author_block_region",
+        "detect_arxiv_identifiers",
+        "detect_email_addresses",
+        "detect_affiliations",
+        "detect_venue_statements",
+        "get_all_redaction_targets"
+      ],
+      "dr_sections": [
+        "1. Text Extraction and Search Operations in PyMuPDF 1.24.0",
+        "5. Academic Paper Anonymization: Specific Patterns",
+        "8. pypdf and pdfplumber as Supplementary Extraction Tools"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-pdf-redaction-engine",
+      "description": "Performs physical redaction of identified content in PDF documents using PyMuPDF's redaction API. Handles exact string redaction, regex-based redaction, hyperlink removal, metadata scrubbing, and secure document saving with garbage collection.",
+      "responsibility": "Applying redaction annotations to identified text regions, removing sensitive hyperlinks, purging standard and XMP metadata, batch processing redactions per page with image preservation, and securely saving the output PDF.",
+      "key_functions": [
+        "redact_exact_strings",
+        "redact_regex_patterns",
+        "redact_page_region",
+        "scrub_hyperlinks",
+        "scrub_metadata",
+        "anonymize_pdf",
+        "save_redacted_document"
+      ],
+      "dr_sections": [
+        "2. The Redaction API in PyMuPDF",
+        "3. Implementing Regex-Based Text Search and Redaction",
+        "4. Handling PDF Elements: Headers, Footers, and Metadata",
+        "6. Managing Links and Annotations",
+        "7. Common Pitfalls, Edge Cases, and Document Saving",
+        "9. Complete End-to-End Code Pattern"
+      ],
+      "depends_on": [
+        "evo-pdf-content-extraction"
+      ]
+    }
+  ]
+}

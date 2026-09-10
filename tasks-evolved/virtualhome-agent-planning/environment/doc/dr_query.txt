@@ -1,0 +1,44 @@
+I need comprehensive information to build a Python utility module for solving PDDL airport planning problems using the libraries available in the Docker environment (pyperplan, unified_planning, up-pyperplan). Here is my research query:
+
+---
+
+Detailed guide on using the `unified_planning` Python library (version 1.3.0) and `pyperplan` (version 2.1) to parse and solve PDDL planning problems programmatically. Specifically I need:
+
+1. **unified_planning API for PDDL parsing and solving:**
+   - Exact import paths and usage for `PDDLReader`, `PDDLWriter`, `OneshotPlanner`, `PlanValidator` from `unified_planning.io` and `unified_planning.shortcuts`
+   - How `PDDLReader().parse_problem(domain_file, problem_file)` works — what object it returns, what properties are available (`.kind`, actions, objects, initial state, goals)
+   - How `OneshotPlanner(problem_kind=problem.kind)` selects an engine — does it automatically pick `up-pyperplan`? Can you specify `name='pyperplan'` or `name='up-pyperplan'`? What are the exact engine names?
+   - How `PDDLWriter(problem).write_plan(plan, filename=...)` formats the output — what exact syntax does it produce? Does it write `(action_name param1 param2)` or `action_name(param1, param2)` format?
+   - How `reader.parse_plan(problem, plan_file)` expects the plan file to be formatted — what syntax does it accept?
+   - Working code example of the full pipeline: parse PDDL → solve → write plan → validate plan
+
+2. **pyperplan direct usage as a fallback:**
+   - How to use `pyperplan` directly as a Python library (not CLI) to parse PDDL domain and problem files and run a search
+   - `pyperplan.planner.search_plan()` or equivalent API — exact function signatures
+   - Available search algorithms and heuristics in pyperplan (A*, greedy best-first, BFS, etc.) and how to select them programmatically
+   - How pyperplan represents and returns plans — what format are actions in?
+   - Which heuristics work well for large PDDL problems (e.g., h_ff, h_add, landmark cut)?
+
+3. **Airport domain specifics from IPC:**
+   - What is the structure of IPC airport domain PDDL files? What are the typical action schemas (e.g., `move`, `pushback`, `park`, `startup`, `taxi`)?
+   - How large are the Munich airport instances in terms of number of objects, actions, and state variables?
+   - Are there known difficulties with airport domain problems (large grounding, many objects, conditional effects, negative preconditions, ADL features)?
+   - Do airport domain PDDL files use any PDDL features beyond STRIPS (e.g., `:typing`, `:negative-preconditions`, `:conditional-effects`, `:disjunctive-preconditions`, ADL)?
+
+4. **Plan output format requirements:**
+   - The expected output format shows `action_name(param1, param2, ...)` — one action per line. Does `PDDLWriter.write_plan()` produce this format, or does it produce `(action_name param1 param2)` PDDL-standard format?
+   - How does `PDDLReader.parse_plan()` in the validation script expect the plan to be formatted? Does it accept both parenthesized and function-call-style formats?
+   - If `write_plan` doesn't match what `parse_plan` expects, how to manually format the plan correctly?
+
+5. **Performance and timeout considerations:**
+   - For a 600-second timeout, which pyperplan search strategy + heuristic combination is fastest for airport domain problems?
+   - Does `unified_planning` support setting a timeout on `OneshotPlanner.solve()`? How? (e.g., `planner.solve(problem, timeout=300)`)
+   - Memory issues with large groundings — does pyperplan handle large airport instances or does it run out of memory?
+   - Are there alternative strategies like using Fast Downward via unified_planning, and is it available in the Docker image?
+
+6. **Common pitfalls:**
+   - Does `unified_planning` 1.3.0 have any known bugs with PDDL parsing (especially with typing, negative preconditions)?
+   - Does `up-pyperplan` 1.1.0 properly handle all PDDL features used in airport domains?
+   - Are there issues with action name case sensitivity between parsing and plan output?
+   - What happens if pyperplan cannot solve a problem within the time limit — does it raise an exception or return None?
+   - Any version incompatibilities between unified_planning 1.3.0, up-pyperplan 1.1.0, and pyperplan 2.1?

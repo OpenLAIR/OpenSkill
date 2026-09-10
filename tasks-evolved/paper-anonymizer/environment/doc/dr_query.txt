@@ -1,0 +1,34 @@
+Research query:
+
+How to programmatically redact and anonymize text in PDF files using PyMuPDF (pymupdf/fitz) version 1.24.0 in Python. I need to build a reusable Python utility module with helper functions for the following specific operations:
+
+1. **Text extraction and search with PyMuPDF 1.24.0**: Exact API for opening PDFs (`fitz.open()`), iterating pages, searching for text with `page.search_for(text)`, and extracting full text with `page.get_text()`. What are the correct method signatures, return types (Rect objects?), and parameter options? Show working code examples with correct imports (`import fitz` vs `import pymupdf`). What is the correct import path in pymupdf 1.24.0?
+
+2. **Redaction API in PyMuPDF**: How to use `page.add_redact_annot()` and `page.apply_redactions()` to permanently remove text from PDFs. What are the exact parameters for `add_redact_annot()` — specifically `quad`, `text`, `fill`, `cross_out` parameters and their types? How to redact by area (Rect) vs by text search? Show complete working code that searches for a string and redacts all occurrences across all pages. What color values to use for the fill (e.g., black fill to visually cover text)? Does `apply_redactions()` permanently remove the underlying text from the PDF or just visually cover it?
+
+3. **Regex-based text search and redaction**: How to use `page.search_for()` with regular expressions, or alternatively how to extract text with positions using `page.get_text("dict")` or `page.get_text("words")` or `page.get_text("blocks")` to find text matching patterns (like email addresses, arXiv identifiers like `arXiv:XXXX.XXXXX`, URLs, affiliation patterns). What does the structured text output look like — what are the dictionary keys, how to get bounding boxes for individual words or spans?
+
+4. **Handling different PDF elements**: How to find and redact text in headers, footers, footnotes, and metadata. How to access and modify PDF metadata (author, title, subject, creator fields) using PyMuPDF — `doc.metadata`, `doc.set_metadata()`. What are the exact metadata dictionary keys? How to also handle XMP metadata?
+
+5. **Redacting specific patterns relevant to academic paper anonymization**:
+   - Author names (typically found on first page, in headers/footers, and in metadata)
+   - Institutional affiliations and email addresses
+   - arXiv identifiers (format: `arXiv:YYMM.NNNNN` or `arXiv:category/NNNNN`)
+   - Conference/venue acceptance statements (e.g., "Accepted at...", "Published in...", "To appear in...")
+   - Self-referential citations (e.g., "our previous work [X]", "we previously showed")
+   - Grant acknowledgment sections that name institutions
+
+6. **Working with links and annotations**: How to find and remove hyperlinks (especially those pointing to author pages, arXiv pages, institutional URLs) using PyMuPDF. API for `page.links()`, `page.delete_link()`, annotation handling.
+
+7. **Common pitfalls and edge cases**:
+   - Does PyMuPDF 1.24.0 use `fitz` or `pymupdf` as the import name? Are there any deprecated APIs in this version?
+   - What happens when `search_for()` doesn't find text that visually appears on the page (e.g., text in images, text with unusual encodings, ligatures)?
+   - How to handle multi-line text spans when redacting?
+   - Does `apply_redactions()` need to be called once per page or can it be batched?
+   - What about text that spans across font changes or style changes?
+   - How to handle the `images` parameter in `apply_redactions()` — specifically `PDF_REDACT_IMAGE_NONE` vs other options to avoid accidentally removing figures?
+   - Saving the modified PDF: `doc.save()` vs `doc.saveIncr()` — which to use after redactions? What parameters ensure the redacted content is truly removed (garbage collection, deflation)?
+
+8. **pypdf and pdfplumber as alternatives/supplements**: Can `pypdf` (version 4.0.0) or `pdfplumber` (version 0.11.0) be used to extract text more reliably for initial analysis before redacting with PyMuPDF? What are their text extraction APIs and how do they compare for getting author names and affiliations from academic PDFs?
+
+9. **Complete end-to-end code pattern**: Show a complete reusable function that takes an input PDF path and output path, finds all occurrences of a list of strings/patterns, applies black-box redactions over them, cleans metadata, and saves the result. Include error handling for corrupted pages or missing fonts.

@@ -1,0 +1,49 @@
+Research query:
+
+DC-OPF (DC Optimal Power Flow) with reserve co-optimization in Python: complete implementation guide for building reusable utility functions
+
+I need comprehensive information on the following topics to build a Python utility module that can:
+1. Load a MATPOWER-format network JSON file and parse bus, generator, branch data
+2. Formulate and solve a DC-OPF with spinning reserve co-optimization
+3. Extract LMPs, binding constraints, and reserve market clearing prices from the solution
+
+Specific areas of research:
+
+**MATPOWER JSON format parsing in Python:**
+- What is the exact structure of a MATPOWER case stored as JSON? What are the field names for bus data, generator data, branch data (from_bus, to_bus, rateA thermal limits, etc.), and generator cost data?
+- What are the column indices in the MATPOWER bus, gen, branch, and gencost matrices? Specifically: bus number, bus type, Pd (load), Qd; gen bus, Pmin, Pmax, cost coefficients; branch from_bus, to_bus, reactance (x), rateA (thermal limit in MVA/MW), status?
+- How to correctly parse polynomial vs piecewise-linear generator cost functions from MATPOWER gencost format (type 1 vs type 2)?
+
+**DC-OPF formulation with reserve co-optimization using Python optimization libraries:**
+- Provide working code examples using PuLP, Pyomo, scipy.optimize, or cvxpy to formulate DC-OPF. Show exact API calls, variable creation, constraint addition, and objective function setup.
+- DC-OPF constraints: power balance per bus using PTDF (Power Transfer Distribution Factors) or B-theta formulation. How to build the bus admittance matrix (Bbus) from branch reactance data for DC power flow. Show the exact mathematical formulation and corresponding Python code.
+- How to compute PTDF matrix from branch and bus data in Python — step by step with code.
+- Thermal line limits as inequality constraints on branch flows: flow = PTDF * injection vector, |flow| <= rateA.
+- Spinning reserve co-optimization: how to add reserve variables per generator, reserve capacity coupling constraint (Pg + Rg <= Pmax), system-wide reserve requirement constraint (sum of Rg >= reserve requirement). What is the "Standard Capacity Coupling" formulation?
+- How to determine the system spinning reserve requirement (e.g., percentage of load, largest unit contingency)?
+
+**Extracting LMPs and dual variables:**
+- How to extract Locational Marginal Prices (LMPs) from the DC-OPF solution — these are the dual variables (shadow prices) of the power balance constraints at each bus.
+- Working code showing how to get dual variables from PuLP, Pyomo, and cvxpy after solving an LP. What are the exact API calls? For PuLP: constraint.pi; for Pyomo: model.dual[constraint]; for cvxpy: constraint.dual_value.
+- How to extract the reserve market clearing price (MCP) — this is the dual of the system reserve requirement constraint.
+- How to identify binding transmission lines (lines where flow equals or is near the thermal limit, e.g., >= 99% loading).
+
+**Specific Python library recommendations and pitfalls:**
+- For PuLP: how to enable dual variable extraction (need to use specific solvers like GLPK or CBC with certain options). What are the correct solver parameters to get shadow prices? Common pitfall: PuLP doesn't return duals by default.
+- For cvxpy: how to ensure DCP compliance for LP problems and retrieve dual values. Show `prob.solve()` and then `constraint.dual_value`.
+- For Pyomo: how to activate the dual suffix (`model.dual = Suffix(direction=Suffix.IMPORT)`).
+- Which solver is pre-installed or easy to install on Ubuntu 24.04 without extra packages? (GLPK, CBC, HiGHS?)
+- Installing optimization packages via pip: `pip install pulp pyomo cvxpy` — which ones include bundled solvers?
+
+**MATPOWER bus numbering and indexing:**
+- MATPOWER uses non-sequential bus numbers. How to map external bus numbers to internal indices (0-based or 1-based) when building the admittance matrix. Common pitfall: assuming bus numbers are sequential.
+- How to find a specific branch (e.g., from bus 64 to bus 1501) in the branch data and modify its rateA.
+
+**Sign conventions and MW base:**
+- MATPOWER uses system MVA base (typically 100 MVA). Do branch limits (rateA) need to be converted? Are they in MW or MVA?
+- Sign convention for LMPs from dual variables — should they be negated depending on the formulation (>= vs <= constraint form)?
+
+**Output formatting:**
+- Python code pattern for building a nested JSON structure and writing it with `json.dump()` with proper formatting (indent, float precision).
+
+Please provide complete, runnable Python code examples wherever possible, with correct import statements and installation commands.

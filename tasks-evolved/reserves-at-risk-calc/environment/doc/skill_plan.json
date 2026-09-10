@@ -1,0 +1,67 @@
+{
+  "task_summary": "Extract gold prices from IMF data, calculate log returns and volatilities, integrate with country reserve data, and compute Reserves at Risk (RaR) metrics in an Excel workbook using openpyxl and LibreOffice for formula evaluation.",
+  "decomposition_rationale": "This task has three distinct concerns: (1) reading/exploring complex IMF spreadsheet data and the template workbook structure, (2) writing financial formulas and data into the correct cells across multiple sheets with openpyxl, and (3) forcing formula recalculation via headless LibreOffice. Since the data exploration feeds directly into the formula writing, and the LibreOffice recalculation is a simple final step, a 2-skill decomposition provides clean separation between data extraction/analysis and Excel formula construction/output.",
+  "skills": [
+    {
+      "name": "evo-excel-data-extraction",
+      "description": "Utilities for exploring and extracting data from complex, multi-sheet Excel workbooks with irregular formatting (merged cells, variable header rows). Provides functions to discover sheet structure, locate specific commodities/countries, and extract time series data from IMF-style spreadsheets.",
+      "responsibility": "Reading and parsing source Excel files (IMF commodity prices and template workbook), handling merged cells, identifying header rows, extracting gold price time series, country reserve data, and understanding the template structure (row/column layout of Answer sheet, Value sheet, Volume sheet, Total Reserves sheet).",
+      "key_functions": [
+        "explore_sheet_structure",
+        "extract_gold_price_series",
+        "extract_country_reserve_data",
+        "get_merged_cell_value",
+        "find_header_row"
+      ],
+      "dr_sections": [
+        "2. Initial Data Exploration with Pandas",
+        "2.1 Using `pandas.read_excel()` for Structural Discovery",
+        "2.2 Advanced Parsing Arguments",
+        "3. Reading IMF Commodity Data with openpyxl",
+        "3.1 Loading the Workbook",
+        "3.2 Iterating Through Rows and Handling Merged Cells",
+        "3.3 Handling Date-Formatted Cells",
+        "9. openpyxl Pitfalls and Edge Cases",
+        "9.1 The `data_only` Dilemma",
+        "9.2 Version-Specific Issues",
+        "9.3 Preserving Existing Sheets and Formats"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-excel-financial-formulas",
+      "description": "Utilities for writing financial Excel formulas (log returns, rolling volatility, annualized volatility, XLOOKUP/INDEX+MATCH, RaR calculations) into openpyxl workbooks, copying data between sheets, and triggering LibreOffice headless recalculation to evaluate all formulas.",
+      "responsibility": "Writing all Excel formulas (LN, STDEV.S, SQRT, XLOOKUP/INDEX+MATCH) into the correct cells, populating gold price data into the Gold price sheet, filling Answer sheet blanks, handling cross-sheet references, computing Gold Price Exposure and RaR formulas, saving the workbook, and running LibreOffice headless to force formula recalculation.",
+      "key_functions": [
+        "write_gold_price_sheet",
+        "write_log_return_formulas",
+        "write_volatility_formulas",
+        "write_answer_sheet_step1",
+        "write_answer_sheet_step2",
+        "write_answer_sheet_step3",
+        "write_lookup_formulas",
+        "recalculate_with_libreoffice"
+      ],
+      "dr_sections": [
+        "4. Writing Excel Formulas with openpyxl",
+        "4.1 Syntax for Writing Formulas",
+        "4.2 Formula Locale and Compatibility Pitfalls",
+        "5. Financial Calculations as Excel Formulas",
+        "5.1 Monthly Log Returns",
+        "5.2 Rolling Standard Deviation: `STDEV.S` vs `STDEV.P`",
+        "5.3 Annualized Volatility",
+        "5.4 Central Bank Gold Price Exposure and Reserves at Risk (RaR)",
+        "6. XLOOKUP and INDEX+MATCH Formula Syntax",
+        "6.1 XLOOKUP Compatibility in LibreOffice",
+        "6.2 The INDEX + MATCH Alternative",
+        "7. openpyxl API for Copying Data Between Sheets",
+        "8. Using LibreOffice Command Line to Recalculate Formulas",
+        "8.1 The `--convert-to` Caveat",
+        "8.2 The Robust Solution: Headless Macro Execution"
+      ],
+      "depends_on": [
+        "evo-excel-data-extraction"
+      ]
+    }
+  ]
+}

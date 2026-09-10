@@ -1,0 +1,46 @@
+Research query for building a Python utility module for video camera motion (egomotion) analysis and dynamic object detection using OpenCV and NumPy:
+
+---
+
+I need comprehensive technical documentation and working code examples for building a Python utility module that performs two tasks on video: (1) camera egomotion classification into cinematographic motion labels, and (2) dynamic/moving object segmentation producing binary masks. The environment is constrained to Python 3, OpenCV (opencv-python-headless 4.12.0.88), NumPy 1.26.4, and ffmpeg. No deep learning frameworks (PyTorch, TensorFlow) are available.
+
+**1. Video Frame Sampling with OpenCV**
+- Exact API for `cv2.VideoCapture` to open an MP4 file, read specific frames at a given sample rate (e.g., every N-th frame based on fps=6 from original video fps). Show how to get original FPS via `cap.get(cv2.CAP_PROP_FPS)`, compute frame step, and extract sampled frames.
+- Correct usage of `cap.set(cv2.CAP_PROP_POS_FRAMES, frame_number)` vs sequential reading — which is more reliable for MP4 files? Are there known issues with seeking in OpenCV 4.12?
+
+**2. Optical Flow Computation for Egomotion Estimation**
+- Complete working code for computing dense optical flow between consecutive frames using `cv2.calcOpticalFlowFarneback()`. Document ALL parameters: `prev`, `next`, `flow`, `pyr_scale`, `levels`, `winsize`, `iterations`, `poly_n`, `poly_sigma`, `flags`. What are the recommended parameter values for camera motion estimation?
+- Alternative: sparse optical flow with `cv2.calcOpticalFlowPyrLK()` — full API signature, parameters for `winSize`, `maxLevel`, `criteria`. How to use `cv2.goodFeaturesToTrack()` to get initial points — exact parameters and return format.
+- How to decompose the global optical flow field into camera motion types:
+  - **Pan Left/Right**: dominant horizontal flow direction across the frame
+  - **Tilt Up/Down**: dominant vertical flow direction
+  - **Dolly In/Out** (zoom): radial flow pattern expanding from or contracting toward center
+  - **Roll Left/Right**: rotational flow pattern around image center
+  - **Stay**: minimal overall flow magnitude
+- What are the mathematical criteria to distinguish these? Specifically: how to compute the homography or affine transform from flow/feature correspondences using `cv2.estimateAffinePartial2D()` or `cv2.findHomography()`, then decompose the transformation matrix into translation, rotation, and scale components?
+- Exact decomposition: given a 2x3 affine matrix `[[a, b, tx], [c, d, ty]]`, how to extract rotation angle, scale factor, and translation vector? What thresholds distinguish "Pan" from "Tilt" from "Dolly" from "Roll" from "Stay"?
+
+**3. Dynamic Object Detection / Segmentation without Deep Learning**
+- How to separate camera-induced (egomotion) flow from independently moving objects using only OpenCV and NumPy:
+  - Compute homography between consecutive frames using `cv2.findHomography()` with RANSAC — exact API: `cv2.findHomography(srcPoints, dstPoints, method=cv2.RANSAC, ransacReprojThreshold=?)`. What is the return format? How to use the inlier mask?
+  - Warp the previous frame using `cv2.warpPerspective()` to compensate for camera motion, then compute the difference image to find dynamic regions.
+  - Alternative: use the RANSAC inlier/outlier mask from homography estimation — outlier feature points correspond to dynamic objects. How to convert sparse outlier points into a dense binary mask?
+- `cv2.createBackgroundSubtractorMOG2()` or `cv2.createBackgroundSubtractorKNN()` — are these useful when the camera is moving? What are their limitations?
+- Morphological operations (`cv2.dilate`, `cv2.erode`, `cv2.morphologyEx`) to clean up binary masks — kernel sizes and iteration counts for typical results.
+
+**4. SciPy Sparse CSR Matrix Format (using only NumPy)**
+- Since scipy is NOT available, how to manually construct CSR (Compressed Sparse Row) representation from a dense 2D boolean NumPy array? Specifically, for a binary mask of shape (H, W), how to compute:
+  - `data`: array of True values (all 1s or True)
+  - `indices`: column indices where mask is True, row by row
+  - `indptr`: row pointer array of length H+1
+- Working code to convert `dense_mask` (H×W boolean ndarray) to `(data, indices, indptr)` arrays.
+- How to save these arrays into an NPZ file using `np.savez()` with keys like `f_{i}_data`, `f_{i}_indices`, `f_{i}_indptr`, and `shape`.
+
+**5. JSON Output Format**
+- Python `json.dump()` for writing the motion labels dictionary with frame interval keys like `"0->1"`.
+
+**6. Common Pitfalls**
+- OpenCV BGR vs RGB color space issues when computing optical flow (need grayscale via `cv2.cvtColor`).
+- `cv2.calcOpticalFlowFarneback` input must be `np.float32` or `np.uint8`? What dtype is required?
+- Integer overflow or dtype issues when computing flow statistics with NumPy.
+- Frame indexing: 0-based vs 1-based in the output JSON.

@@ -1,0 +1,44 @@
+Research query for building a Python skill to extract standalone LaTeX formulas from PDF research papers:
+
+I need comprehensive technical documentation on extracting displayed (standalone/block) LaTeX formulas from academic PDF papers using Python. Specifically, I need to build a reusable Python utility module with the following capabilities:
+
+1. **marker-pdf library (version 1.3.3) — exact API usage for PDF-to-LaTeX conversion:**
+   - What is the correct Python API to convert a PDF file to markdown/LaTeX output using marker-pdf 1.3.3? Provide exact import paths, function signatures, and working code examples.
+   - How does marker-pdf 1.3.3 represent mathematical formulas in its output? Does it use `$$...$$` for display math and `$...$` for inline math? Or does it use `\[...\]` and `\(...\)` notation?
+   - What configuration options exist in marker-pdf 1.3.3 to maximize the quality of LaTeX formula extraction? Are there flags to control OCR model behavior for math regions?
+   - How does marker-pdf handle multi-line equations, aligned environments, equation arrays, and numbered equations?
+   - What are the known limitations or common errors in marker-pdf's LaTeX output for mathematical formulas?
+
+2. **Surya OCR models used by marker-pdf:**
+   - How do the surya_det3, surya_rec2, surya_layout, texify, and surya_tablerec models work together in the marker-pdf pipeline?
+   - What role does the `texify` model (datalab-to/texify) specifically play in LaTeX formula recognition? What are its known accuracy issues or common misrecognitions?
+   - Are there parameters to control confidence thresholds or post-processing for the texify model output?
+
+3. **Distinguishing display math (standalone formulas) from inline math:**
+   - What patterns and heuristics reliably identify display/block math formulas (formulas on their own line) versus inline formulas in marker-pdf output?
+   - In LaTeX source, what are all the standard environments and delimiters for displayed equations: `$$...$$`, `\[...\]`, `\begin{equation}`, `\begin{align}`, `\begin{gather}`, `\begin{multline}`, `\begin{eqnarray}`, etc.?
+   - How should I convert LaTeX environments like `\begin{align}`, `\begin{equation}`, `\begin{gathered}` etc. into clean `$$...$$` format while preserving the visual rendering?
+
+4. **LaTeX formula cleaning and validation:**
+   - What are common OCR artifacts and typos in LaTeX formula extraction (e.g., misrecognized symbols, broken commands, unmatched braces/brackets)?
+   - How to programmatically validate LaTeX math syntax in Python? Are there libraries like `pylatexenc`, `latex2sympy`, or regex-based approaches to check for balanced braces, valid LaTeX commands, etc.?
+   - What are the exact import paths and function signatures for pylatexenc's LaTeX parsing capabilities?
+   - How to detect and fix common LaTeX syntax errors: unmatched `{`, `}`, `\left` without `\right`, malformed `\frac`, `\sqrt`, etc.?
+   - How to strip trailing tags, commas, periods, and equation numbers (like `(1)`, `(2.3)`) from extracted formulas?
+
+5. **Rendering verification with Playwright:**
+   - How to use Playwright (Python, version 1.57.0) to render LaTeX formulas via MathJax or KaTeX in a headless browser and verify they render correctly? Provide working code with exact API calls.
+   - What is the correct way to set up a minimal HTML page with MathJax/KaTeX CDN, inject `$$...$$` formulas, and check for rendering errors?
+
+6. **Alternative/complementary approaches:**
+   - Can pdfplumber, PyMuPDF (fitz), or pdfminer extract text regions that correspond to displayed equations?
+   - How to use PyMuPDF to extract text blocks with positional information to identify standalone formula regions on each page?
+
+7. **Common pitfalls:**
+   - What are version-specific breaking changes in marker-pdf between versions (especially 1.x)?
+   - Are there deprecated APIs in marker-pdf 1.3.3 that show up in older tutorials?
+   - How does marker-pdf handle formulas that span multiple lines or use alignment characters (`&`)?
+   - What encoding issues arise when writing LaTeX special characters to markdown files in Python?
+   - How to handle formulas with `\tag{}`, `\label{}`, `\nonumber`, `\notag` commands — should these be stripped?
+
+Provide working, tested Python code snippets for each of these areas with correct imports, function calls, and expected output formats.

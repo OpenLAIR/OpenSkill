@@ -1,0 +1,29 @@
+version = "1.0"
+# NOTE: This task requires external credentials (GOOGLE_AUTH_PATH with Gmail/Calendar
+# OAuth tokens). Skip in baseline runs without these credentials.
+
+[metadata]
+author_name = "Xinyi Liu"
+author_email = "xinyiliu0227@gmail.com"
+difficulty = "medium"
+category = "Scheduling"
+tags = ["scheduling", "calendar"]
+
+[verifier]
+timeout_sec = 900.0
+
+[agent]
+timeout_sec = 900.0
+
+[environment]
+build_timeout_sec = 600.0
+cpus = 1
+memory_mb = 4096
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+
+[verifier.env]
+
+[solution.env]
+HUGGINGFACE_API_TOKEN="${HUGGINGFACE_API_TOKEN}"

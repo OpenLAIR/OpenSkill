@@ -1,0 +1,49 @@
+{
+  "task_summary": "Build a Python function that extracts chemical names from a PDF, resolves them to SMILES via PubChem, computes Morgan fingerprint Tanimoto similarity against a target molecule, and returns the top-k most similar chemicals sorted by descending similarity with alphabetical tie-breaking.",
+  "decomposition_rationale": "The task has three distinct functional domains: (1) extracting chemical names from a PDF, (2) converting chemical names to molecular representations via PubChem, and (3) computing fingerprint-based similarity and ranking results. However, since the pipeline is tightly coupled and the background research document provides a near-complete unified solution, decomposing into 2 skills—one for PDF extraction/name resolution and one for similarity computation/ranking—provides clean separation without over-decomposition.",
+  "skills": [
+    {
+      "name": "evo-chem-pdf-extraction",
+      "description": "Extracts chemical names from a PDF file and resolves them to SMILES strings using PubChemPy. Handles PDF parsing with pdfplumber, text cleaning, and PubChem API rate limiting with retries.",
+      "responsibility": "PDF text extraction, chemical name parsing/cleaning, and chemical name to SMILES resolution via PubChem API. Does NOT compute similarity.",
+      "key_functions": [
+        "extract_chemicals_from_pdf",
+        "resolve_name_to_smiles",
+        "clean_and_parse_chemical_names"
+      ],
+      "dr_sections": [
+        "2. PDF Text Extraction of Chemical Names",
+        "2.1 Extraction Using `pdfplumber` (v0.11.9)",
+        "2.2 Extraction Using `pypdf` (v6.6.0) as an Alternative",
+        "2.3 Best Practices for Cleaning and Parsing Extracted Text",
+        "3. Converting Chemical Names to SMILES via PubChemPy",
+        "3.1 PubChemPy API Details (v1.0.5)",
+        "3.2 Error Handling, Rate Limits, and Edge Cases",
+        "3.3 Working Code: Name to SMILES Converter"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-chem-tanimoto-similarity",
+      "description": "Computes Morgan fingerprint-based Tanimoto similarity between molecules using RDKit 2025+ APIs, and provides the top-k ranking pipeline with proper tie-breaking. Integrates with the PDF extraction skill to form the complete solution.",
+      "responsibility": "SMILES to RDKit Mol conversion, Morgan fingerprint generation using the modern rdFingerprintGenerator API (radius=2, fpSize=2048, includeChirality=True), Tanimoto similarity computation, top-k sorting with descending similarity and alphabetical tie-breaking, and the main `topk_tanimoto_similarity_molecules` function.",
+      "key_functions": [
+        "generate_fingerprint",
+        "compute_tanimoto_similarity",
+        "topk_tanimoto_similarity_molecules"
+      ],
+      "dr_sections": [
+        "4. RDKit Molecular Processing & Tanimoto Similarity (Version 2025.09.3)",
+        "4.1 Converting SMILES to Mol Objects",
+        "4.2 Morgan Fingerprints: The Deprecation of `GetMorganFingerprintAsBitVect`",
+        "4.3 Computing Tanimoto Similarity",
+        "4.4 Complete Working Code: SMILES to Tanimoto",
+        "5. Common Pitfalls and Edge Cases Summary",
+        "6. The Unified Data Pipeline Pattern"
+      ],
+      "depends_on": [
+        "evo-chem-pdf-extraction"
+      ]
+    }
+  ]
+}

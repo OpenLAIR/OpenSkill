@@ -1,0 +1,40 @@
+Research the SEC Form 13F-HR quarterly filing dataset structure and how to programmatically analyze it in Python (pandas) for hedge fund holdings analysis. I need comprehensive technical documentation to build a reusable Python utility skill module. Specifically:
+
+1. **SEC 13F Dataset File Structure (EDGAR Form 13F bulk download / quarterly TSV dumps)**:
+   - What is the exact schema and file layout of the SEC's quarterly Form 13F structured data sets (the ZIP files containing TSV files like COVERPAGE.tsv, SUBMISSION.tsv, INFOTABLE.tsv, FORM13FFILE.tsv, SUMMARYPAGE.tsv, OTHERMANAGER.tsv, SIGNATURE.tsv, OTHERMANAGER2.tsv)?
+   - What columns exist in each file? In particular, list all columns of COVERPAGE.tsv (e.g., ACCESSION_NUMBER, FILINGMANAGER_NAME, FILINGMANAGER_STREET1, REPORTCALENDARORQUARTER, etc.) and INFOTABLE.tsv (e.g., ACCESSION_NUMBER, NAMEOFISSUER, TITLEOFCLASS, CUSIP, VALUE, SSHPRNAMT, SSHPRNAMTTYPE, INVESTMENTDISCRETION, PUTCALL, etc.) and SUMMARYPAGE.tsv (e.g., ACCESSION_NUMBER, TABLEENTRYTOTAL, TABLEVALUETOTAL, OTHERINCLUDEDMANAGERSCOUNT).
+   - What is the unit of the VALUE column in INFOTABLE — is it in dollars, thousands of dollars, or has it changed across reporting periods (the 2022/2023 SEC rule change on reporting in dollars vs thousands)? How should AUM (Assets Under Management) be derived — is it TABLEVALUETOTAL from SUMMARYPAGE.tsv, and what are its units?
+   - What is the delimiter used in these TSV files (tab vs pipe `|`)? What encoding? Are there quoting issues?
+   - How to correctly read these files in pandas (e.g., `pd.read_csv(path, sep='\t', dtype=str)` or `sep='|'`)? Show working code examples for loading COVERPAGE, INFOTABLE, SUMMARYPAGE and joining them on ACCESSION_NUMBER.
+
+2. **Key analytical patterns**:
+   - How to count unique stocks held by a fund (deduplicate by CUSIP within an accession_number's INFOTABLE rows).
+   - How to compute total AUM / portfolio value per fund (sum of VALUE in INFOTABLE vs. reading TABLEVALUETOTAL from SUMMARYPAGE).
+   - How to compare holdings of the same fund manager across two quarters — noting that ACCESSION_NUMBER changes each quarter but the manager (CIK or FILINGMANAGER_NAME) is consistent. How is CIK exposed in these files?
+   - How to rank top holders of a specific CUSIP across all filers in a quarter (group by accession_number, sum value).
+
+3. **Fuzzy matching for fund manager names**:
+   - Working code examples using `rapidfuzz` (v3.x) — specifically `rapidfuzz.process.extract`, `extractOne`, scorers like `fuzz.WRatio`, `fuzz.token_set_ratio`. Correct import paths and function signatures in rapidfuzz 3.14.
+   - Best practices for fuzzy-searching a query like "renaissance technologies" or "berkshire hathaway" against the FILINGMANAGER_NAME column.
+
+4. **CUSIP lookups for well-known stocks**:
+   - The CUSIP for Palantir Technologies Class A common stock (is it 69608A108?). How is CUSIP formatted in 13F INFOTABLE — 9 characters, with/without leading zeros, uppercase? Common normalization pitfalls.
+
+5. **Common pitfalls**:
+   - PUTCALL column — should PUT/CALL option rows be excluded when counting stock holdings or comparing positions?
+   - Amendments (form type 13F-HR/A) — can the same manager have multiple filings per quarter and how to pick the latest?
+   - Data type issues: VALUE and SSHPRNAMT loaded as string vs numeric; need to convert.
+   - Whitespace and case sensitivity in name matching.
+   - The 2023 SEC change where VALUE is reported in actual dollars (not thousands) — how to detect/handle.
+
+6. **Recommended reusable utility function signatures** the skill should expose, e.g.:
+   - `load_coverpage(quarter_dir) -> DataFrame`
+   - `load_infotable(quarter_dir) -> DataFrame`
+   - `load_summarypage(quarter_dir) -> DataFrame`
+   - `fuzzy_find_manager(coverpage_df, query, top_n=5) -> DataFrame`
+   - `get_fund_holdings(infotable_df, accession_number) -> DataFrame`
+   - `get_fund_aum(summarypage_df, accession_number) -> float`
+   - `compare_holdings(holdings_q2, holdings_q3) -> DataFrame`
+   - `top_holders_of_cusip(infotable_df, coverpage_df, cusip, n=3) -> DataFrame`
+
+Please provide concrete, working Python code snippets with correct pandas APIs, rapidfuzz 3.x APIs, file paths typical of the EDGAR 13F dataset extraction, and explicit warnings about deprecated APIs or version-specific quirks. Cite SEC EDGAR documentation pages for the 13F structured datasets where relevant.

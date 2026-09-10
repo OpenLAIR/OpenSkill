@@ -1,0 +1,50 @@
+Research query for building a Python utility module for lake water temperature trend analysis and driving factor attribution:
+
+Provide comprehensive documentation and working code examples for the following Python libraries and techniques needed to build reusable utility functions for environmental time series analysis:
+
+1. **pymannkendall library (version 1.4.3)**:
+   - Complete API reference for `pymannkendall.original_test()` and all other trend test functions (seasonal_test, hamed_rao_modification_test, etc.)
+   - Exact function signatures, all parameters, and return value structure — specifically which attributes of the returned named tuple contain the slope (Sen's slope) and p-value
+   - What is the exact attribute name for the slope? Is it `.slope`, `.Tau`, or something else? What about the p-value — is it `.p` or `.p_value`?
+   - Working code example: `import pymannkendall as mk; result = mk.original_test(data_series); print(result.slope, result.p)`
+   - When should you use `original_test` vs `hamed_rao_modification_test` vs `yue_wang_modification_test` for autocorrelated environmental data?
+   - How does it handle NaN values? Do you need to dropna before passing data?
+
+2. **scipy.stats (version 1.14.1) for linear regression trend analysis**:
+   - `scipy.stats.linregress()` — exact return type, how to extract slope and p-value
+   - `scipy.stats.kendalltau()` and `scipy.stats.theilslopes()` as alternatives
+   - Mann-Kendall test implementation details and comparison with pymannkendall
+
+3. **scikit-learn (version 1.5.2) for feature importance / driving factor analysis**:
+   - `sklearn.ensemble.RandomForestRegressor` — how to extract `feature_importances_` and interpret them as percentage contributions
+   - `sklearn.linear_model.LinearRegression` with standardized coefficients for relative importance
+   - `sklearn.preprocessing.StandardScaler` usage before regression for comparable coefficients
+   - How to compute relative contribution percentages from feature importances (normalize to sum to 100%)
+   - Working code pattern: load multiple predictor variables, fit model against water temperature, extract and rank feature importances
+
+4. **Pandas (version 2.2.3) data pipeline patterns**:
+   - Reading CSV files with `pd.read_csv()` — handling date columns, setting index
+   - Merging/joining multiple CSV files (climate, land_cover, hydrology) on date or year columns
+   - Computing annual or monthly means from time series for trend analysis
+   - Grouping variables into categories (Heat, Flow, Wind, Human) and summing their feature importances
+
+5. **Factor categorization for environmental driving factors**:
+   - What climate variables typically fall into Heat category (e.g., air temperature, solar radiation, shortwave radiation)?
+   - What variables fall into Flow category (e.g., streamflow, precipitation, inflow, discharge from hydrology data)?
+   - What variables fall into Wind category (e.g., wind speed, wind direction)?
+   - What variables fall into Human category (e.g., land cover change percentages, urban area, impervious surface)?
+   - How to map column names from typical environmental datasets to these four categories
+
+6. **Common pitfalls**:
+   - Does pymannkendall expect a 1D array/Series or can it handle DataFrames? What happens with missing values?
+   - When computing feature importance with RandomForest, does multicollinearity between predictors affect the relative importance values? Should you use permutation importance instead?
+   - `sklearn.inspection.permutation_importance` — API, parameters, and how it differs from built-in feature_importances_
+   - Precision issues when reporting slope and p-value — how many decimal places are standard?
+   - How to correctly output a single-row CSV with pandas `DataFrame.to_csv()` without the index column
+
+7. **factor_analyzer library (version 0.5.1)**:
+   - What is this library used for? Factor analysis for variable grouping?
+   - `FactorAnalyzer` class API — fit, loadings, variance explained
+   - Could this be used to group environmental variables into Heat/Flow/Wind/Human categories, or is manual categorization more appropriate?
+
+Provide complete, runnable Python code snippets for each of these operations with correct import statements.

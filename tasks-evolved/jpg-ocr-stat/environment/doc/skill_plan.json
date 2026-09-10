@@ -1,0 +1,46 @@
+{
+  "task_summary": "Extract dates and total amounts from scanned receipt images using OCR and write results to an Excel file",
+  "decomposition_rationale": "This task has three distinct concerns: (1) image preprocessing and OCR text extraction, (2) structured data parsing (dates and amounts) from noisy OCR text using keyword matching and regex, and (3) Excel output formatting. However, since the parsing logic is tightly coupled to the OCR output and the Excel writing is straightforward, two skills provide the best balance: one for OCR preprocessing/extraction and one for receipt-specific text parsing with output generation.",
+  "skills": [
+    {
+      "name": "evo-ocr-preprocess-extract",
+      "description": "Preprocesses receipt images using Pillow (grayscale, upscaling, contrast enhancement, binarization) and extracts raw text using pytesseract with optimal PSM configuration for receipt layouts. Provides utilities for batch processing image directories.",
+      "responsibility": "Image loading, preprocessing pipeline (grayscale, resize, contrast, threshold), Tesseract OCR configuration and text extraction, batch file discovery and sorting",
+      "key_functions": [
+        "preprocess_image",
+        "extract_text_from_image",
+        "get_sorted_image_files"
+      ],
+      "dr_sections": [
+        "1. Pytesseract API Details and Core Architecture",
+        "2. Pillow Image Preprocessing for OCR Accuracy",
+        "3. Tesseract Config Strings for Digit-Heavy Receipt Text",
+        "8. Common Pitfalls and Mitigation Strategies",
+        "9. File Handling Patterns",
+        "10. Version-Specific Concerns"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-receipt-parse-export",
+      "description": "Parses OCR text from receipts to extract dates and total amounts using keyword-priority matching and regex patterns, then writes structured results to an Excel file. Handles OCR noise, keyword exclusions, multi-line value extraction, and comma-separated amounts.",
+      "responsibility": "Date extraction with multiple format support and ISO formatting, total amount extraction using prioritized keyword matching with exclusion rules and fallback logic, Excel file creation with openpyxl including proper sheet naming and null handling",
+      "key_functions": [
+        "extract_date",
+        "extract_total_amount",
+        "parse_receipt_text",
+        "write_results_to_excel"
+      ],
+      "dr_sections": [
+        "5. Date Extraction Patterns from OCR Text",
+        "6. Total Amount Extraction from OCR Text",
+        "7. Line-by-Line Text Processing Patterns",
+        "4. openpyxl API for Writing Excel Files",
+        "8. Common Pitfalls and Mitigation Strategies"
+      ],
+      "depends_on": [
+        "evo-ocr-preprocess-extract"
+      ]
+    }
+  ]
+}

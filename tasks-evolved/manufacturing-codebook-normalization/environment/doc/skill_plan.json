@@ -1,0 +1,85 @@
+{
+  "task_summary": "Normalize noisy, multilingual defect reason texts from manufacturing test center logs by fuzzy-matching them against standard product codebooks, producing structured JSON output with confidence scores.",
+  "decomposition_rationale": "The task has three distinct concerns: (1) preprocessing and normalizing noisy multilingual text, (2) fuzzy matching normalized text segments against codebook entries with confidence calibration, and (3) orchestrating the data pipeline (reading CSVs, segmenting compound reasons, assembling the output JSON). Separating text normalization from matching logic keeps each skill focused and testable, while the pipeline skill handles I/O and orchestration.",
+  "skills": [
+    {
+      "name": "evo-text-normalize",
+      "description": "Preprocesses and normalizes noisy multilingual (Chinese-English mixed) industrial text. Handles full-width to half-width conversion, Unicode normalization, lowercasing, whitespace cleanup, punctuation normalization, abbreviation expansion, and splitting mixed Chinese/English tokens.",
+      "responsibility": "All text preprocessing: NFKC normalization, full-width/half-width conversion, Chinese punctuation mapping, whitespace normalization, case folding, abbreviation expansion, and mixed-language token splitting. Does NOT perform matching or scoring.",
+      "key_functions": [
+        "normalize_width",
+        "preprocess_text",
+        "expand_abbreviations",
+        "split_mixed_text",
+        "split_compound_reasons"
+      ],
+      "dr_sections": [
+        "2. Native Chinese Text Processing Strategies",
+        "2.1 Character-Level Tokenization and Regex Approaches",
+        "2.2 Full-width to Half-width Normalization",
+        "2.3 Manufacturing and QA Abbreviation Expansion",
+        "3. Text Normalization Pipeline for Noisy Descriptions",
+        "3.1 Preprocessing and Noise Removal",
+        "3.2 Splitting Compound Defect Reasons (Span Tracking)"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-fuzzy-match",
+      "description": "Provides fuzzy string matching algorithms and confidence calibration for mapping normalized text segments against codebook entries. Implements SequenceMatcher ratio, Levenshtein distance, Jaccard similarity, cosine similarity over character n-grams, ensemble scoring, and threshold-based UNKNOWN classification with calibrated confidence.",
+      "responsibility": "All similarity computation and scoring: difflib SequenceMatcher, Levenshtein distance, Jaccard similarity, cosine similarity, ensemble scoring, confidence calibration, and UNKNOWN thresholding. Does NOT handle I/O or text preprocessing.",
+      "key_functions": [
+        "levenshtein_distance",
+        "levenshtein_ratio",
+        "jaccard_similarity",
+        "cosine_similarity",
+        "get_ngrams",
+        "ensemble_similarity",
+        "calibrate_confidence",
+        "match_segment"
+      ],
+      "dr_sections": [
+        "1. Fuzzy String Matching with Python Standard Library",
+        "1.1 `difflib.SequenceMatcher`",
+        "1.2 Custom Implementation of Levenshtein Distance",
+        "1.3 Jaccard Similarity and Cosine Similarity (n-grams)",
+        "4. Codebook Matching and Confidence Calibration",
+        "4.1 Computing a Meaningful Confidence Score",
+        "4.2 Thresholds and \"UNKNOWN\" Classification",
+        "4.3 Engineering Calibration"
+      ],
+      "depends_on": [
+        "evo-text-normalize"
+      ]
+    },
+    {
+      "name": "evo-defect-pipeline",
+      "description": "End-to-end data pipeline that reads test center log CSVs and product codebook files, orchestrates text normalization and fuzzy matching, and produces the structured solution.json output with proper JSON serialization handling for numpy/pandas types.",
+      "responsibility": "File discovery and CSV reading with encoding fallbacks, codebook dictionary construction per product, record-level orchestration of segmentation and matching, segment_id generation, output JSON assembly conforming to the required schema, and numpy/pandas type-safe JSON serialization.",
+      "key_functions": [
+        "safe_read_csv",
+        "discover_codebooks",
+        "build_codebook_mapping",
+        "process_record",
+        "export_results_to_json",
+        "run_pipeline"
+      ],
+      "dr_sections": [
+        "5. Data Pipeline with Pandas",
+        "5.1 Reading Mixed-Encoding CSV Files",
+        "5.2 Building Lookup Dictionaries",
+        "5.3 JSON Serialization Issues with Numpy Data Types",
+        "6. End-to-End Working Code Patterns",
+        "7. Common Pitfalls and Operational Friction",
+        "7.1 `difflib.get_close_matches()` Defaults",
+        "7.2 Pandas Silently Dropping Rows",
+        "7.3 File Path Discovery with `glob`",
+        "7.4 Identical Entries and Multi-Code Collisions"
+      ],
+      "depends_on": [
+        "evo-text-normalize",
+        "evo-fuzzy-match"
+      ]
+    }
+  ]
+}

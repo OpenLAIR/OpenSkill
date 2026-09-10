@@ -1,0 +1,68 @@
+{
+  "task_summary": "Parse FJSP instance data with downtime/policy constraints, generate an optimized feasible schedule with minimal makespan respecting machine downtimes and policy budgets, and output as JSON and CSV.",
+  "decomposition_rationale": "The task naturally separates into three concerns: (1) parsing heterogeneous input formats into unified data structures, (2) core scheduling algorithms with downtime-aware feasibility logic and policy budget enforcement, and (3) validation and output formatting. This decomposition keeps I/O, computation, and verification cleanly separated.",
+  "skills": [
+    {
+      "name": "evo-fjsp-data-io",
+      "description": "Parses all input data files (FJSP instance.txt, downtime.csv, policy.json, baseline schedule CSV) into standardized Python data structures, and exports final schedules to JSON and CSV formats.",
+      "responsibility": "All file I/O: reading instance definitions, downtime windows, policy budgets, baseline schedules; writing solution.json and schedule.csv with proper type handling (numpy int64 serialization).",
+      "key_functions": [
+        "parse_fjsp_instance",
+        "parse_downtimes_csv",
+        "parse_policy_budgets",
+        "parse_baseline_schedule",
+        "export_solution_json",
+        "export_solution_csv"
+      ],
+      "dr_sections": [
+        "2. Input Data Parsing Patterns",
+        "7. Output Formatting",
+        "8. Common Pitfalls and Solutions"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-fjsp-scheduler",
+      "description": "Core scheduling engine implementing downtime-aware earliest-start computation, greedy dispatching, baseline repair with policy budget enforcement, and simulated annealing optimization for FJSP.",
+      "responsibility": "All scheduling computation: finding earliest feasible start times considering downtimes, greedy constructive heuristics (ECT), constraint-based schedule repair respecting policy budgets, simulated annealing local search optimization, and schedule decoding from OS/MS representations.",
+      "key_functions": [
+        "find_earliest_start",
+        "greedy_dispatching",
+        "repair_schedule",
+        "decode_schedule",
+        "simulated_annealing_fjsp",
+        "validate_policy_budgets"
+      ],
+      "dr_sections": [
+        "1. Problem Formulation and Mathematical Modeling",
+        "3. Handling Machine Downtime Windows Correctly",
+        "4. Scheduling Algorithms for Python Implementation",
+        "5. Policy Budget Constraints",
+        "9. Best Pure-Python Approaches (Within 15 Min Compute Budget)"
+      ],
+      "depends_on": [
+        "evo-fjsp-data-io"
+      ]
+    },
+    {
+      "name": "evo-fjsp-validator",
+      "description": "Validates generated schedules for full FJSP feasibility: operation completeness, precedence constraints, machine eligibility, duration correctness, machine non-overlap, and downtime non-overlap.",
+      "responsibility": "Post-hoc schedule validation ensuring all hard constraints are satisfied before output. Checks completeness, precedence, machine capacity, duration correctness, downtime compliance, and makespan calculation.",
+      "key_functions": [
+        "validate_schedule",
+        "check_precedence",
+        "check_machine_overlaps",
+        "check_downtime_overlaps",
+        "check_eligibility_and_duration",
+        "calculate_makespan"
+      ],
+      "dr_sections": [
+        "6. Feasibility Validation",
+        "8. Common Pitfalls and Solutions"
+      ],
+      "depends_on": [
+        "evo-fjsp-data-io"
+      ]
+    }
+  ]
+}

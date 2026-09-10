@@ -1,0 +1,17 @@
+How to build a Python utility module for querying local CSV/database files using pandas to plan a travel itinerary, specifically focusing on:
+
+1. **Pandas CSV data loading and querying patterns**: How to load multiple CSV files from a `/app/data/` directory using `pandas==2.0.3`, inspect their schema (column names, data types), and create reusable search/filter functions. What are the exact function signatures for `pd.read_csv()`, `DataFrame.query()`, `DataFrame.loc[]`, and string matching with `DataFrame[col].str.contains()` including case-insensitive search? Show working code examples for filtering rows by multiple criteria (city name, cuisine type, budget constraints, pet-friendly boolean flags).
+
+2. **Common travel planning database schemas**: For datasets typically used in TravelPlanner benchmarks (flights.csv, restaurants.csv, accommodations.csv, attractions.csv, cities.csv, googleDistanceMatrix.csv or similar), what are the expected column names and data formats? How are costs represented (per person, per night, per meal)? How is "pet-friendly" typically encoded (boolean, string "Yes"/"No", policy column)? How are distances/driving times between cities stored?
+
+3. **Reusable skill function patterns for search utilities**: How to write Python functions like `search_cities(state)`, `search_accommodations(city, constraints)`, `search_restaurants(city, cuisine_type)`, `search_attractions(city)`, `search_transportation(origin, destination, mode)` that wrap pandas queries and return structured results. Show complete working examples with proper error handling, including handling missing columns and empty result sets.
+
+4. **Budget calculation logic**: How to compute total trip cost across transportation (self-driving fuel/distance costs), accommodations (per night × number of people), and meals (per person costs) using pandas aggregation. What are correct patterns for summing costs across 7 days for 2 travelers while staying within a $5,100 budget?
+
+5. **JSON output generation in Python**: How to construct a nested JSON structure with `json.dump()` to write to `/app/output/itinerary.json`, ensuring the directory exists using `os.makedirs()`. Correct patterns for building the plan array with day objects and tool_called tracking array.
+
+6. **Pitfalls and edge cases with pandas 2.0.3**: Are there any deprecated methods in pandas 2.0 that were available in earlier versions? Issues with `DataFrame.append()` being removed? String dtype handling changes? How to correctly handle NaN values when filtering for pet-friendly accommodations? Issues with case sensitivity in city name matching (e.g., "Minneapolis" vs "minneapolis")?
+
+7. **Route planning logic for multi-city itineraries**: Given a starting city (Minneapolis) and requirement to visit 3 Ohio cities over 7 days, what are common algorithmic patterns for allocating days across cities, determining optimal visit order (minimizing driving distance), and handling travel days vs. sightseeing days?
+
+8. **File discovery pattern**: How to programmatically list and inspect all CSV files in a directory using Python's `os.listdir()` or `glob.glob()`, then auto-detect their schemas with `pd.read_csv(f, nrows=0).columns.tolist()` to build a data catalog before writing search functions?

@@ -1,0 +1,23 @@
+Research query:
+
+CVE-2025-32433 Erlang/OTP SSH server pre-authentication remote code execution vulnerability. I need comprehensive technical details about this vulnerability for building a Python utility module that can identify and patch the affected Erlang source code.
+
+Specifically, I need to know:
+
+1. **Exact CVE details and root cause**: What is CVE-2025-32433? Which SSH protocol message type (e.g., SSH_MSG_CHANNEL_REQUEST, SSH_MSG_CHANNEL_OPEN, SSH_MSG_USERAUTH_REQUEST, etc.) allows unauthenticated command execution? What is the exact mechanism — does the server process channel request messages (like "exec", "shell", "subsystem") before authentication is completed?
+
+2. **Affected Erlang/OTP source files and functions**: Which specific Erlang source files in the OTP SSH application (under `lib/ssh/src/`) contain the vulnerability? I've seen references to files like `ssh_connection_handler.erl` and `ssh_connection.erl`. What are the exact function names and clauses that need modification? Show the exact Erlang code diff from the official fix (the patch applied in OTP 27.3.2.1 or OTP 26.2.5.11).
+
+3. **The official patch/fix**: Show the complete git diff or code changes from the official Erlang/OTP fix for this vulnerability. Which functions were modified? Was it a matter of adding authentication state checks before processing certain SSH message types? What exact Erlang pattern matching clauses were added or modified?
+
+4. **SSH protocol message handling in Erlang/OTP**: How does the Erlang/OTP SSH server's state machine (`ssh_connection_handler.erl`) handle different SSH protocol states (key exchange, authentication, connected)? What are the state names used (e.g., `{connected, Role}`, `{userauth, Role}`)? How are SSH messages dispatched based on connection state?
+
+5. **The specific attack vector**: Does the attack involve sending SSH_MSG_CHANNEL_OPEN and SSH_MSG_CHANNEL_REQUEST messages with type "exec" before completing user authentication? What exact sequence of SSH messages triggers the vulnerability?
+
+6. **Python paramiko exploitation details**: Since the Docker environment includes python3-paramiko, how would an exploit be written using paramiko's Transport class to send raw SSH messages before authentication? This helps understand the test/validation side.
+
+7. **File paths within OTP source tree**: What is the exact directory structure under `lib/ssh/src/` in OTP 27.3.2? List all relevant `.erl` files that handle SSH connection protocol messages.
+
+8. **Version-specific details for OTP 27.3.2**: Confirm that OTP 27.3.2 (not 27.3.2.1) is the vulnerable version. What exact code exists in this version's `ssh_connection_handler.erl` that fails to check authentication state?
+
+Please provide the actual Erlang source code snippets showing both the vulnerable code and the fixed code, with exact line numbers or function clause signatures where possible.

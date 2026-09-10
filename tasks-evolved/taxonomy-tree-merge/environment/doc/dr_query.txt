@@ -1,0 +1,52 @@
+Research query:
+
+I am building a reusable Python skill (utility module) for unifying hierarchical product category taxonomies from three e-commerce platforms (Amazon, Facebook, Google Shopping) into a single 5-level unified taxonomy. The skill will be used by an AI coding agent in a constrained environment with these exact pinned libraries: pandas==2.2.0, numpy==1.26.4, scipy==1.12.0, scikit-learn==1.4.0, nltk==3.8.1, sentence-transformers==2.5.1, openpyxl==3.1.2, tqdm==4.66.1. No LLM API access — only local embeddings + clustering. Agent timeout is 500 seconds, so embeddings + clustering must be efficient on a few thousand category paths.
+
+Please research and provide a comprehensive technical reference covering:
+
+1. **sentence-transformers 2.5.1 exact API for embedding short category strings:**
+   - Correct import path (`from sentence_transformers import SentenceTransformer`)
+   - Recommended small/fast pretrained models for short-text semantic similarity (e.g., `all-MiniLM-L6-v2`, `all-mpnet-base-v2`) — sizes, embedding dimensions, and CPU inference speed
+   - Exact signature of `SentenceTransformer.encode()`: parameters `batch_size`, `show_progress_bar`, `convert_to_numpy`, `convert_to_tensor`, `normalize_embeddings` — when to set `normalize_embeddings=True` for cosine similarity
+   - Working code example for encoding a list of category-path strings into a numpy array
+   - Pitfalls: model download/caching, offline behavior, CPU vs GPU defaults, tokenizer truncation for long category paths
+
+2. **scikit-learn 1.4.0 hierarchical clustering APIs:**
+   - `sklearn.cluster.AgglomerativeClustering` exact parameter names in 1.4.0 — note that `affinity` was deprecated and replaced by `metric`; confirm current parameter name and accepted values (`euclidean`, `cosine`, `precomputed`)
+   - Parameters `linkage` (`ward`, `average`, `complete`, `single`), `distance_threshold`, `n_clusters`, `compute_full_tree`, `compute_distances`
+   - How to access `.children_`, `.distances_`, `.labels_` to build a dendrogram / hierarchical tree
+   - `scipy.cluster.hierarchy.linkage`, `fcluster`, `dendrogram` — signatures, distance matrix vs condensed distance vector requirements, and how to cut the tree at multiple levels to produce a 5-level hierarchy
+   - `sklearn.metrics.pairwise.cosine_similarity` / `cosine_distances` — return shapes and value ranges
+   - Working example: compute cosine distance matrix from normalized embeddings → agglomerative clustering with `metric='precomputed'` and `linkage='average'` → extract multi-level cluster assignments
+
+3. **Multi-level taxonomy construction patterns:**
+   - Standard algorithmic approaches to cut a single dendrogram into K levels with target cluster-count constraints per level (10-20 at level 1, 3-20 children per parent at deeper levels)
+   - Top-down recursive clustering vs bottom-up dendrogram cutting — pros/cons and reference code patterns
+   - How to enforce balanced cluster sizes (avoid degenerate singleton clusters) — e.g., size-constrained k-means, balanced agglomerative variants
+   - How to compute "representativeness" of a cluster label (≥70% of children share a concept) using embedding centroid similarity or token frequency
+
+4. **Category-name selection and text normalization:**
+   - nltk 3.8.1 utilities: tokenization (`word_tokenize`), stopwords (`nltk.corpus.stopwords`), lemmatization (`WordNetLemmatizer`) — required `nltk.download()` calls and how to handle offline environments
+   - Patterns for selecting a representative name for a cluster from member strings: TF-IDF top terms (`sklearn.feature_extraction.text.TfidfVectorizer`), most-common-token, centroid-nearest-member
+   - Computing word-overlap / Jaccard similarity between sibling cluster names to enforce <30% overlap
+   - Avoiding parent-child name duplication
+   - Formatting with " | " separator, max 5 words, title-casing conventions
+
+5. **Pandas 2.2.0 data pipeline patterns:**
+   - Reading CSVs with potentially inconsistent schemas (`pd.read_csv` with `dtype`, `encoding`, `on_bad_lines`)
+   - Splitting hierarchical path strings like `"electronics > computers > Laptops"` into level columns via `.str.split(' > ', expand=True)` — handling variable depth, whitespace, casing
+   - Concatenating multiple source dataframes with a `source` column
+   - Writing output CSVs with specific column orders and deduplicated hierarchy rows
+   - Pitfalls: NaN handling in path splits, FutureWarnings in pandas 2.2
+
+6. **Ensuring even source distribution across the unified taxonomy:**
+   - Techniques (stratified clustering, source-balanced sampling, post-hoc rebalancing) and metrics (entropy / chi-square) to verify each unified cluster contains a reasonable mix of Amazon/Facebook/Google entries
+
+7. **Common pitfalls specifically for this task:**
+   - sentence-transformers + huggingface model download failure in offline Docker — how to detect / fallback
+   - sklearn 1.4 deprecations (`affinity` → `metric`, `n_features_in_`, etc.)
+   - scipy linkage requiring condensed (1D) vs square distance matrices — `scipy.spatial.distance.squareform`
+   - Memory blowup with O(N²) distance matrices for large N
+   - Reproducibility: setting `random_state` for KMeans/MiniBatchKMeans if used as a fallback
+
+Please provide working, copy-pasteable Python code snippets with correct imports for each major step, exact current parameter names for the pinned library versions, and call out any deprecated APIs to avoid. Prioritize CPU-only, offline-friendly approaches that complete within ~500 seconds on a few thousand input rows.

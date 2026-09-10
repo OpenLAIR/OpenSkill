@@ -1,0 +1,35 @@
+{
+  "task_summary": "Solve TPP (Travelling Purchase Problem) PDDL planning tasks by reading domain/problem files, generating valid plans using pyperplan via unified_planning, and writing formatted plan output files.",
+  "decomposition_rationale": "The task is straightforward: parse JSON config, solve PDDL problems with an existing solver stack, format and write plans. The provided solve.py already demonstrates the core workflow. A single skill covers the end-to-end pipeline since parsing, solving, formatting, and output are tightly coupled and the validation approach requires pickle serialization matching the solver output exactly.",
+  "skills": [
+    {
+      "name": "evo-tpp-solver",
+      "description": "End-to-end utility for solving TPP PDDL planning tasks: reads problem.json, parses PDDL domain/problem files using unified_planning's PDDLReader, solves each task using pyperplan (with configurable heuristic/search fallbacks), formats actions in the required function-call syntax, writes plan text files, and serializes plans as pickle for validation compatibility.",
+      "responsibility": "Complete pipeline: JSON config parsing, PDDL parsing, plan generation with pyperplan (with fallback configurations like gbf/hff if default times out), action formatting as 'action_name(arg1, arg2, ...)' strings, writing plan output files, and pickle serialization for validator compatibility.",
+      "key_functions": [
+        "load_task_config",
+        "solve_task",
+        "format_action",
+        "write_plan",
+        "solve_all_tasks"
+      ],
+      "dr_sections": [
+        "The unified_planning Library (Version 1.3.0) API Details",
+        "PDDLReader and Problem Instantiation",
+        "OneshotPlanner and Plan Generation",
+        "ActionInstance Formatting",
+        "Serialization with Pickle",
+        "pyperplan (Version 2.1) as a Planning Engine",
+        "Search Algorithms and Defaults",
+        "Configuring Heuristics and Search via UP",
+        "Performance Characteristics",
+        "Travelling Purchase Problem (TPP) in PDDL",
+        "Plan Output Format",
+        "Common Pitfalls and Edge Cases",
+        "Alternative Approaches if pyperplan Fails",
+        "Working Code Examples"
+      ],
+      "depends_on": []
+    }
+  ]
+}

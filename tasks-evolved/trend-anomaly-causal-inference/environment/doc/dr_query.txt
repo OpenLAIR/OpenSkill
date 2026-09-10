@@ -1,0 +1,48 @@
+Research query:
+
+I need comprehensive technical guidance to build a Python utility module for an e-commerce anomaly detection and causal inference pipeline. The pipeline involves: (1) cleaning dirty CSV data, (2) time series anomaly detection using Facebook Prophet for counterfactual prediction, (3) feature engineering on survey/demographic data, and (4) Difference-in-Differences (DiD) causal analysis with intensive and extensive margins. The environment uses Python 3.11, pandas 2.3.3, numpy 2.3.5, scipy 1.17.0, scikit-learn 1.8.0, statsmodels 0.14.6, and prophet 1.2.1.
+
+Please provide detailed information on the following:
+
+**1. Facebook Prophet for Counterfactual Prediction & Anomaly Detection:**
+- Exact API for Prophet in version 1.2.1: correct import path (`from prophet import Prophet`), the `Prophet()` constructor parameters, and `fit()` / `predict()` method signatures.
+- How to use Prophet to build a counterfactual: train on historical data (all data before March 2020), then predict March 2020 daily sales, and compare predicted vs actual to measure anomalies.
+- How to extract prediction intervals (`yhat_lower`, `yhat_upper`, `yhat`) from Prophet's forecast DataFrame.
+- Working code example: fitting Prophet on a daily sales time series with columns `ds` (date) and `y` (sales), generating forecasts, and computing residuals/deviation scores.
+- How to create a deviation index scaled from -100 to 100 based on the difference between actual and predicted values, normalized appropriately (e.g., using z-scores from Prophet's uncertainty intervals, or percentage deviation).
+- Common pitfalls: Prophet expecting specific column names (`ds`, `y`), datetime format requirements, handling categories with very few data points, suppressing Prophet's verbose logging output.
+
+**2. Difference-in-Differences (DiD) Causal Analysis using statsmodels 0.14.6:**
+- Exact API for running OLS regression in statsmodels: `import statsmodels.api as sm`, `import statsmodels.formula.api as smf`, `smf.ols()` formula syntax, `.fit()` method, extracting coefficients (`params`), p-values (`pvalues`), and confidence intervals.
+- How to set up a DiD regression: the interaction term `Treatment * Post` as the DiD estimator, with `Treatment` being a demographic feature indicator and `Post` being the period indicator (baseline=0, treatment=1).
+- **Intensive margin DiD**: Among purchasers only, regress `Total_Spend` on `feature * post` interaction. Explain univariate DiD where each demographic feature is tested one at a time.
+- **Extensive margin DiD**: Among all users (at-risk population), regress `Has_Purchase` (binary 0/1) on feature interactions. Explain multivariate heterogeneous DiD where multiple features are included simultaneously.
+- Working code example of a DiD regression with statsmodels OLS, extracting the DiD estimate (coefficient on the interaction term) and its p-value.
+- How to handle binary/categorical demographic features in DiD: creating dummy variables, handling the interaction term correctly.
+- Sorting results by contribution strength: for surge categories sort by descending DiD estimate, for slump categories sort by ascending DiD estimate.
+
+**3. Data Cleaning Patterns for Dirty E-commerce & Survey Data (pandas 2.3.3):**
+- Best practices for deduplication: `DataFrame.drop_duplicates()` parameters, identifying duplicates by subset of columns.
+- Handling missing values: `fillna()`, `dropna()`, strategies for numeric vs categorical columns.
+- Inconsistent formatting cleanup: string normalization (`.str.strip()`, `.str.lower()`, `.str.title()`), date parsing with `pd.to_datetime()` with `errors='coerce'` and `format` parameter, handling mixed date formats.
+- Cleaning price/monetary columns: removing `$` signs, converting to float, handling negative values.
+- Extracting product categories from Amazon purchase data: common column names, category hierarchies.
+- Merging transaction data with survey data: identifying the join key (likely a user/respondent ID), `pd.merge()` with `how='inner'`/`'left'`, handling ID type mismatches (int vs string).
+
+**4. Feature Engineering on Survey/Demographic Data:**
+- Common approaches: one-hot encoding categorical variables (`pd.get_dummies()`), binning continuous variables (`pd.cut()`), creating binary indicators.
+- scikit-learn 1.8.0 preprocessing: `LabelEncoder`, `OneHotEncoder` — correct import paths and API.
+- How to handle ordinal survey responses (e.g., income brackets, education levels, age ranges) — encoding strategies.
+- Ensuring the `Survey ResponseID` column is preserved through transformations.
+
+**5. Aggregation Patterns for User-Category-Period Data:**
+- GroupBy aggregations in pandas: computing `Total_Spend` per user per category per period, computing `Has_Purchase` binary indicator.
+- Creating period labels (baseline vs treatment) based on date ranges.
+- Proper structure for intensive margin data (only users who purchased) vs extensive margin data (all users with 0/1 purchase indicator).
+
+**6. Common Pitfalls and Edge Cases:**
+- Prophet version 1.2.1 specific issues: any deprecated parameters, cmdstan backend requirements, suppressing logging.
+- statsmodels perfect separation or singular matrix issues when running OLS on sparse binary outcomes.
+- pandas 2.x breaking changes: any deprecated methods like `append()`, `DataFrame.iteritems()`.
+- Handling categories with zero sales in certain periods.
+- JSON serialization of numpy types (`np.float64`, `np.int64`) — need to convert to Python native types before `json.dump()`.

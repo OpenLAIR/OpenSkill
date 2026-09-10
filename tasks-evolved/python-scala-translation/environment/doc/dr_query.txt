@@ -1,0 +1,74 @@
+Research query:
+
+Idiomatic Scala 2.13 patterns for translating a Python tokenizer module to Scala, focusing on the following specific topics:
+
+1. **Scala 2.13 Enum/ADT representation**: How to idiomatically represent Python `Enum` classes in Scala 2.13. Specifically, should I use `sealed trait` + `case object`, or Scala's `Enumeration` class? Show working code examples for an enum like `TokenType` with string values (e.g., `STRING = "string"`, `NUMERIC = "numeric"`), including a `fromString` factory method and `toString` override. What are the trade-offs and best practices?
+
+2. **Scala case classes vs Python dataclasses**: How to translate Python `@dataclass` classes with default values, optional fields (`Optional[X]` → `Option[X]`), and mutable fields to Scala case classes. Show examples with `copy()` method usage, default parameter values, and `Option` fields. How to handle Python's `field(default_factory=list)` equivalent in Scala case classes.
+
+3. **Scala traits and abstract classes for Python ABC**: How to translate Python `ABC` with `@abstractmethod` to Scala `trait` or `abstract class`. Show examples of:
+   - A base trait with abstract methods and concrete methods
+   - Generic type parameters (covariant `+T`, contravariant `-T`) on traits — equivalent to Python's `TypeVar("T_co", covariant=True)`
+   - Type bounds and constrained type parameters (equivalent to Python's `TypeVar("NumericT", int, float, Decimal)`)
+   - Structural typing / Protocol equivalent in Scala (duck typing)
+
+4. **Pattern matching and type matching in Scala 2.13**: How to translate Python's `isinstance()` checks and `match`/`case` patterns to Scala pattern matching. Show examples matching on:
+   - Type (equivalent to `isinstance(x, str)`)
+   - Sealed trait members
+   - Options (`Some`/`None`)
+   - Tuple deconstruction
+   - Guard conditions
+
+5. **Error handling in Scala 2.13**: Best practices for translating Python's `try`/`except`/`raise` to Scala. Specifically:
+   - `Try`, `Success`, `Failure` usage with working examples
+   - `Either[Left, Right]` for error handling
+   - Custom exception classes in Scala
+   - When to use `Try` vs `Either` vs `Option`
+   - How to translate Python's `ValueError`, `TypeError` to Scala idioms
+
+6. **Scala naming conventions**: Complete guide to:
+   - Method names: snake_case to camelCase conversion rules
+   - Class names: PascalCase
+   - Package names
+   - Constants and enum values
+   - Boolean method naming (e.g., `isEmpty` not `is_empty`)
+   - Companion object conventions
+
+7. **Scala 2.13 collections and standard library equivalents**:
+   - `collections.abc.Sequence` → `Seq`
+   - `collections.abc.Iterable` → `Iterable`
+   - Python `list` comprehensions → Scala `map`/`flatMap`/`filter`/`collect`/`for` comprehensions
+   - Python `dict` → Scala `Map` with working examples of construction, access, update
+   - Python `enumerate()` → Scala `zipWithIndex`
+   - Python generator/`yield` → Scala `Iterator` or `LazyList`
+   - `itertools` equivalents in Scala standard library
+
+8. **Scala generics and type system for Python Generic[T]**: How to translate:
+   - `class MyClass(Generic[T])` to Scala
+   - `TypeVar` with bounds to Scala type parameters
+   - Union types (`Union[str, int]`) in Scala 2.13 (no native union types — use sealed trait or `Either`)
+   - `@overload` decorator equivalent in Scala (method overloading)
+   - `Callable[[A], B]` → `A => B` function types
+
+9. **Scala datetime handling**: Equivalents of Python's `datetime.datetime`, `datetime.date`, and formatting:
+   - `java.time.LocalDateTime`, `java.time.LocalDate`
+   - `DateTimeFormatter` patterns equivalent to Python's `strftime`/`strptime`
+   - ISO format parsing and formatting
+   - Working code examples
+
+10. **Scala `BigDecimal`** for Python's `decimal.Decimal`: Construction, arithmetic, precision handling, conversion to/from String and numeric types.
+
+11. **Scala companion objects and factory patterns**: How to translate Python's `@classmethod` and `@staticmethod` to Scala companion objects. Show builder pattern implementation in Scala equivalent to Python's builder class with method chaining.
+
+12. **Scala JSON handling with standard library only** (no external dependencies): How to produce JSON-like string output from case classes without external libraries, or if the test expects specific JSON formatting.
+
+13. **Scala 2.13 compilation**: Correct `scalac` command-line usage for compiling a single `.scala` file with Scala 2.13.12. Required imports for `java.time.*`, `scala.util.*`, etc. Package declaration and file organization.
+
+14. **Common pitfalls when translating Python to Scala 2.13**:
+    - Mutable vs immutable collections — Scala defaults to immutable
+    - `null` vs `None`/`Option` — never use `null` in idiomatic Scala
+    - Python's dynamic typing vs Scala's strict static typing
+    - Default mutable arguments (Python anti-pattern) — how to handle in Scala
+    - `==` vs `eq` in Scala (structural vs referential equality)
+    - String interpolation `s"..."` vs Python f-strings
+    - Regex handling in Scala (`"""...""".r` patterns)

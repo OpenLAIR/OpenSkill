@@ -1,0 +1,38 @@
+Research query:
+
+Python utility functions for enterprise data retrieval from local files: building a reusable skill module for searching and extracting information from documents stored in a directory structure.
+
+I need comprehensive guidance on the following:
+
+1. **File discovery and reading patterns in Python**: How to recursively scan a directory (`/root/DATA`) to discover all files regardless of format (PDF, DOCX, XLSX, CSV, JSON, TXT, PPTX, HTML, Markdown, etc.). What are the correct libraries, import paths, and function signatures for reading each format?
+
+   - For PDF files: `PyPDF2` vs `pdfplumber` vs `pymupdf (fitz)` — current recommended library, exact import paths, `extract_text()` usage, page iteration patterns. Are there deprecated APIs in PyPDF2 (e.g., `PdfFileReader` vs `PdfReader`)?
+   - For DOCX files: `python-docx` library — correct import (`from docx import Document`), how to extract text from paragraphs, tables, headers, footers.
+   - For XLSX/XLS files: `openpyxl` and `pandas.read_excel()` — reading all sheets, extracting cell values, handling merged cells.
+   - For PPTX files: `python-pptx` — extracting text from slides, shapes, notes.
+   - For CSV/JSON/TXT: standard library and pandas patterns.
+
+2. **Text search and information extraction patterns**: How to build reusable search functions that:
+   - Search across all extracted document text for specific keywords/phrases (e.g., "Market Research Report", "CoachForce", "PersonalizeForce", "competitor", "demo URL", "author", "key reviewer", "employee ID")
+   - Extract structured information like employee IDs (regex patterns for common employee ID formats like `EMP001`, `E-12345`, etc.)
+   - Extract URLs from text using regex
+   - Handle case-insensitive matching and fuzzy matching
+
+3. **Question-answering pipeline for enterprise documents**: 
+   - Pattern for loading a question file (JSON-like but with unquoted values as shown), parsing it into a Python dict
+   - How to parse malformed JSON where values aren't quoted (using regex or custom parser)
+   - Pattern for mapping questions to search strategies
+   - How to format answers as JSON with the required structure including token tracking
+
+4. **Common pitfalls**:
+   - Encoding issues when reading files (`utf-8` vs `latin-1` vs `cp1252`)
+   - Binary vs text file detection
+   - Handling password-protected or corrupted files gracefully
+   - Memory issues with large files
+   - Missing library handling (checking if libraries are installed, installing with pip at runtime)
+
+5. **Token counting patterns**: How to track/estimate token consumption in a Python script when not using an LLM API — what conventions exist for logging tokens consumed by an agent, and how to report them in output JSON.
+
+6. **Output formatting**: Working code example for writing a Python dict to a JSON file at a specific path with proper formatting, ensuring it's readable by `json.load()`.
+
+Provide complete working code examples with correct imports for each pattern, especially for the file reading utilities and text search functions. Show how to handle the case where libraries may not be pre-installed (pip install at runtime in a Docker container based on Ubuntu 24.04 with only python3 and python3-pip installed).

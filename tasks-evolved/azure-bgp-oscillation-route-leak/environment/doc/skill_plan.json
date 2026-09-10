@@ -1,0 +1,69 @@
+{
+  "task_summary": "Detect BGP route oscillation and valley-free route leaks in an Azure Virtual WAN topology, then evaluate which proposed solutions resolve each issue.",
+  "decomposition_rationale": "The task has three distinct functional concerns: (1) loading/parsing BGP topology data with proper type handling, (2) detecting oscillation cycles and route leak violations using graph/policy algorithms, and (3) evaluating natural-language solution descriptions against resolution criteria. These map cleanly to 3 skills with clear boundaries.",
+  "skills": [
+    {
+      "name": "evo-bgp-data-loader",
+      "description": "Loads and normalizes BGP topology JSON files from /app/data/, handling the critical Python JSON integer-key coercion pitfall. Provides robust file I/O with encoding and error handling.",
+      "responsibility": "Load all input JSON files (route.json, preferences.json, local_pref.json, relationships.json, topology.json, route_events.json, possible_solutions.json) and normalize data types, especially converting string dictionary keys back to integers for ASN lookups.",
+      "key_functions": [
+        "load_json_with_int_keys",
+        "load_json_list",
+        "load_all_bgp_data"
+      ],
+      "dr_sections": [
+        "5. Data Loading Patterns and Data Pipeline",
+        "5.1 JSON File Loading from a Fixed Path",
+        "5.2 Handling Integer Keys in Python JSON (The Pitfall)"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-bgp-anomaly-detection",
+      "description": "Detects BGP route oscillation via preference cycle detection in directed graphs and identifies route leaks by evaluating valley-free routing constraints against route events.",
+      "responsibility": "Implement DFS-based cycle detection on the routing preference graph to find oscillation cycles, and apply Gao-Rexford valley-free rules to route events to classify route leaks. Produces deterministically ordered cycle lists and standardized leak report objects.",
+      "key_functions": [
+        "detect_preference_cycle",
+        "check_route_leak",
+        "detect_route_leaks"
+      ],
+      "dr_sections": [
+        "2. BGP Route Oscillation Detection via Routing Preference Cycles",
+        "2.1 Formal Definition of BGP Route Oscillation",
+        "2.2 Detecting Cycles in a Directed Preference Graph",
+        "2.3 Definition of oscillation_cycle and affected_ases",
+        "2.4 Python Implementation of Route Oscillation Detection",
+        "3. BGP Valley-Free Routing and Route Leak Detection",
+        "3.1 The Valley-Free Routing Principle (Gao-Rexford)",
+        "3.2 Definition and Detection of a Route Leak",
+        "3.3 Python Implementation for Classifying Route Events",
+        "3.4 Standard Format for Reporting Route Leaks"
+      ],
+      "depends_on": [
+        "evo-bgp-data-loader"
+      ]
+    },
+    {
+      "name": "evo-bgp-solution-evaluator",
+      "description": "Evaluates natural-language solution descriptions to determine if each resolves BGP oscillation and/or route leaks, then assembles and writes the final structured JSON report.",
+      "responsibility": "Use regex pattern matching to classify each proposed solution as resolving oscillation (breaks preference cycle or disables peering link), resolving route leaks (enforces export/ingress filtering, community tagging, routing intent, or disables peering), or neither. Assemble the complete oscillation_report.json output with all required fields.",
+      "key_functions": [
+        "evaluate_solution",
+        "evaluate_all_solutions",
+        "generate_oscillation_report",
+        "save_report"
+      ],
+      "dr_sections": [
+        "4. Solution Evaluation Logic",
+        "4.1 Resolution Effectiveness Criteria",
+        "4.2 Python Pattern Matching Implementation",
+        "6. Output Format Specification",
+        "7. Common Pitfalls and Edge Cases to Avoid"
+      ],
+      "depends_on": [
+        "evo-bgp-data-loader",
+        "evo-bgp-anomaly-detection"
+      ]
+    }
+  ]
+}

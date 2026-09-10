@@ -1,0 +1,49 @@
+{
+  "task_summary": "Build a 7-day travel itinerary JSON for 2 travelers from Minneapolis covering 3 Ohio cities, with pet-friendly accommodations, specific cuisine preferences, no flights, and $5,100 budget",
+  "decomposition_rationale": "The task requires two distinct capabilities: (1) searching/querying CSV datasets for cities, accommodations, restaurants, attractions, and transportation data, and (2) assembling the queried data into a constraint-compliant itinerary and outputting valid JSON. These naturally separate into a data querying layer and an itinerary assembly layer.",
+  "skills": [
+    {
+      "name": "evo-travel-data-search",
+      "description": "Provides utility functions to discover, load, and query travel planning CSV datasets (cities, accommodations, restaurants, attractions, distance matrix) with filtering support for constraints like pet-friendly, cuisine type, city, state, and budget.",
+      "responsibility": "All data discovery, CSV loading, schema detection, and filtered querying of travel datasets. Handles case-insensitive matching, pet-friendly filtering via Room rule column, cuisine substring matching, and distance/transportation lookups.",
+      "key_functions": [
+        "search_cities",
+        "search_accommodations",
+        "search_restaurants",
+        "search_attractions",
+        "search_transportation",
+        "search_distance",
+        "load_dataset",
+        "discover_datasets"
+      ],
+      "dr_sections": [
+        "2. File Discovery Pattern and Schema Auto-Detection",
+        "3. Common Travel Planning Database Schemas",
+        "4. Pandas CSV Data Loading and Querying Patterns",
+        "5. Reusable Skill Function Patterns for Search Utilities",
+        "8. Pitfalls and Edge Cases with Pandas 2.0.3"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-travel-itinerary-builder",
+      "description": "Assembles a complete 7-day travel itinerary by orchestrating search queries, optimizing multi-city routing, validating budget constraints, and generating the final JSON output file.",
+      "responsibility": "Route optimization across multiple cities, day-by-day itinerary construction, budget calculation and validation, temporal allocation of travel vs sightseeing days, and JSON output generation to /app/output/itinerary.json.",
+      "key_functions": [
+        "optimize_route",
+        "allocate_days_to_cities",
+        "validate_budget",
+        "build_daily_plan",
+        "generate_itinerary_json"
+      ],
+      "dr_sections": [
+        "6. Budget Calculation Logic",
+        "7. Route Planning Logic for Multi-City Itineraries",
+        "9. JSON Output Generation in Python"
+      ],
+      "depends_on": [
+        "evo-travel-data-search"
+      ]
+    }
+  ]
+}

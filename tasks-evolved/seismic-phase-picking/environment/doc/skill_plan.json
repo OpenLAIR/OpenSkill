@@ -1,0 +1,45 @@
+{
+  "task_summary": "Process 100 earthquake trace .npz files using SeisBench deep learning models to pick P and S wave arrival indices and output results to CSV",
+  "decomposition_rationale": "The task is a single end-to-end pipeline with tightly coupled steps (load npz, convert to ObsPy, run SeisBench model, extract picks). Splitting into two skills: one for data I/O and preprocessing (npz loading, channel reordering, ObsPy conversion, resampling) and one for model inference and pick extraction (SeisBench model loading, classify, index conversion, CSV output). This separation allows clean boundaries between data preparation and ML inference.",
+  "skills": [
+    {
+      "name": "evo-seismic-data-preprocessing",
+      "description": "Loads seismic waveform data from .npz files and converts them into ObsPy Stream objects ready for SeisBench model inference. Handles channel identification, reordering to Z/N/E convention, transposing, float32 conversion, detrending, and resampling to 100 Hz.",
+      "responsibility": "All data I/O from .npz files and transformation into properly formatted ObsPy Stream objects with correct channel ordering, sampling rate, and data types",
+      "key_functions": [
+        "load_npz_trace",
+        "build_obspy_stream",
+        "identify_channel_order",
+        "preprocess_stream"
+      ],
+      "dr_sections": [
+        "3. Data Pipeline: Loading .npz Files and Preparing Input",
+        "4. ObsPy Integration: Bridging NumPy and SeisBench",
+        "7. Common Pitfalls"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-seismic-phase-picking",
+      "description": "Runs SeisBench pretrained PhaseNet model on ObsPy Streams to detect P and S wave arrivals, extracts pick indices mapped back to original sample coordinates, and writes results to CSV. Handles model loading, inference with classify(), pick extraction from ClassifyOutput, and index conversion accounting for resampling.",
+      "responsibility": "Model loading, inference execution, pick extraction from model output, index conversion from resampled to original coordinates, and CSV output generation",
+      "key_functions": [
+        "load_phasenet_model",
+        "run_phase_picking",
+        "extract_picks_to_dataframe",
+        "convert_pick_to_original_index",
+        "process_all_traces_to_csv"
+      ],
+      "dr_sections": [
+        "2. Pretrained Models for Phase Picking",
+        "5. Running Inference with SeisBench Models",
+        "6. Pick Extraction from Model Output",
+        "8. Working End-to-End Code Example",
+        "1. SeisBench Installation and Imports"
+      ],
+      "depends_on": [
+        "evo-seismic-data-preprocessing"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "task_summary": "Scrape two Paul Graham essays from paulgraham.com and convert them to a single audiobook MP3 using TTS APIs (OpenAI/ElevenLabs) with local fallback",
+  "decomposition_rationale": "The task has two distinct functional domains: (1) web scraping and text extraction/cleaning, and (2) TTS synthesis with API fallback and audio concatenation. Separating these concerns allows each skill to be independently reusable and testable, while keeping the decomposition minimal.",
+  "skills": [
+    {
+      "name": "evo-web-essay-scraper",
+      "description": "Scrapes and extracts clean text from Paul Graham's essays on paulgraham.com. Handles the site's legacy table-based HTML, character encoding issues, and navigational boilerplate removal. Also provides text chunking utilities for downstream TTS consumption.",
+      "responsibility": "Fetching essay HTML, parsing DOM to extract essay body text, cleaning text artifacts, and chunking text into API-safe segments (respecting character limits)",
+      "key_functions": [
+        "scrape_pg_essay",
+        "clean_text",
+        "chunk_text"
+      ],
+      "dr_sections": [
+        "1. Scraping Paul Graham Essays",
+        "5. Text Chunking Strategy"
+      ],
+      "depends_on": []
+    },
+    {
+      "name": "evo-tts-audiobook-synth",
+      "description": "Converts text chunks into speech audio using a cascading fallback strategy: tries OpenAI TTS first, then ElevenLabs, then local TTS (edge-tts/gTTS). Handles API authentication, rate limiting, binary audio capture, and concatenation of chunk audio segments into a single MP3 file.",
+      "responsibility": "TTS API integration (OpenAI, ElevenLabs, edge-tts, gTTS), retry/backoff logic, MP3 chunk generation, and audio concatenation into final output file",
+      "key_functions": [
+        "synthesize_with_openai",
+        "synthesize_with_elevenlabs",
+        "synthesize_with_local_tts",
+        "synthesize_text_to_audio",
+        "concatenate_audio_chunks"
+      ],
+      "dr_sections": [
+        "2. OpenAI TTS API Usage (2024-2025 Standards)",
+        "3. ElevenLabs TTS API Usage",
+        "4. Audio Concatenation and MP3 Handling",
+        "6. Fallback to Local TTS (Ubuntu 24.04, No GPU)",
+        "7. Common Operational Pitfalls"
+      ],
+      "depends_on": [
+        "evo-web-essay-scraper"
+      ]
+    }
+  ]
+}

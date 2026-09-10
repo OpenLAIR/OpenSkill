@@ -7,7 +7,6 @@
 *An agent that builds both its skills and its own verification signals from scratch — using only a task prompt and open-world resources, with **no target-task supervision**.*
 
 [![Website](https://img.shields.io/badge/🌐_Website-openlair.github.io/openskill-2f64b3)](https://openlair.github.io/openskill/)
-[![Paper](https://img.shields.io/badge/📄_Paper-PDF-6b7280)](https://arxiv.org/pdf/2606.06741)
 [![arXiv](https://img.shields.io/badge/arXiv-2606.06741-b31b1b)](https://arxiv.org/abs/2606.06741)
 [![Hugging Face Papers](https://img.shields.io/badge/🤗_HF_Papers-2606.06741-ffcc4d)](https://huggingface.co/papers/2606.06741)
 [![Code](https://img.shields.io/badge/💻_Code-repository-2f8c5b)](https://github.com/OpenLAIR/OpenSkill)
@@ -24,7 +23,7 @@
 
 ---
 
-## TL;DR
+## Overview
 
 Self-evolving agents need to adapt *after* deployment — but existing methods assume a usable learning loop is already there: curated skills, successful trajectories, or verifier signals. Real open-world deployments may offer **none of these**, only a task prompt.
 
@@ -94,18 +93,18 @@ All dependency versions (including the Harbor evaluation framework and the `goog
 OpenSkill/
 ├── libs/
 │   ├── openskill/               # the OpenSkill pipeline
-│   │   ├── pipeline.py          #   Stage 1–3 orchestrator (host side)
+│   │   ├── pipeline.py          #   Stage 1–3 orchestrator 
 │   │   ├── run_pipeline.py      #   CLI: evolve skills from scratch
 │   │   ├── run_eval.py          #   CLI: zero-shot evaluation of existing skills
-│   │   ├── openskill_evolution.py #  in-container skill-creator agent (Stage 2)
-│   │   ├── agent_planner.py     #   research-query synthesis        (Appendix B.1)
-│   │   ├── skill_planner.py     #   multi-skill plan + references   (Appendix B.1)
-│   │   ├── deep_research_client.py # deep-research retrieval        (Appendix B.1)
-│   │   └── targeted_dr.py       #   gap-vs-bug diagnosis & retrieval (Appendix B.5)
+│   │   ├── openskill_evolution.py #  in-container skill-creator agent 
+│   │   ├── agent_planner.py     #   research-query synthesis        
+│   │   ├── skill_planner.py     #   multi-skill plan + references   
+│   │   ├── deep_research_client.py # deep-research retrieval        
+│   │   └── targeted_dr.py       #   gap-vs-bug diagnosis & retrieval 
 │   └── terminus_agent/          # agent runtime: skill discovery, virtual verifier,
 │                                #   pytest parsing, evaluation-agent wrappers
 ├── .claude/skills/skill-creator/ # meta-skill injected into the creator agent
-├── tasks/                       # 84 SkillsBench tasks — clean definitions (no skills)
+├── tasks/                       # 84 SkillsBench tasks — no skills
 ├── tasks-evolved/               # the same tasks + skills evolved by OpenSkill + retrieved docs
 └── pyproject.toml / uv.lock / LICENSE / .env.example
 ```
@@ -131,7 +130,7 @@ uv run python -m libs.openskill.run_eval \
 ```
 
 - `--eval-runs 5` follows the paper protocol (n_eval = 5 independent zero-shot runs per task).
-- `--eval-agent` selects the target harness: `claude-code`, `codex`, `claude-code-bedrock`, or `terminus-2`.
+- `--eval-agent` selects the target harness: `claude-code` or `codex`.
 - To sweep the whole benchmark, pass `--tasks $(ls tasks-evolved)`.
 - On machines with slow disks, add `--timeout-multiplier 4` to scale the per-task Docker build and agent timeouts.
 
